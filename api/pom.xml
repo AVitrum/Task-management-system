@@ -14,7 +14,7 @@
 	<name>api</name>
 	<description>Backend for TMS</description>
 	<properties>
-		<java.version>21</java.version>
+		<java.version>20</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
