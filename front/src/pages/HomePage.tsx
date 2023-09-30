@@ -17,7 +17,7 @@ export default function HomePage() {
     });
 
     const profile = async () => {
-      const res = await axios.get('http://localhost:8080/api/v1/auth/profile');
+      const res = await axios.get('http://16.170.214.192:8080/api/v1/auth/profile');
       setUserInfo(res.data);
     }
 
