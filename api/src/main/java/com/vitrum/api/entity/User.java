@@ -36,6 +36,10 @@ public class User implements UserDetails {
         return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
+    public String getTrueUsername() {
+        return username;
+    }
+
     @Override
     public String getPassword() {
         return password;

@@ -64,7 +64,7 @@ public class AuthService {
         return UserProfileResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .username(user.getUsername())
+                .username(user.getTrueUsername())
                 .role(user.getRole())
                 .build();
     }
