@@ -3,7 +3,6 @@ package com.vitrum.api.controller;
 import com.vitrum.api.dto.Request.AuthenticationRequest;
 import com.vitrum.api.dto.Response.AuthenticationResponse;
 import com.vitrum.api.dto.Request.RegisterRequest;
-import com.vitrum.api.dto.Response.UserProfileResponse;
 import com.vitrum.api.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +17,14 @@ public class AuthController {
     private final AuthService service;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(
+    public ResponseEntity<?> register(
             @RequestBody RegisterRequest request
     ) {
-        return ResponseEntity.ok(service.register(request));
+        try {
+            return ResponseEntity.ok(service.register(request));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/authenticate")
@@ -32,9 +35,13 @@ public class AuthController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<UserProfileResponse> getUserProfile
+    public ResponseEntity<?> getUserProfile
             (HttpServletRequest request) {
-        return ResponseEntity.ok(service.getUserProfile(request));
+        try {
+            return ResponseEntity.ok(service.getUserProfile(request));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
 

@@ -10,6 +10,7 @@ import com.vitrum.api.repository.UserRepository;
 import com.vitrum.api.security.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,22 +27,28 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
-        var user = User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
-                .build();
-        repository.save(user);
-        var jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder()
-                .token(jwtToken)
-                .build();
+        try {
+            var user = User.builder()
+                    .username(request.getUsername())
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .role(Role.USER)
+                    .build();
+
+            repository.save(user);
+
+            var jwtToken = jwtService.generateToken(user);
+            return AuthenticationResponse.builder()
+                    .token(jwtToken)
+                    .build();
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("User with the same email/username already exists.");
+        }
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         var user = repository.findByUsername(request.getUsername())
-                .orElseThrow();
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         user.getEmail(),
@@ -57,10 +64,8 @@ public class AuthService {
     public UserProfileResponse getUserProfile(HttpServletRequest request) {
         String jwt = extractJwtFromRequest(request);
         String userEmail = jwtService.extractEmail(jwt);
-
         User user = repository.findByEmail(userEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
         return UserProfileResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
