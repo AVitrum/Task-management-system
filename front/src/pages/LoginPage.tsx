@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState, useContext } from "react";
 import { UserContext } from "../components/UserContext";
 import { useNavigate } from "react-router-dom";
+import backendIp from "../serverconfig";
 
 export default function LoginPage(){
     const [username, setUsername] = useState('');
@@ -12,7 +13,7 @@ export default function LoginPage(){
 
     const onSubmit = async (e:React.FormEvent) => {
         e.preventDefault();
-        const res = await axios.post('http://16.171.232.56:8080/api/v1/auth/authenticate',
+        const res = await axios.post(`${backendIp}/api/auth/authenticate`,
         {
             username,     
             password,
