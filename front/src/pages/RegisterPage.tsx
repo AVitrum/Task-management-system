@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../components/UserContext";
+import backendIp from "../serverconfig";
 
 export default function RegisterPage(){
 
@@ -14,7 +14,7 @@ export default function RegisterPage(){
     const onSubmit = async (e:React.FormEvent) => {
         e.preventDefault();
         
-        await axios.post('http://16.171.232.56:8080/api/v1/auth/register',
+        await axios.post(`${backendIp}/api/auth/register`,
         {
             username,     
             email,
