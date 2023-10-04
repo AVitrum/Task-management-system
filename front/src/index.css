@@ -16,6 +16,11 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 }
+@layer components {
+  .all-\[unset\] {
+    all: unset;
+  }
+}
 
 a {
   font-weight: 500;
@@ -28,7 +33,7 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
+  
   place-items: center;
   
 }

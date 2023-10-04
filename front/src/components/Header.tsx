@@ -33,9 +33,12 @@ export default function Header(){
     }, []);
 
     return(
-       <>
-        <button className="btnlog" onClick={logout}>Logout</button>
+       
+          <div>
+        
+      <button className="btnlog" onClick={logout}>Logout</button>
+    </div>
     
-       </>
+       
     );
 }
