@@ -1,4 +1,6 @@
-
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -28,14 +30,10 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
+
 
 button {
   border-radius: 8px;
@@ -68,3 +66,242 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+
+* {
+  box-sizing: border-box;
+
+}
+
+
+
+
+
+main {
+
+  color: white;
+
+  margin: 0 auto
+}
+
+button:hover {
+  background-color: #2b3550;
+  transition: 0.2s;
+}
+
+header {
+
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 50px;
+  align-items: center;
+  background-color: #222;
+  
+}
+
+header a {
+  max-width: 90%;
+  text-decoration: none;
+  color: inherit;
+}
+
+header a.logo {
+
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  height: 30px;
+}
+
+header nav {
+  display: flex;
+  gap: 15px;
+}
+
+.cont {
+
+  margin-left: 15px;
+  margin-right: 15px;
+
+}
+
+form.login,
+form.register {
+  max-width: 500px;
+  height: 250px;
+
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+
+}
+
+.login-input {
+
+  display: block;
+  margin-bottom: 5px;
+  width: 100%;
+  height: 80%;
+  padding: 5px 10px;
+  border-style: ridge;
+  border-color: rgb(146, 29, 29);
+  border-width: 5px;
+
+  background-color: rgb(171, 214, 220);
+}
+
+.btnlog {
+  margin-top: 10px;
+  width: 80%;
+  height: 90%;
+  color: #ffffff;
+  background-color: #1b8f3e;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 10px;
+  
+  transition: 0.7s;
+    
+}
+
+.cellInput {
+  width: 50px;
+  height: 50px;
+  font-size: 30px;
+  text-align: center;
+  padding: 2px;
+  border: 1px solid black;
+  outline: 1px;
+}
+
+.App {
+  text-align: center;
+}
+
+.App-header {
+
+  min-width: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px +2vmin);
+  color: rgb(255, 255, 255);
+}
+
+table.sudoku {
+  border-collapse: collapse;
+  border: 10px solid rgb(78, 143, 200);
+  background-color: rgb(78, 143, 200);
+}
+
+td {
+  padding: 0;
+}
+
+.buttonContainer {
+  margin-top: 20px;
+}
+
+.solveButton {
+  background-color: rgb(2, 173, 2);
+  font-weight: bold;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 15px;
+  font-size: 15px;
+  margin: 0px 20px;
+}
+
+.checkButton {
+  background-color: orange;
+  font-weight: bold;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 15px;
+  font-size: 15px;
+}
+
+.resetButton {
+  background-color: tomato;
+  font-weight: bold;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 15px;
+  font-size: 15px;
+}
+
+.homeButton {
+  background-color: green;
+  font-weight: bold;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 15px;
+  font-size: 15px;
+}
+
+.homeStartButton {
+  background-color: green;
+  font-weight: bold;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 15px;
+  font-size: 15px;
+  width: 30%;
+  color: white;
+  text-align: center;
+  display: inline-block;
+
+
+}
+
+.unlogHomepage {
+  font-size: 30px;
+}
+
+.homepageContainer {
+
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  height: 30vh;
+
+}
+
+.bBorder {
+  border-bottom: 10px solid #2b3550;
+}
+
+.rBorder {
+  border-right: 2px solid black;
+}
+
+.statscontent {
+  width: 40%;
+  text-align: center;
+
+}
+
+.statsheader {
+  color: rgb(240, 234, 234);
+  font-size: 50px;
+
+}
+
+footer {
+  bottom: 0;
+  position: absolute;
+  width: 100%;
+  height: 3%;
+  line-height: 20px;
+  font-size: 12px;
+}
+
+.container {
+  width: auto;
+  max-width: 680px;
+  padding: 0 15px;
+}
+
