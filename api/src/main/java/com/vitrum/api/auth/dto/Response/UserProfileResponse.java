@@ -1,5 +1,6 @@
-package com.vitrum.api.dto.Request;
+package com.vitrum.api.auth.dto.Response;
 
+import com.vitrum.api.user.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,9 +10,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest {
+public class UserProfileResponse {
 
-    private String username;
+    private Long id;
     private String email;
-    private String password;
+    private String username;
+    private Role role;
 }
