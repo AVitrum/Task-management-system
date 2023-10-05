@@ -1,5 +1,6 @@
-package com.vitrum.api.entity;
+package com.vitrum.api.user;
 
+import com.vitrum.api.token.Token;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,13 +24,20 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(unique = true)
     private String username;
+
     @Column(unique = true)
     private String email;
+
     private String password;
-    @Enumerated
+
+    @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany(mappedBy = "user")
+    private List<Token> tokens;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

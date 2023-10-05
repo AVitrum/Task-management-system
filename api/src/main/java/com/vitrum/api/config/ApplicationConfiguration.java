@@ -1,9 +1,11 @@
 package com.vitrum.api.config;
 
-import com.vitrum.api.repository.UserRepository;
+import com.vitrum.api.auditing.ApplicationAuditAware;
+import com.vitrum.api.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -31,6 +33,11 @@ public class ApplicationConfiguration {
         authenticationProvider.setUserDetailsService(userDetailsService());
         authenticationProvider.setPasswordEncoder(passwordEncoder());
         return authenticationProvider;
+    }
+
+    @Bean
+    public AuditorAware<Long> auditorAware() {
+        return new ApplicationAuditAware();
     }
 
     @Bean

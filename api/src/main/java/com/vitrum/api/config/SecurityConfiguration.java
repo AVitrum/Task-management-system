@@ -1,4 +1,4 @@
-package com.vitrum.api.security;
+package com.vitrum.api.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +30,7 @@ public class SecurityConfiguration {
                         httpSecurityCorsConfigurer.configurationSource(request ->
                                 new CorsConfiguration().applyPermitDefaultValues()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**")
+                        .requestMatchers("/api/auth/**", "/api/users")
                             .permitAll()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
