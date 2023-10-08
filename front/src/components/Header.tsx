@@ -2,14 +2,15 @@ import { useContext, useEffect } from 'react';
 import { UserContext } from './UserContext';
 import axios from "axios";
 import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import backendIp from '../serverconfig';
 
-export default function Header(){
 
-    const {token, setUserInfo, userInfo, setToken } = useContext(UserContext);
+export default function Header() {
+
+    const { token, setUserInfo, userInfo, setToken } = useContext(UserContext);
     const navigate = useNavigate();
-    
+
     const profile = async () => {
     const res = await axios.get(`${backendIp}/api/auth/profile`, {
             headers: {
@@ -17,7 +18,7 @@ export default function Header(){
             },
         });
         setUserInfo(res.data);
-    
+
     };
 
     const logout = () => {
@@ -33,9 +34,22 @@ export default function Header(){
         profile();
     }, []);
 
-    return(
-       <>
-        <button className="btnlog" onClick={logout}>Logout</button>
-       </>
+    return (
+        
+            <div className=' bg-gray-700 text-white shadow-lg'>
+
+                <Link to="/">Home</Link>
+
+                {userInfo.id === -1 ? (
+                    <>
+                     <Link to="/login">Login</Link>
+                     <Link to="/register">Register</Link>
+                    </>
+                ) : (
+                    <button className="" onClick={logout}>Logout</button>
+                )}
+                   
+            </div>
+        
     );
 }

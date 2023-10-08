@@ -3,13 +3,16 @@ import Header from "./Header";
 
 export default function Layout(){
     return(
-        <div>
+        <div className="relative">
             <header>
                 <Header/>
             </header>
-            <main>
+
+            <main className="mt-16 mb-16" >
                 <Outlet/>
             </main>
+
+            <footer>TMS2023</footer>
         </div>
     );
 }

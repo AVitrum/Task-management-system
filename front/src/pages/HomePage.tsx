@@ -6,7 +6,12 @@ export default function HomePage() {
     const {userInfo} = useContext(UserContext);
 
     return(
-        <div>
+        <div >
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
           <>
           {userInfo.id}
           </>
