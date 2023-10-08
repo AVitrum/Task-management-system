@@ -6,16 +6,16 @@ import LoginPage from "./pages/LoginPage";
 import { UserContextProvider } from "./components/UserContext";
 
 
-export default function AppRoutes(){
-    return(
+export default function AppRoutes() {
+    return (
         <UserContextProvider>
             <Routes>
-                <Route path="/" element={<Layout/>}>
-                <Route index element={<HomePage/>}/>
-                <Route path="/register" element={<RegisterPage/>}/>
-                <Route path="/login" element={<LoginPage/>}/>
-                    
+                <Route path="/" element={<Layout />}>
+                    <Route index element={<HomePage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/login" element={<LoginPage />} />
                 </Route>
+
             </Routes>
         </UserContextProvider>
     );

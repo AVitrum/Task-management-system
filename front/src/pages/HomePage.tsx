@@ -27,7 +27,12 @@ export default function HomePage() {
     }, []);
 
     return(
-        <div>
+        <div >
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
           <>
           {userInfo.id}
           </>

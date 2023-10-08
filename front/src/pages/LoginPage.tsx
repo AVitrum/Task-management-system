@@ -24,19 +24,21 @@ export default function LoginPage() {
 
     return (
 
-        <form className="register " onSubmit={(e) => onSubmit(e)}>
-            <h1>Login</h1>
+        <form className="centerForm " onSubmit={(e) => onSubmit(e)}>
+            <h1 className="text-xl font-semibold mb-4">Login</h1>
+
             <input type="text"
                 placeholder="username"
                 value={username}
                 onChange={ev => setUsername(ev.target.value)}
-                className="login-input" />
+                className="customInput" />
 
             <input type="password"
                 placeholder="password"
                 value={password}
                 onChange={ev => setPassword(ev.target.value)}
-                className="login-input" />
+                className="customInput" />
+
             <button className="btnlog" type="submit">Login</button>
         </form>
 
