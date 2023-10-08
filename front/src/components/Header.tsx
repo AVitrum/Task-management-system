@@ -3,6 +3,8 @@ import { UserContext } from './UserContext';
 import axios from "axios";
 import Cookies from "js-cookie";
 import { Link, useNavigate } from "react-router-dom";
+import backendIp from '../serverconfig';
+
 
 export default function Header() {
 
@@ -10,7 +12,7 @@ export default function Header() {
     const navigate = useNavigate();
 
     const profile = async () => {
-        const res = await axios.get('http://16.171.232.56:8080/api/v1/auth/profile', {
+    const res = await axios.get(`${backendIp}/api/auth/profile`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
