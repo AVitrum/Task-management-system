@@ -18,13 +18,12 @@ export default function Header() {
             },
         });
         setUserInfo(res.data);
-
     };
 
     const logout = () => {
         Cookies.remove('userInfo');
         Cookies.remove('token');
-        setUserInfo({ id: -1, username: '', email: '', role: '' });
+        setUserInfo({ id: 0, username: '', email: '', role: '' });
         setToken('');
         navigate('/');
         window.location.reload();
@@ -32,6 +31,7 @@ export default function Header() {
 
     useEffect(() => {
         profile();
+
     }, []);
 
     return (
@@ -40,7 +40,7 @@ export default function Header() {
 
                 <Link to="/">Home</Link>
 
-                {userInfo.id === -1 ? (
+                {userInfo.id === undefined || userInfo.id === 0 ? (
                     <>
                      <Link to="/login">Login</Link>
                      <Link to="/register">Register</Link>
