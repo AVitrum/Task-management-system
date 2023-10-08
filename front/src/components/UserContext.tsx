@@ -21,7 +21,7 @@ interface UserContextData {
 
 export const UserContext = createContext<UserContextData>({
     userInfo: {
-        id: -1,
+        id: 0,
         username: "",
         email: "",
         role: "",
