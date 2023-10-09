@@ -25,14 +25,4 @@ public class Team {
 
     @OneToMany(mappedBy = "team")
     private List<TeamMembership> members = new ArrayList<>();
-
-    public void addMember(User user, RoleInTeam role) {
-        members.add(
-                TeamMembership.builder()
-                        .team(this)
-                        .user(user)
-                        .role(role)
-                        .build()
-        );
-    }
 }

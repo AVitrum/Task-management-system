@@ -19,9 +19,11 @@ public class TeamMembership {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "team_id")
     private Team team;
 
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     @Enumerated(EnumType.STRING)
