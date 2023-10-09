@@ -1,6 +1,8 @@
-package com.vitrum.api.user;
+package com.vitrum.api.service;
 
-import com.vitrum.api.user.dto.ChangePasswordRequest;
+import com.vitrum.api.dto.Request.ChangePasswordRequest;
+import com.vitrum.api.entity.User;
+import com.vitrum.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;

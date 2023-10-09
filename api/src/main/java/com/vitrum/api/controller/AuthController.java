@@ -1,8 +1,9 @@
-package com.vitrum.api.auth;
+package com.vitrum.api.controller;
 
-import com.vitrum.api.auth.dto.Request.AuthenticationRequest;
-import com.vitrum.api.auth.dto.Response.AuthenticationResponse;
-import com.vitrum.api.auth.dto.Request.RegisterRequest;
+import com.vitrum.api.service.AuthService;
+import com.vitrum.api.dto.Request.AuthenticationRequest;
+import com.vitrum.api.dto.Response.AuthenticationResponse;
+import com.vitrum.api.dto.Request.RegisterRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

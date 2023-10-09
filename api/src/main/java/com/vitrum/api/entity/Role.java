@@ -1,22 +1,26 @@
-package com.vitrum.api.user;
+package com.vitrum.api.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.vitrum.api.user.Permission.*;
+import static com.vitrum.api.entity.Permission.*;
 
 @Getter
 @RequiredArgsConstructor
 public enum Role {
 
 
-    USER(Collections.emptySet()),
+    USER(Set.of(
+            USER_CREATE,
+            USER_UPDATE,
+            USER_DELETE,
+            USER_READ
+    )),
     ADMIN(
             Set.of(
                     ADMIN_READ,
