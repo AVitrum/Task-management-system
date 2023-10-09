@@ -4,10 +4,7 @@ import com.vitrum.api.service.TeamService;
 import com.vitrum.api.dto.Request.TeamCreationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
@@ -29,5 +26,10 @@ public class TeamController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/show")
+    public ResponseEntity<?> showTest() {
+        return ResponseEntity.ok(service.showTest());
     }
 }

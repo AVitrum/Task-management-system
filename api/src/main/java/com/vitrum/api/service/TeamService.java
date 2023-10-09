@@ -1,5 +1,6 @@
 package com.vitrum.api.service;
 
+import com.vitrum.api.dto.Response.TestResponse;
 import com.vitrum.api.dto.Response.UserProfileResponse;
 import com.vitrum.api.entity.RoleInTeam;
 import com.vitrum.api.entity.Team;
@@ -60,5 +61,15 @@ public class TeamService {
                 .build();
         team.getMembers().add(member);
         teamMembershipRepository.save(member);
+    }
+
+    public TestResponse showTest() {
+        var team = repository.findByName("Test").orElse(null);
+        var members = team.getMembers();
+        return TestResponse.builder()
+                .id(members.get(0).getUser().getId())
+                .name(members.get(0).getUser().getTrueUsername())
+                .role(members.get(0).getRole().name())
+                .build();
     }
 }
