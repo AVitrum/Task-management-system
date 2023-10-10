@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.17",
+    "@heroicons/react": "^2.0.18",
     "amqplib": "^0.10.3",
     "axios": "^1.5.1",
     "js-cookie": "^3.0.5",
