@@ -1,18 +1,22 @@
 import { Outlet } from "react-router-dom";
 import Header from "./Header";
+import Footer from "./Footer";
 
-export default function Layout(){
-    return(
-        <div className="relative">
-            <header>
-                <Header/>
+
+export default function Layout() {
+    return (
+        <div className="min-h-screen flex flex-col">
+            <header >
+                <Header />
             </header>
 
-            <main className="mt-16 mb-16" >
-                <Outlet/>
+            <main className="centerForm mt-16 mb-16 " >
+                <Outlet />
             </main>
 
-            <footer>TMS2023</footer>
+            <footer className="centerForm mt-auto mb-4">
+                <Footer/>
+            </footer>
         </div>
     );
 }
