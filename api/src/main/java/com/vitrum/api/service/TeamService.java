@@ -4,12 +4,14 @@ import com.vitrum.api.dto.Response.*;
 import com.vitrum.api.entity.enums.RoleInTeam;
 import com.vitrum.api.entity.Team;
 import com.vitrum.api.entity.Member;
-import com.vitrum.api.repository.TeamMembershipRepository;
+import com.vitrum.api.repository.MemberRepository;
 import com.vitrum.api.repository.TeamRepository;
 import com.vitrum.api.dto.Request.TeamCreationRequest;
 import com.vitrum.api.entity.User;
+import com.vitrum.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -22,7 +24,8 @@ import java.util.stream.Collectors;
 public class TeamService {
 
     private final TeamRepository repository;
-    private final TeamMembershipRepository teamMembershipRepository;
+    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
 
     public TeamCreationResponse createTeam(TeamCreationRequest request, Principal connectedUser) {
         try {
@@ -53,6 +56,19 @@ public class TeamService {
                 .build();
     }
 
+    public String addUserToTeam(String username, String teamName) {
+        var team = repository.findByName(teamName)
+                .orElseThrow(() -> new IllegalArgumentException("Can't find team by this name"));
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Can't find user"));
+        if (memberRepository.findByUser(user).isEmpty()) {
+            addMember(user, RoleInTeam.MEMBER, team);
+            return "The user has been added to the team";
+        } else {
+            throw new IllegalArgumentException("The user is already in the team");
+        }
+    }
+
     private void addMember(User user, RoleInTeam role, Team team) {
         var member = Member.builder()
                 .user(user)
@@ -60,7 +76,7 @@ public class TeamService {
                 .team(team)
                 .build();
         team.getMembers().add(member);
-        teamMembershipRepository.save(member);
+        memberRepository.save(member);
     }
 
     private UserProfileResponse mapUserToUserProfileResponse(User user) {
