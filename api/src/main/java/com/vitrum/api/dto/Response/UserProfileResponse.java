@@ -1,6 +1,6 @@
 package com.vitrum.api.dto.Response;
 
-import com.vitrum.api.entity.Role;
+import com.vitrum.api.entity.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

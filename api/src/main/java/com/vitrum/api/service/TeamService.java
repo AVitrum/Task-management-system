@@ -1,14 +1,12 @@
 package com.vitrum.api.service;
 
-import com.vitrum.api.dto.Response.TestResponse;
-import com.vitrum.api.dto.Response.UserProfileResponse;
-import com.vitrum.api.entity.RoleInTeam;
+import com.vitrum.api.dto.Response.*;
+import com.vitrum.api.entity.enums.RoleInTeam;
 import com.vitrum.api.entity.Team;
-import com.vitrum.api.entity.TeamMembership;
+import com.vitrum.api.entity.Member;
 import com.vitrum.api.repository.TeamMembershipRepository;
 import com.vitrum.api.repository.TeamRepository;
 import com.vitrum.api.dto.Request.TeamCreationRequest;
-import com.vitrum.api.dto.Response.TeamCreationResponse;
 import com.vitrum.api.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +44,25 @@ public class TeamService {
         }
     }
 
+    public TeamResponse findByName(String name) {
+        var team = repository.findByName(name).orElseThrow(() -> new IllegalArgumentException("Team not found"));
+        return TeamResponse.builder()
+                .id(team.getId())
+                .name(team.getName())
+                .members(getMemberResponse(team))
+                .build();
+    }
+
+    private void addMember(User user, RoleInTeam role, Team team) {
+        var member = Member.builder()
+                .user(user)
+                .role(role)
+                .team(team)
+                .build();
+        team.getMembers().add(member);
+        teamMembershipRepository.save(member);
+    }
+
     private UserProfileResponse mapUserToUserProfileResponse(User user) {
         return UserProfileResponse.builder()
                 .id(user.getId())
@@ -53,23 +72,18 @@ public class TeamService {
                 .build();
     }
 
-    private void addMember(User user, RoleInTeam role, Team team) {
-        var member = TeamMembership.builder()
-                .user(user)
-                .role(role)
-                .team(team)
-                .build();
-        team.getMembers().add(member);
-        teamMembershipRepository.save(member);
+    private List<MemberResponse> getMemberResponse(Team team) {
+        List<Member> members = team.getMembers();
+        return members.stream()
+                .map(this::mapMemberToMemberResponse)
+                .collect(Collectors.toList());
     }
 
-    public TestResponse showTest() {
-        var team = repository.findByName("Test").orElse(null);
-        var members = team.getMembers();
-        return TestResponse.builder()
-                .id(members.get(0).getUser().getId())
-                .name(members.get(0).getUser().getTrueUsername())
-                .role(members.get(0).getRole().name())
+    private MemberResponse mapMemberToMemberResponse(Member membership) {
+        return MemberResponse.builder()
+                .id(membership.getId())
+                .name(membership.getUser().getTrueUsername())
+                .role(membership.getRole())
                 .build();
     }
 }

@@ -1,5 +1,6 @@
 package com.vitrum.api.dto.Response;
 
+import com.vitrum.api.entity.enums.RoleInTeam;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,9 +10,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TestResponse {
+public class MemberResponse {
 
-    private String name;
     private Long id;
-    private String role;
+    private String name;
+    private RoleInTeam role;
 }

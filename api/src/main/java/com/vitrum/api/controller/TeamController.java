@@ -28,8 +28,14 @@ public class TeamController {
         }
     }
 
-    @GetMapping("/show")
-    public ResponseEntity<?> showTest() {
-        return ResponseEntity.ok(service.showTest());
+    @GetMapping("/{name}")
+    public ResponseEntity<?> showTeamByName(
+        @PathVariable String name
+    ) {
+        try {
+            return ResponseEntity.ok(service.findByName(name));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

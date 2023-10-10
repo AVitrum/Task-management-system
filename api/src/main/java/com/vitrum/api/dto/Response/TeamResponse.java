@@ -5,13 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TestResponse {
+public class TeamResponse {
 
-    private String name;
     private Long id;
-    private String role;
+    private String name;
+    private List<MemberResponse> members;
 }

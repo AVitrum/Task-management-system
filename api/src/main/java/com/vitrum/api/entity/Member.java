@@ -1,5 +1,6 @@
 package com.vitrum.api.entity;
 
+import com.vitrum.api.entity.enums.RoleInTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,12 +8,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "team_membership")
+@Table(name = "member")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TeamMembership {
+public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

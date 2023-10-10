@@ -15,7 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.web.cors.CorsConfiguration;
 
-import static com.vitrum.api.entity.Role.USER;
+import static com.vitrum.api.entity.enums.Role.USER;
 
 @Configuration
 @EnableWebSecurity
