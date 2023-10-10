@@ -3,6 +3,7 @@ package com.vitrum.api.user;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public enum Permission {
 
@@ -11,6 +12,5 @@ public enum Permission {
     ADMIN_CREATE("admin:create"),
     ADMIN_DELETE("admin:delete");
 
-    @Getter
     private final String permission;
 }
