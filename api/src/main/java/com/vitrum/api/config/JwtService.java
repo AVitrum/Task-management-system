@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import io.jsonwebtoken.Claims;
@@ -17,10 +18,12 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private static final String secretKey = "P8c0IaqBEiIbWhjMe0K2BZ2OyRPLxL4R54D6xOFoPBWL8gv/QdNtF4bDxsjSnTDEGJr3C9jX8bE3gKMtrr8ox0+Zt4/qFc8PrIXxaYfPBIL7cwjmoWsv1/jnvqglxpfE1g/UVesrxLQl+79ebQ4IHEeMRLYtpEls5Jmde3yzKC1OgPjkKDlfARAwNil4RPrTTMuKkeG3oRaNs6tG9JYnogLfrst4CxHMLjrAHrECqacwTspGDJvVK/SdmWgtMZH2oRu+6xQ20/adSdY/2hXXsIjKU3BhlLmQEijNyp2MjTwjscHmMGeaSF0sbicre9sAzEt7u55fNdDn1ngkDkvyV4Lsg6KVDdwJ5zl5gZzizWI=";
-    private final long jwtExpiration = 86400000;
-    private final long refreshExpiration = 604800000;
-
+    @Value("${application.security.jwt.secret-key}")
+    private String secretKey;
+    @Value("${application.security.jwt.expiration}")
+    private long jwtExpiration;
+    @Value("${application.security.jwt.refresh-token.expiration}")
+    private long refreshExpiration;
 
     public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);

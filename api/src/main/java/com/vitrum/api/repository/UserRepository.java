@@ -1,5 +1,6 @@
-package com.vitrum.api.user;
+package com.vitrum.api.repository;
 
+import com.vitrum.api.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,11 +1,13 @@
-package com.vitrum.api.auth;
+package com.vitrum.api.controller;
 
-import com.vitrum.api.auth.dto.Request.AuthenticationRequest;
-import com.vitrum.api.auth.dto.Response.AuthenticationResponse;
-import com.vitrum.api.auth.dto.Request.RegisterRequest;
+import com.vitrum.api.service.AuthService;
+import com.vitrum.api.dto.Request.AuthenticationRequest;
+import com.vitrum.api.dto.Response.AuthenticationResponse;
+import com.vitrum.api.dto.Request.RegisterRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +25,7 @@ public class AuthController {
             @RequestBody RegisterRequest request
     ) {
         try {
-            return ResponseEntity.ok(service.register(request));
+            return ResponseEntity.status(HttpStatus.CREATED).body(service.register(request));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -42,17 +44,6 @@ public class AuthController {
             HttpServletResponse response
     ) throws IOException {
         service.refreshToken(request, response);
-    }
-
-    @GetMapping("/profile")
-    public ResponseEntity<?> getUserProfile(
-            HttpServletRequest request
-    ) {
-        try {
-            return ResponseEntity.ok(service.getUserProfile(request));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
     }
 }
 
