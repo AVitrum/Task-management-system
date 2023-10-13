@@ -1,4 +1,4 @@
-package com.vitrum.api.auth.dto.Request;
+package com.vitrum.api.dto.Request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthenticationRequest {
+public class TeamCreationRequest {
 
-    private String username;
-    private String password;
+    private String name;
 }

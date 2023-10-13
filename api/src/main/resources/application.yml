@@ -13,3 +13,11 @@ spring:
         format_sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+application:
+  security:
+    jwt:
+      secret-key: P8c0IaqBEiIbWhjMe0K2BZ2OyRPLxL4R54D6xOFoPBWL8gv/QdNtF4bDxsjSnTDEGJr3C9jX8bE3gKMtrr8ox0+Zt4/qFc8PrIXxaYfPBIL7cwjmoWsv1/jnvqglxpfE1g/UVesrxLQl+79ebQ4IHEeMRLYtpEls5Jmde3yzKC1OgPjkKDlfARAwNil4RPrTTMuKkeG3oRaNs6tG9JYnogLfrst4CxHMLjrAHrECqacwTspGDJvVK/SdmWgtMZH2oRu+6xQ20/adSdY/2hXXsIjKU3BhlLmQEijNyp2MjTwjscHmMGeaSF0sbicre9sAzEt7u55fNdDn1ngkDkvyV4Lsg6KVDdwJ5zl5gZzizWI=
+      expiration: 86400000
+      refresh-token:
+        expiration: 604800000

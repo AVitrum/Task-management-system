@@ -1,4 +1,4 @@
-package com.vitrum.api.user.dto;
+package com.vitrum.api.dto.Request;
 
 import lombok.Builder;
 import lombok.Data;
