@@ -1,5 +1,7 @@
 package com.vitrum.api.service;
 
+import com.vitrum.api.entity.Team;
+import com.vitrum.api.entity.User;
 import com.vitrum.api.entity.enums.RoleInTeam;
 import com.vitrum.api.repository.MemberRepository;
 import com.vitrum.api.repository.TeamRepository;
@@ -21,12 +23,16 @@ public class MemberService {
                 .orElseThrow(() -> new IllegalArgumentException("Can't find team by this name"));
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Can't find user"));
-        if (repository.findByUser(user).isEmpty()) {
-            var member = team.addUser(user, RoleInTeam.MEMBER);
-            repository.save(member);
-            return "The user has been added to the team";
-        } else {
-            throw new IllegalArgumentException("The user is already in the team");
+        if (inTeam(user, team)) {
+            return "The user is already in the team";
         }
+        var member = team.addUser(user, RoleInTeam.MEMBER);
+        repository.save(member);
+        return "The user has been added to the team";
+    }
+
+    private Boolean inTeam(User user, Team team) {
+        return team.getMembers().contains(repository.findByUser(user)
+                .orElse(null));
     }
 }

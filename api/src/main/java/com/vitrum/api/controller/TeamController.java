@@ -3,13 +3,14 @@ package com.vitrum.api.controller;
 import com.vitrum.api.service.TeamService;
 import com.vitrum.api.dto.Request.TeamCreationRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
 @RestController
-@RequestMapping("/api/team/")
+@RequestMapping("/api/team")
 @RequiredArgsConstructor
 public class TeamController {
 
@@ -21,7 +22,7 @@ public class TeamController {
         Principal connectedUser
     ) {
         try {
-            return ResponseEntity.ok(service.create(request, connectedUser));
+            return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request, connectedUser));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -36,6 +37,11 @@ public class TeamController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<?> showAll() {
+        return ResponseEntity.ok(service.getAll());
     }
 
 }

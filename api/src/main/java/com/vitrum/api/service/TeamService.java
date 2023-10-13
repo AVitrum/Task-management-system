@@ -45,8 +45,17 @@ public class TeamService {
         }
     }
 
+    public List<TeamResponse> getAll() {
+        var teams = repository.findAll();
+        return teams.stream().map(this::mapTeamToTeamResponse).collect(Collectors.toList());
+    }
+
     public TeamResponse findByName(String name) {
         var team = repository.findByName(name).orElseThrow(() -> new IllegalArgumentException("Team not found"));
+        return mapTeamToTeamResponse(team);
+    }
+
+    private TeamResponse mapTeamToTeamResponse(Team team) {
         return TeamResponse.builder()
                 .id(team.getId())
                 .name(team.getName())
