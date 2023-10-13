@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.web.cors.CorsConfiguration;
 
+import static com.vitrum.api.entity.enums.Role.ADMIN;
 import static com.vitrum.api.entity.enums.Role.USER;
 
 @Configuration
@@ -35,9 +36,10 @@ public class SecurityConfiguration {
                         httpSecurityCorsConfigurer.configurationSource(request ->
                                 new CorsConfiguration().applyPermitDefaultValues()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/users/**")
+                        .requestMatchers("/api/auth/**")
                             .permitAll()
-                        .requestMatchers("/api/team/**").hasAnyRole(USER.name())
+                        .requestMatchers("/api/users/**").hasAnyRole(USER.name(), ADMIN.name())
+                        .requestMatchers("/api/teams/**").hasAnyRole(USER.name(), ADMIN.name())
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)

@@ -45,16 +45,5 @@ public class AuthController {
     ) throws IOException {
         service.refreshToken(request, response);
     }
-
-    @GetMapping("/profile")
-    public ResponseEntity<?> getUserProfile(
-            HttpServletRequest request
-    ) {
-        try {
-            return ResponseEntity.ok(service.getUserProfile(request));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
 }
 

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/team/member")
+@RequestMapping("/api/teams/members")
 @RequiredArgsConstructor
 public class MemberController {
 

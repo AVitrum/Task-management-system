@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vitrum.api.dto.Request.AuthenticationRequest;
 import com.vitrum.api.dto.Response.AuthenticationResponse;
 import com.vitrum.api.dto.Request.RegisterRequest;
-import com.vitrum.api.dto.Response.UserProfileResponse;
 import com.vitrum.api.entity.Token;
 import com.vitrum.api.repository.TokenRepository;
 import com.vitrum.api.entity.enums.TokenType;
@@ -102,27 +101,6 @@ public class AuthService {
                 new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
             }
         }
-    }
-
-    public UserProfileResponse getUserProfile(HttpServletRequest request) {
-        String jwt = extractJwtFromRequest(request);
-        String userEmail = jwtService.extractEmail(jwt);
-        User user = repository.findByEmail(userEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return UserProfileResponse.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .username(user.getTrueUsername())
-                .role(user.getRole())
-                .build();
-    }
-
-    private String extractJwtFromRequest(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);
-        }
-        throw new IllegalArgumentException("Invalid authorization header");
     }
 
     private void saveUserToken(User user, String jwtToken) {

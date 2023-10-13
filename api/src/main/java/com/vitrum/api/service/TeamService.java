@@ -32,7 +32,7 @@ public class TeamService {
                     .members(new ArrayList<>())
                     .build();
             repository.save(team);
-            var member = team.addUser(user, RoleInTeam.MANAGER);
+            var member = team.addUser(user, RoleInTeam.LEADER);
             memberRepository.save(member);
             return TeamCreationResponse.builder()
                     .id(team.getId())
