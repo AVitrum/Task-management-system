@@ -1,6 +1,7 @@
-package com.vitrum.api.controller;
+package com.vitrum.api.validation;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,7 +13,9 @@ import java.util.Objects;
 public class ValidationExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String handleValidationExceptions(MethodArgumentNotValidException ex) {
-        return Objects.requireNonNull(ex.getBindingResult().getFieldError()).getDefaultMessage();
+    public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        String errorMessage = Objects.requireNonNull(ex.getBindingResult().getFieldError()).getDefaultMessage();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
     }
 }
+
