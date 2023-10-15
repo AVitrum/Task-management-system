@@ -6,11 +6,13 @@ export default function HomePage() {
     const {userInfo} = useContext(UserContext);
 
     return(
-        <div >
+        <div className="text-white" >
           <br/>
           <br/>
           <br/>
           <br/>
+          <br/>
+          Here will be something interesting but later
           <br/>
           <>
           {userInfo.id}
@@ -26,6 +28,7 @@ export default function HomePage() {
           <br/>
           <>
           {userInfo.role}
+          
           </>
         </div>
     );
