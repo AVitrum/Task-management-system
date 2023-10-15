@@ -1,5 +1,6 @@
 package com.vitrum.api.dto.Request;
 
+import com.vitrum.api.validation.PasswordConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,5 +14,6 @@ public class RegisterRequest {
 
     private String username;
     private String email;
+    @PasswordConstraint
     private String password;
 }
