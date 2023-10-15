@@ -12,7 +12,9 @@ export default function Header() {
     const navigate = useNavigate();
 
     const profile = async () => {
-        const res = await axios.get(`${backendIp}/api/users/profile`, {
+
+    const res = await axios.get(`${backendIp}/api/users/profile`, {
+
             headers: {
                 Authorization: `Bearer ${token}`,
             },
