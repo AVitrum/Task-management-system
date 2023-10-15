@@ -12,7 +12,7 @@ export default function Header() {
     const navigate = useNavigate();
 
     const profile = async () => {
-        const res = await axios.get(`${backendIp}/api/auth/profile`, {
+        const res = await axios.get(`${backendIp}/api/users/profile`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -35,10 +35,10 @@ export default function Header() {
     }, []);
 
     return (
+        
 
-
-        <div className='bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg '>
-            <nav className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
+        <div className='bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg '>
+            <nav className=" flex items-center justify-between p-6 lg:px-8" >
                 <div className="flex lg:flex-1">
                     <a href="/" className="-m-1.5 -p-1.5">
                         <span className="sr-only">Your Company</span>
@@ -46,35 +46,36 @@ export default function Header() {
                     </a>
                 </div>
 
-                <div className=" lg:flex lg:gap-x-12">
-                    <a href="/" className="text-sm font-semibold leading-6">
+                <div className="ml-12 ">
+                    <a href="/" className="linkHomePage ">
                         Home
                     </a>
-                    <a href="#" className="text-sm font-semibold leading-6 ">
+                    <a href="#" className="linkHomePage">
                         About
                     </a>
-                    <a href="#" className="text-sm font-semibold leading-6 ">
+                    <a href="#" className="linkHomePage ">
                         Help
                     </a>
                 </div>
                 <div className=" lg:flex lg:flex-1 lg:justify-end lg:gap-x-6" >
 
-                        {userInfo.id === 0 || userInfo.id === undefined ? (
-                            <>
-                                <Link to="/login" className="text-sm font-semibold leading-6 ">
-                                    Log in <span aria-hidden="true">&#10094;</span>
-                                </Link>
+                    {userInfo.id === 0 || userInfo.id === undefined ? (
+                        <>
+                            <Link to="/login" className="regLogLinks hover:text-green-500  lg:mr-4 md:mr-2 sm:mr-1">
+                                Log in <span aria-hidden="true">&#10094;</span>
+                            </Link>
 
-                                <Link to="/register" className="text-sm font-semibold leading-6 ">
-                                    Register <span aria-hidden="true">&#10094;</span>
-                                </Link >
+                            <Link to="/register" className="regLogLinks hover:text-amber-500  ml-1">
+                                Register <span aria-hidden="true">&#10094;</span>
+                            </Link >
 
-                            </>
-                        ) : (
-                            <button className="text-sm font-semibold leading-6  " onClick={logout}>
-                                Logout</button>
-                        )}
-                    
+                        </>
+                    ) : (
+                        <button className="regLogLinks hover:text-red-500  "
+                            onClick={logout}>
+                            Logout <span aria-hidden="true">&#10094;</span></button>
+                    )}
+
                 </div>
             </nav>
 
