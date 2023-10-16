@@ -6,10 +6,12 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import backendIp from "../serverconfig";
 
-export default function LoginPage() {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const { setToken } = useContext(UserContext);
+export default function ResetPage() {
+
+    const [currentPassword, setcurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmationPassword, setconfirmationPassword] = useState('');
+    const { token } = useContext(UserContext);
 
     const navigate = useNavigate();
 
@@ -28,17 +30,27 @@ export default function LoginPage() {
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        const data = {
+            currentPassword:currentPassword,
+            newPassword:newPassword,
+            confirmationPassword:confirmationPassword
+        }
+        console.log(data);
         try {
-            const response = await axios.post(`${backendIp}/api/auth/authenticate`,
-                {
-                    username,
-                    password,
-                })
-            setToken(response.data.token);
+            const response = await axios.patch(`${backendIp}/api/users`, data, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                
+                },
+
+            });
+
 
             navigate('/');
             window.location.reload();
-           
+
         } catch (error: any) {
             notify(error.response.data);
         }
@@ -50,25 +62,32 @@ export default function LoginPage() {
             <div className="bg-white px-8 pt-8 pb-14
             rounded-sm shadow-2xl my-32">
                 <form className=" " onSubmit={(e) => onSubmit(e)}>
-                    <h1 className="text-black tracking-wide text-3xl font-black mb-8 centerForm">Login</h1>
+                    <h1 className="text-black tracking-wide text-3xl font-black mb-8 centerForm">Reset Password</h1>
 
-                    <h2 className="textOverInputField">Username</h2>
+                    <h2 className="textOverInputField">Сurrent Password</h2>
                     <input type="text"
-                        placeholder="Type your username"
-                        value={username}
-                        onChange={ev => setUsername(ev.target.value)}
+                        placeholder="Type your current password"
+                        value={currentPassword}
+                        onChange={ev => setcurrentPassword(ev.target.value)}
                         className="customInput " />
 
-                    <h2 className="textOverInputField">Password</h2>
-                    <input type="password"
-                        placeholder="Type your password"
-                        value={password}
-                        onChange={ev => setPassword(ev.target.value)}
+                    <h2 className="textOverInputField"> New Password</h2>
+                    <input type="text"
+                        placeholder="Type your new password"
+                        value={newPassword}
+                        onChange={ev => setNewPassword(ev.target.value)}
+                        className="customInput" />
+
+                    <h2 className="textOverInputField"> Confirm Password</h2>
+                    <input type="text"
+                        placeholder="Type your confirm password"
+                        value={confirmationPassword}
+                        onChange={ev => setconfirmationPassword(ev.target.value)}
                         className="customInput" />
 
                     <div className="centerForm">
-                        <button className="button-64 mt-8 " type="submit" >
-                            <span className="text">Login</span>
+                        <button className="button-64 mt-6 " type="submit" >
+                            <span className="text">Reset</span>
                         </button>
                     </div>
                 </form>

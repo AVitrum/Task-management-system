@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.security.Principal;
 
 @RestController
@@ -27,12 +28,16 @@ public class UserController {
         }
     }
 
-    @PatchMapping
+    @PatchMapping("/password")
     public ResponseEntity<?> changePassword(
-            @RequestBody ChangePasswordRequest request,
+            @Valid @RequestBody ChangePasswordRequest request,
             Principal connectedUser
     ) {
-        service.changePassword(request, connectedUser);
-        return ResponseEntity.ok().build();
+        try {
+            service.changePassword(request, connectedUser);
+            return ResponseEntity.ok().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
