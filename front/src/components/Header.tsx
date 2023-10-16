@@ -13,7 +13,7 @@ export default function Header() {
 
     const profile = async () => {
 
-    const res = await axios.get(`${backendIp}/api/users/profile`, {
+        const res = await axios.get(`${backendIp}/api/users/profile`, {
 
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -37,7 +37,7 @@ export default function Header() {
     }, []);
 
     return (
-        
+
 
         <div className='bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg '>
             <nav className=" flex items-center justify-between p-6 lg:px-8" >
@@ -73,9 +73,15 @@ export default function Header() {
 
                         </>
                     ) : (
-                        <button className="regLogLinks hover:text-red-500  "
-                            onClick={logout}>
-                            Logout <span aria-hidden="true">&#10094;</span></button>
+                        <>
+                            <Link to="/reset" className="regLogLinks hover:text-amber-500 lg:mr-4 md:mr-2 mr-1">
+                                Reset Password <span aria-hidden="true">&#10094;</span>
+                            </Link >
+                            <button className="regLogLinks hover:text-red-500  "
+                                onClick={logout}>
+                                Logout <span aria-hidden="true">&#10094;</span></button>
+                        </>
+
                     )}
 
                 </div>
