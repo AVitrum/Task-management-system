@@ -4,6 +4,7 @@ import com.vitrum.api.dto.Request.ChangePasswordRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -38,5 +39,11 @@ public class UserController {
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PostMapping("/test")
+    public ResponseEntity<?> test() {
+        service.sendSimpleMessage();
+        return ResponseEntity.ok().body("Okay");
     }
 }

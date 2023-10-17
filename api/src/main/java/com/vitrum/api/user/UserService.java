@@ -5,6 +5,9 @@ import com.vitrum.api.dto.Request.ChangePasswordRequest;
 import com.vitrum.api.dto.Response.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +22,19 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository repository;
     private final JwtService jwtService;
+    @Autowired
+    private JavaMailSender emailSender;
+
+    public void sendSimpleMessage() {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("tms.team.noreply@gmail.com");
+        message.setTo("andrey.almashi@gmail.com");
+        message.setSubject("Test");
+        message.setText("Test text");
+        emailSender.send(message);
+    }
+
+
 
     public UserProfileResponse profile(HttpServletRequest request) {
         String jwt = extractJwtFromRequest(request);
