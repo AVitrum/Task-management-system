@@ -1,7 +1,6 @@
 package com.vitrum.api.user;
 
 import com.vitrum.api.dto.Request.ChangePasswordRequest;
-import com.vitrum.api.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

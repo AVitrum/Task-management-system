@@ -1,6 +1,5 @@
 package com.vitrum.api.member;
 
-import com.vitrum.api.member.Member;
 import com.vitrum.api.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 

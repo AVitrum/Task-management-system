@@ -1,11 +1,8 @@
 package com.vitrum.api.team;
 
 import com.vitrum.api.dto.Response.*;
-import com.vitrum.api.team.RoleInTeam;
-import com.vitrum.api.team.Team;
 import com.vitrum.api.member.Member;
 import com.vitrum.api.member.MemberRepository;
-import com.vitrum.api.team.TeamRepository;
 import com.vitrum.api.dto.Request.TeamCreationRequest;
 import com.vitrum.api.user.User;
 import lombok.RequiredArgsConstructor;
