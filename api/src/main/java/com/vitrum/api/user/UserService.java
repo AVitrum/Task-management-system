@@ -6,13 +6,15 @@ import com.vitrum.api.dto.Response.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.security.Principal;
 
 @Service
@@ -24,17 +26,6 @@ public class UserService {
     private final JwtService jwtService;
     @Autowired
     private JavaMailSender emailSender;
-
-    public void sendSimpleMessage() {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("tms.team.noreply@gmail.com");
-        message.setTo("andrey.almashi@gmail.com");
-        message.setSubject("Test");
-        message.setText("Test text");
-        emailSender.send(message);
-    }
-
-
 
     public UserProfileResponse profile(HttpServletRequest request) {
         String jwt = extractJwtFromRequest(request);
@@ -63,6 +54,33 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         repository.save(user);
     }
+
+    public void getRecoverycode(Principal connectedUser) {
+        try {
+            var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+            MimeMessage message = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message);
+
+            helper.setFrom("tms.team.noreply@gmail.com");
+            helper.setTo(user.getUsername());
+            helper.setSubject("Recovery code");
+            helper.setText("123456");
+
+            emailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Something went wrong!");
+        }
+    }
+
+//    public void sendSimpleMessage() {
+//        SimpleMailMessage message = new SimpleMailMessage();
+//        message.setFrom("tms.team.noreply@gmail.com");
+//        message.setTo("andrey.almashi@gmail.com");
+//        message.setSubject("Test");
+//        message.setText("Test text");
+//        emailSender.send(message);
+//    }
+
 
     private String extractJwtFromRequest(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");

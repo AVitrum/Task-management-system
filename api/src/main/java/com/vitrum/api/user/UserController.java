@@ -4,9 +4,9 @@ import com.vitrum.api.dto.Request.ChangePasswordRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import javax.validation.Valid;
 import java.security.Principal;
 
@@ -41,9 +41,15 @@ public class UserController {
         }
     }
 
-    @PostMapping("/test")
-    public ResponseEntity<?> test() {
-        service.sendSimpleMessage();
-        return ResponseEntity.ok().body("Okay");
+    @GetMapping("/recoverycode")
+    public ResponseEntity<?> getRecoverycode(
+            Principal connectedUser
+    ) {
+        try {
+            service.getRecoverycode(connectedUser);
+            return ResponseEntity.ok().body("Sent");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
