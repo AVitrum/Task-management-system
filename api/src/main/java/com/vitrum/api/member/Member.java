@@ -1,6 +1,8 @@
-package com.vitrum.api.entity;
+package com.vitrum.api.member;
 
-import com.vitrum.api.entity.enums.RoleInTeam;
+import com.vitrum.api.team.Team;
+import com.vitrum.api.team.RoleInTeam;
+import com.vitrum.api.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

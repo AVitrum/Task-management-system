@@ -1,6 +1,6 @@
-package com.vitrum.api.config;
+package com.vitrum.api.authentication;
 
-import com.vitrum.api.repository.TokenRepository;
+import com.vitrum.api.token.TokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

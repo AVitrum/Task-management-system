@@ -1,6 +1,6 @@
-package com.vitrum.api.controller;
+package com.vitrum.api.member;
 
-import com.vitrum.api.service.MemberService;
+import com.vitrum.api.member.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

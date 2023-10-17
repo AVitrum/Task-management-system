@@ -1,6 +1,6 @@
-package com.vitrum.api.repository;
+package com.vitrum.api.token;
 
-import com.vitrum.api.entity.Token;
+import com.vitrum.api.token.Token;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

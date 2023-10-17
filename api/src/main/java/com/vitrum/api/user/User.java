@@ -1,6 +1,6 @@
-package com.vitrum.api.entity;
+package com.vitrum.api.user;
 
-import com.vitrum.api.entity.enums.Role;
+import com.vitrum.api.token.Token;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,11 +1,10 @@
-package com.vitrum.api.service;
+package com.vitrum.api.member;
 
-import com.vitrum.api.entity.Team;
-import com.vitrum.api.entity.User;
-import com.vitrum.api.entity.enums.RoleInTeam;
-import com.vitrum.api.repository.MemberRepository;
-import com.vitrum.api.repository.TeamRepository;
-import com.vitrum.api.repository.UserRepository;
+import com.vitrum.api.team.Team;
+import com.vitrum.api.user.User;
+import com.vitrum.api.team.RoleInTeam;
+import com.vitrum.api.team.TeamRepository;
+import com.vitrum.api.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;

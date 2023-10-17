@@ -1,4 +1,4 @@
-package com.vitrum.api.entity.enums;
+package com.vitrum.api.user;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

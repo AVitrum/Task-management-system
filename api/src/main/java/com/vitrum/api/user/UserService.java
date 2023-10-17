@@ -1,10 +1,8 @@
-package com.vitrum.api.service;
+package com.vitrum.api.user;
 
 import com.vitrum.api.config.JwtService;
 import com.vitrum.api.dto.Request.ChangePasswordRequest;
 import com.vitrum.api.dto.Response.UserProfileResponse;
-import com.vitrum.api.entity.User;
-import com.vitrum.api.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

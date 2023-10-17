@@ -1,13 +1,13 @@
-package com.vitrum.api.service;
+package com.vitrum.api.team;
 
 import com.vitrum.api.dto.Response.*;
-import com.vitrum.api.entity.enums.RoleInTeam;
-import com.vitrum.api.entity.Team;
-import com.vitrum.api.entity.Member;
-import com.vitrum.api.repository.MemberRepository;
-import com.vitrum.api.repository.TeamRepository;
+import com.vitrum.api.team.RoleInTeam;
+import com.vitrum.api.team.Team;
+import com.vitrum.api.member.Member;
+import com.vitrum.api.member.MemberRepository;
+import com.vitrum.api.team.TeamRepository;
 import com.vitrum.api.dto.Request.TeamCreationRequest;
-import com.vitrum.api.entity.User;
+import com.vitrum.api.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;

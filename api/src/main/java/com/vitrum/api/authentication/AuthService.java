@@ -1,15 +1,15 @@
-package com.vitrum.api.service;
+package com.vitrum.api.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vitrum.api.dto.Request.AuthenticationRequest;
 import com.vitrum.api.dto.Response.AuthenticationResponse;
 import com.vitrum.api.dto.Request.RegisterRequest;
-import com.vitrum.api.entity.Token;
-import com.vitrum.api.repository.TokenRepository;
-import com.vitrum.api.entity.enums.TokenType;
-import com.vitrum.api.entity.enums.Role;
-import com.vitrum.api.entity.User;
-import com.vitrum.api.repository.UserRepository;
+import com.vitrum.api.token.Token;
+import com.vitrum.api.token.TokenRepository;
+import com.vitrum.api.token.TokenType;
+import com.vitrum.api.user.Role;
+import com.vitrum.api.user.User;
+import com.vitrum.api.user.UserRepository;
 import com.vitrum.api.config.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

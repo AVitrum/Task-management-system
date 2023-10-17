@@ -1,6 +1,5 @@
-package com.vitrum.api.repository;
+package com.vitrum.api.team;
 
-import com.vitrum.api.entity.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

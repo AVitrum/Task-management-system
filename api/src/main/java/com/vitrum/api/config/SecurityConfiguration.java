@@ -17,8 +17,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import static com.vitrum.api.entity.enums.Role.ADMIN;
-import static com.vitrum.api.entity.enums.Role.USER;
+import static com.vitrum.api.user.Role.ADMIN;
+import static com.vitrum.api.user.Role.USER;
 
 @Configuration
 @EnableWebSecurity

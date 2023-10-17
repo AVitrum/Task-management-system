@@ -1,4 +1,4 @@
-package com.vitrum.api.entity.enums;
+package com.vitrum.api.token;
 
 public enum TokenType {
     BEARER
