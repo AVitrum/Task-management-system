@@ -1,6 +1,7 @@
 package com.vitrum.api.user;
 
 import com.vitrum.api.dto.Request.ChangePasswordRequest;
+import com.vitrum.api.dto.Request.PasswordRecoveryRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -42,10 +43,10 @@ public class UserController {
 
     @GetMapping("/recoverycode")
     public ResponseEntity<?> getRecoverycode(
-            Principal connectedUser
+            @RequestBody PasswordRecoveryRequest passwordRecoveryRequest
     ) {
         try {
-            service.getRecoverycode(connectedUser);
+            service.getRecoverycode(passwordRecoveryRequest.getEmail());
             return ResponseEntity.ok().body("Sent");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

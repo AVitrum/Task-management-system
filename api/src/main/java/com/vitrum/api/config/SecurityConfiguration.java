@@ -36,7 +36,8 @@ public class SecurityConfiguration {
                 .cors(httpSecurityCorsConfigurer ->
                         httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**")
+                        .requestMatchers("/api/auth/**",
+                                "/api/users/recoverycode")
                             .permitAll()
                         .requestMatchers("/api/users/**").hasAnyRole(USER.name(), ADMIN.name())
                         .requestMatchers("/api/teams/**").hasAnyRole(USER.name(), ADMIN.name())

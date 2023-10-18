@@ -1,5 +1,6 @@
 package com.vitrum.api.user;
 
+import com.vitrum.api.Recoverycode.Recoverycode;
 import com.vitrum.api.token.Token;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -37,6 +38,9 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
+
+    @OneToMany(mappedBy = "user")
+    private List<Recoverycode> recoverycode;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

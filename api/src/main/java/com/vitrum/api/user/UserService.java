@@ -1,5 +1,7 @@
 package com.vitrum.api.user;
 
+import com.vitrum.api.Recoverycode.Recoverycode;
+import com.vitrum.api.Recoverycode.RecoverycodeRepository;
 import com.vitrum.api.config.JwtService;
 import com.vitrum.api.dto.Request.ChangePasswordRequest;
 import com.vitrum.api.dto.Response.UserProfileResponse;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.security.Principal;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +26,7 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
     private final UserRepository repository;
+    private final RecoverycodeRepository recoverycodeRepository;
     private final JwtService jwtService;
     @Autowired
     private JavaMailSender emailSender;
@@ -43,28 +47,30 @@ public class UserService {
     public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
         var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            throw new IllegalStateException("Wrong password");
+            throw new IllegalStateException("Wrong password!");
         }
         if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
-            throw new IllegalStateException("Password are the same with current");
+            throw new IllegalStateException("Password are the same with current!");
         }
         if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
-            throw new IllegalStateException("Password are not the same");
+            throw new IllegalStateException("Password are not the same!");
         }
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         repository.save(user);
     }
 
-    public void getRecoverycode(Principal connectedUser) {
+    public void getRecoverycode(String email) {
         try {
-            var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+            var user = repository.findByEmail(email)
+                    .orElseThrow(() -> new UsernameNotFoundException("Wrong email!"));
+            var recoverycode = getRecoverycode(user);
             MimeMessage message = emailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message);
 
             helper.setFrom("tms.team.noreply@gmail.com");
             helper.setTo(user.getUsername());
-            helper.setSubject("Recovery code");
-            helper.setText("123456");
+            helper.setSubject("TMS Recovery code");
+            helper.setText("Your password recovery code: " + recoverycode.getCode());
 
             emailSender.send(message);
         } catch (MessagingException e) {
@@ -72,21 +78,27 @@ public class UserService {
         }
     }
 
-//    public void sendSimpleMessage() {
-//        SimpleMailMessage message = new SimpleMailMessage();
-//        message.setFrom("tms.team.noreply@gmail.com");
-//        message.setTo("andrey.almashi@gmail.com");
-//        message.setSubject("Test");
-//        message.setText("Test text");
-//        emailSender.send(message);
-//    }
+    private Recoverycode getRecoverycode(User user) {
+        if (recoverycodeRepository.findByUser(user).isPresent()) {
+            var recoverycode = recoverycodeRepository.findByUser(user)
+                    .orElseThrow(() -> new IllegalArgumentException("Wrong User!"));
+            recoverycodeRepository.delete(recoverycode);
+        }
 
+        var recoverycode = Recoverycode.builder()
+                .code(new Random().nextLong(999999 - 100000 + 1) + 100000)
+                .expired(false)
+                .user(user)
+                .build();
+        recoverycodeRepository.save(recoverycode);
+        return recoverycode;
+    }
 
     private String extractJwtFromRequest(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);
         }
-        throw new IllegalArgumentException("Invalid authorization header");
+        throw new IllegalArgumentException("Invalid authorization header!");
     }
 }
