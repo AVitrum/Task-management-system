@@ -128,6 +128,14 @@ public class AuthService {
             token.setRevoked(true);
         });
         tokenRepository.saveAll(validUserTokens);
+        deleteAllExpiredUserTokens(user);
+    }
+
+    private void deleteAllExpiredUserTokens(User user) {
+        var expiredUserTokens = tokenRepository.findAllExpiredTokenByUser(user.getId());
+        if (expiredUserTokens.isEmpty())
+            return;
+        tokenRepository.deleteAll(expiredUserTokens);
     }
 
 }
