@@ -1,7 +1,7 @@
 package com.vitrum.api.user;
 
-import com.vitrum.api.Recoverycode.Recoverycode;
-import com.vitrum.api.Recoverycode.RecoverycodeRepository;
+import com.vitrum.api.recoverycode.Recoverycode;
+import com.vitrum.api.recoverycode.RecoverycodeRepository;
 import com.vitrum.api.config.JwtService;
 import com.vitrum.api.dto.Request.ChangePasswordRequest;
 import com.vitrum.api.dto.Request.ResetPasswordRequest;

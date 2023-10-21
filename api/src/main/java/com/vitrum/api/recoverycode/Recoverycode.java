@@ -1,4 +1,4 @@
-package com.vitrum.api.Recoverycode;
+package com.vitrum.api.recoverycode;
 
 import com.vitrum.api.user.User;
 import jakarta.persistence.*;
