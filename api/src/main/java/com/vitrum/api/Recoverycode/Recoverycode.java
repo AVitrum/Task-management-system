@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalTime;
+
 @Entity
 @Table(name = "recoverycode")
 @Data
@@ -20,9 +22,15 @@ public class Recoverycode {
     private Long id;
 
     private Long code;
-    public boolean expired;
+    private LocalTime creationTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     public User user;
+
+    public boolean isExpired() {
+        LocalTime creationTime = this.getCreationTime();
+        LocalTime currentTime = LocalTime.now();
+        return creationTime.plusMinutes(2).isBefore(currentTime);
+    }
 }

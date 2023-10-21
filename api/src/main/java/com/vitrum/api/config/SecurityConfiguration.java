@@ -36,11 +36,17 @@ public class SecurityConfiguration {
                 .cors(httpSecurityCorsConfigurer ->
                         httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**",
-                                "/api/users/recoverycode")
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/api/users/password/recoverycode",
+                                "/api/users/password/reset")
                             .permitAll()
-                        .requestMatchers("/api/users/**").hasAnyRole(USER.name(), ADMIN.name())
-                        .requestMatchers("/api/teams/**").hasAnyRole(USER.name(), ADMIN.name())
+                        .requestMatchers(
+                                "/api/users/**"
+                        ).hasAnyRole(USER.name(), ADMIN.name())
+                        .requestMatchers(
+                                "/api/teams/**"
+                        ).hasAnyRole(USER.name(), ADMIN.name())
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)

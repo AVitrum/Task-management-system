@@ -1,7 +1,8 @@
 package com.vitrum.api.user;
 
 import com.vitrum.api.dto.Request.ChangePasswordRequest;
-import com.vitrum.api.dto.Request.PasswordRecoveryRequest;
+import com.vitrum.api.dto.Request.GenerateRecoverycodeRequest;
+import com.vitrum.api.dto.Request.ResetPasswordRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,7 @@ public class UserController {
         }
     }
 
+
     @PatchMapping("/password")
     public ResponseEntity<?> changePassword(
             @Valid @RequestBody ChangePasswordRequest request,
@@ -41,14 +43,26 @@ public class UserController {
         }
     }
 
-    @GetMapping("/recoverycode")
+    @GetMapping("/password/recoverycode")
     public ResponseEntity<?> getRecoverycode(
-            @RequestBody PasswordRecoveryRequest passwordRecoveryRequest
+            @RequestBody GenerateRecoverycodeRequest request
     ) {
         try {
-            service.getRecoverycode(passwordRecoveryRequest.getEmail());
+            service.getRecoverycode(request.getEmail());
             return ResponseEntity.ok().body("Sent");
         } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PatchMapping("/password/reset")
+    public ResponseEntity<?> resetPassword(
+            @RequestBody ResetPasswordRequest request
+    ) {
+        try {
+            service.resetPassword(request);
+            return ResponseEntity.ok().body("Changed");
+        } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

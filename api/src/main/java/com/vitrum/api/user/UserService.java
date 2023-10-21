@@ -4,6 +4,7 @@ import com.vitrum.api.Recoverycode.Recoverycode;
 import com.vitrum.api.Recoverycode.RecoverycodeRepository;
 import com.vitrum.api.config.JwtService;
 import com.vitrum.api.dto.Request.ChangePasswordRequest;
+import com.vitrum.api.dto.Request.ResetPasswordRequest;
 import com.vitrum.api.dto.Response.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.security.Principal;
+import java.time.LocalTime;
 import java.util.Random;
 
 @Service
@@ -59,6 +61,25 @@ public class UserService {
         repository.save(user);
     }
 
+    public void resetPassword(ResetPasswordRequest request) {
+        var user = repository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("Wrong email!"));
+        var recoverycode = user.getRecoverycode().get(0);
+        if (recoverycode.isExpired()) {
+            recoverycodeRepository.delete(recoverycode);
+            throw new IllegalStateException("Code is expired");
+        }
+        if (!recoverycode.getCode().equals(request.getCode())) {
+            throw new IllegalStateException("The codes are not the same");
+        }
+        if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
+            throw new IllegalStateException("Password are not the same!");
+        }
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        repository.save(user);
+        recoverycodeRepository.delete(recoverycode);
+    }
+
     public void getRecoverycode(String email) {
         try {
             var user = repository.findByEmail(email)
@@ -87,12 +108,13 @@ public class UserService {
 
         var recoverycode = Recoverycode.builder()
                 .code(new Random().nextLong(999999 - 100000 + 1) + 100000)
-                .expired(false)
+                .creationTime(LocalTime.now())
                 .user(user)
                 .build();
         recoverycodeRepository.save(recoverycode);
         return recoverycode;
     }
+
 
     private String extractJwtFromRequest(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
