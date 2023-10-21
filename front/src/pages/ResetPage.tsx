@@ -38,7 +38,7 @@ export default function ResetPage() {
         }
         console.log(data);
         try {
-            const response = await axios.patch(`${backendIp}/api/users`, data, {
+            const response = await axios.patch(`${backendIp}/api/users/password`, data, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json'
