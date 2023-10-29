@@ -38,7 +38,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/api/users/password/recoverycode",
+                                "/api/users/password/recoverycode/**",
                                 "/api/users/password/reset")
                             .permitAll()
                         .requestMatchers(

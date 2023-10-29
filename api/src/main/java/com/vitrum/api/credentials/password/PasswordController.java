@@ -1,7 +1,6 @@
 package com.vitrum.api.credentials.password;
 
 import com.vitrum.api.dto.Request.ChangePasswordRequest;
-import com.vitrum.api.dto.Request.GenerateRecoverycodeRequest;
 import com.vitrum.api.dto.Request.ResetPasswordRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,12 +29,12 @@ public class PasswordController {
         }
     }
 
-    @GetMapping("/password/recoverycode")
+    @GetMapping("/password/recoverycode/{email}")
     public ResponseEntity<?> getRecoverycode(
-            @RequestBody GenerateRecoverycodeRequest request
+            @PathVariable String email
     ) {
         try {
-            service.getRecoverycode(request.getEmail());
+            service.getRecoverycode(email);
             return ResponseEntity.ok().body("Sent");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
