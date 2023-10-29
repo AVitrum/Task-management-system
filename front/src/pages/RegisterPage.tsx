@@ -46,9 +46,9 @@ export default function RegisterPage() {
 
 
     return (
-        <div className="py-2 mx-10 my-20
+        <div className="py-4 mx-10 my-28
         flex flex-col justify-center items-center ">
-            <div className="bg-white px-8 pt-6 pb-14
+            <div className="bg-white px-8 pt-12 pb-14
            rounded-sm shadow-2xl my-30">
                 <form className="" onSubmit={(e) => onSubmit(e)}>
                     <h1 className="text-black tracking-wide text-3xl font-black mb-8 centerForm">Register</h1>

@@ -14,9 +14,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import static com.vitrum.api.entity.enums.Role.ADMIN;
-import static com.vitrum.api.entity.enums.Role.USER;
+import static com.vitrum.api.credentials.user.Role.ADMIN;
+import static com.vitrum.api.credentials.user.Role.USER;
 
 @Configuration
 @EnableWebSecurity
@@ -33,13 +35,25 @@ public class SecurityConfiguration {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(httpSecurityCorsConfigurer ->
-                        httpSecurityCorsConfigurer.configurationSource(request ->
-                                new CorsConfiguration().applyPermitDefaultValues()))
+                        httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**")
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/api/users/password/recoverycode/**",
+                                "/api/users/password/reset")
                             .permitAll()
-                        .requestMatchers("/api/users/**").hasAnyRole(USER.name(), ADMIN.name())
-                        .requestMatchers("/api/teams/**").hasAnyRole(USER.name(), ADMIN.name())
+                        .requestMatchers(
+                                "/api/users/changeCredentials",
+                                "/api/users/ban",
+                                "/api/users/create",
+                                "api/users/delete"
+                        ).hasRole(ADMIN.name())
+                        .requestMatchers(
+                                "/api/users/**"
+                        ).hasAnyRole(USER.name(), ADMIN.name())
+                        .requestMatchers(
+                                "/api/teams/**"
+                        ).hasAnyRole(USER.name(), ADMIN.name())
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
@@ -52,6 +66,18 @@ public class SecurityConfiguration {
                                 )
                 )
                 .build();
+    }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.addAllowedOrigin("*"); // change to IP when the development is finished
+        config.addAllowedMethod("*");
+        config.addAllowedHeader("*");
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+
+        return source;
     }
 
 }
