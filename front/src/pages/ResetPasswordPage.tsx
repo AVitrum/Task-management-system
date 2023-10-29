@@ -30,24 +30,18 @@ export default function ResetPage() {
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
-        const data = {
-            currentPassword:currentPassword,
-            newPassword:newPassword,
-            confirmationPassword:confirmationPassword
-        }
-        console.log(data);
+    
         try {
-            const response = await axios.patch(`${backendIp}/api/users`, data, {
+            await axios.patch(`${backendIp}/api/users/password`, {
+                currentPassword,
+                newPassword,
+                confirmationPassword
+            }, {
                 headers: {
                     Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                
                 },
 
             });
-
-
             navigate('/');
             window.location.reload();
 
@@ -59,7 +53,7 @@ export default function ResetPage() {
     return (
         <div className="py-2 mx-10 my-0
          flex flex-col justify-center items-center ">
-            <div className="bg-white px-8 pt-8 pb-14
+            <div className="bg-white px-8 pt-6 pb-14
             rounded-sm shadow-2xl my-32">
                 <form className=" " onSubmit={(e) => onSubmit(e)}>
                     <h1 className="text-black tracking-wide text-3xl font-black mb-8 centerForm">Reset Password</h1>

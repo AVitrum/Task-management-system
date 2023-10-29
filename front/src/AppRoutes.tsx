@@ -4,7 +4,9 @@ import HomePage from "./pages/HomePage";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import { UserContextProvider } from "./components/UserContext";
-import ResetPage from "./pages/ResetPage";
+import ResetPage from "./pages/ResetPasswordPage";
+import RecoveryPage from "./pages/RecoveryPage";
+
 
 
 export default function AppRoutes() {
@@ -15,7 +17,8 @@ export default function AppRoutes() {
                     <Route index element={<HomePage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/login" element={<LoginPage />} />
-                    <Route path="/reset" element={<ResetPage/>} />
+                    <Route path="/reset" element={<ResetPage />} />
+                    <Route path="/recovery" element={<RecoveryPage />} />
                 </Route>
 
             </Routes>

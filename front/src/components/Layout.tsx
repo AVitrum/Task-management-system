@@ -10,7 +10,7 @@ export default function Layout() {
                 <Header />
             </header>
 
-            <main className="flex-grow  mt-16 mb-16" >
+            <main className="flex-grow  mt-14 mb-14" >
                 <Outlet />
                 
             </main>
