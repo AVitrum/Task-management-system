@@ -42,8 +42,9 @@ public class SecurityConfiguration {
                                 "/api/users/password/reset")
                             .permitAll()
                         .requestMatchers(
-                                "/api/users/changeRole",
-                                "/api/users/ban"
+                                "/api/users/changeCredentials",
+                                "/api/users/ban",
+                                "/api/users/create"
                         ).hasRole(ADMIN.name())
                         .requestMatchers(
                                 "/api/users/**"

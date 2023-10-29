@@ -9,8 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangeUserRoleRequest {
+public class ChangeUserCredentials {
 
     private String username;
     private String role;
+    private String email;
+    private String newUsername;
 }

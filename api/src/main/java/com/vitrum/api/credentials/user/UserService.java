@@ -1,10 +1,13 @@
 package com.vitrum.api.credentials.user;
 
-import com.vitrum.api.dto.Request.ChangeUserRoleRequest;
+import com.vitrum.api.credentials.authentication.AuthService;
+import com.vitrum.api.dto.Request.ChangeUserCredentials;
 import com.vitrum.api.config.JwtService;
+import com.vitrum.api.dto.Request.RegisterRequest;
 import com.vitrum.api.dto.Response.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository repository;
+    private final AuthService authService;
     private final JwtService jwtService;
 
     public UserProfileResponse profile(HttpServletRequest request) {
@@ -29,16 +33,38 @@ public class UserService {
                 .build();
     }
 
-    public void changeRole(ChangeUserRoleRequest request) {
+    public void create(RegisterRequest request) {
+        authService.register(request);
         var user = repository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         try {
             user.setRole(Role.valueOf(request.getRole()));
             repository.save(user);
         } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Error");
+        }
+    }
+
+    public void changeCredentials(ChangeUserCredentials request) {
+        var user = repository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        try {
+            if (request.getRole() != null) {
+                user.setRole(Role.valueOf(request.getRole()));
+            }
+            if (request.getEmail() != null) {
+                user.setEmail(request.getEmail());
+            }
+            if (request.getNewUsername() != null) {
+                user.setUsername(request.getNewUsername());
+            }
+            repository.save(user);
+        } catch (IllegalArgumentException e) {
             user.setRole(Role.USER);
             repository.save(user);
-            throw new IllegalArgumentException("Wrong role");
+            throw new IllegalArgumentException("Wrong Credentials");
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("User with the same email/username already exists.");
         }
     }
 

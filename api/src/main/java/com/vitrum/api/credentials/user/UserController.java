@@ -1,6 +1,7 @@
 package com.vitrum.api.credentials.user;
 
-import com.vitrum.api.dto.Request.ChangeUserRoleRequest;
+import com.vitrum.api.dto.Request.ChangeUserCredentials;
+import com.vitrum.api.dto.Request.RegisterRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,18 @@ public class UserController {
 
     private final UserService service;
 
+    @PostMapping("/create")
+    public ResponseEntity<?> create(
+            @RequestBody RegisterRequest request
+    ) {
+        try {
+            service.create(request);
+            return ResponseEntity.ok("Created");
+        } catch (UsernameNotFoundException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @GetMapping("/profile")
     public ResponseEntity<?> profile(
             HttpServletRequest request
@@ -27,12 +40,12 @@ public class UserController {
         }
     }
 
-    @PutMapping("/changeRole")
-    public ResponseEntity<?> changeRole(
-            @RequestBody ChangeUserRoleRequest request
+    @PutMapping("/changeCredentials")
+    public ResponseEntity<?> changeCredentials(
+            @RequestBody ChangeUserCredentials request
     ) {
         try {
-            service.changeRole(request);
+            service.changeCredentials(request);
             return ResponseEntity.ok("Changed");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
