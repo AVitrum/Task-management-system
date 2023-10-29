@@ -42,6 +42,7 @@ public class AuthService {
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
                     .role(Role.USER)
+                    .isBanned(false)
                     .build();
 
             var savedUser = repository.save(user);
@@ -60,6 +61,9 @@ public class AuthService {
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         var user = repository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("Wrong username"));
+        if (!user.isAccountNonLocked()) {
+            throw new IllegalStateException("The account is blocked");
+        }
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(

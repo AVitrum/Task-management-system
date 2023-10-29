@@ -33,6 +33,9 @@ public class User implements UserDetails {
 
     private String password;
 
+    @Column(name = "is_banned")
+    private Boolean isBanned;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -68,7 +71,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !isBanned;
     }
 
     @Override

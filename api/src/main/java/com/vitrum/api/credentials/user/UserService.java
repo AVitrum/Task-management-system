@@ -5,12 +5,9 @@ import com.vitrum.api.config.JwtService;
 import com.vitrum.api.dto.Response.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +40,13 @@ public class UserService {
             repository.save(user);
             throw new IllegalArgumentException("Wrong role");
         }
+    }
+
+    public void ban(String username) {
+        var user = repository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.setIsBanned(true);
+        repository.save(user);
     }
 
     private String extractJwtFromRequest(HttpServletRequest request) {

@@ -4,7 +4,10 @@ import com.vitrum.api.dto.Request.ChangeUserRoleRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -30,8 +33,20 @@ public class UserController {
     ) {
         try {
             service.changeRole(request);
-            return ResponseEntity.ok().body("Changed");
+            return ResponseEntity.ok("Changed");
         } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/ban")
+    public ResponseEntity<?> ban(
+        @RequestBody Map<String, String> username
+    ) {
+        try {
+            service.ban(username.get("username"));
+            return ResponseEntity.ok("Okay");
+        } catch (UsernameNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
