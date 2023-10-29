@@ -1,4 +1,4 @@
-package com.vitrum.api.authentication;
+package com.vitrum.api.credentials.authentication;
 
 import com.vitrum.api.dto.Request.AuthenticationRequest;
 import com.vitrum.api.dto.Request.RegisterRequest;
@@ -37,7 +37,7 @@ public class AuthController {
     ) {
         try {
             return ResponseEntity.ok(service.authenticate(request));
-        } catch (IllegalArgumentException | UsernameNotFoundException e) {
+        } catch (IllegalArgumentException | IllegalStateException | UsernameNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

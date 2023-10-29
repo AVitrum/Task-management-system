@@ -1,4 +1,4 @@
-package com.vitrum.api.user;
+package com.vitrum.api.credentials.user;
 
 import com.vitrum.api.recoverycode.Recoverycode;
 import com.vitrum.api.token.Token;
@@ -32,6 +32,9 @@ public class User implements UserDetails {
     private String email;
 
     private String password;
+
+    @Column(name = "is_banned")
+    private Boolean isBanned;
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -68,7 +71,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !isBanned;
     }
 
     @Override

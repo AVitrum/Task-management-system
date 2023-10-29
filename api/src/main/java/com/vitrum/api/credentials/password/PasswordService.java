@@ -1,12 +1,12 @@
-package com.vitrum.api.user;
+package com.vitrum.api.credentials.password;
 
-import com.vitrum.api.recoverycode.Recoverycode;
-import com.vitrum.api.recoverycode.RecoverycodeRepository;
 import com.vitrum.api.config.JwtService;
+import com.vitrum.api.credentials.user.User;
+import com.vitrum.api.credentials.user.UserRepository;
 import com.vitrum.api.dto.Request.ChangePasswordRequest;
 import com.vitrum.api.dto.Request.ResetPasswordRequest;
-import com.vitrum.api.dto.Response.UserProfileResponse;
-import jakarta.servlet.http.HttpServletRequest;
+import com.vitrum.api.recoverycode.Recoverycode;
+import com.vitrum.api.recoverycode.RecoverycodeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -24,27 +24,14 @@ import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class PasswordService {
 
     private final PasswordEncoder passwordEncoder;
     private final UserRepository repository;
     private final RecoverycodeRepository recoverycodeRepository;
-    private final JwtService jwtService;
     @Autowired
     private JavaMailSender emailSender;
 
-    public UserProfileResponse profile(HttpServletRequest request) {
-        String jwt = extractJwtFromRequest(request);
-        String userEmail = jwtService.extractEmail(jwt);
-        User user = repository.findByEmail(userEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return UserProfileResponse.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .username(user.getTrueUsername())
-                .role(user.getRole())
-                .build();
-    }
 
     public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
         var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
@@ -71,6 +58,9 @@ public class UserService {
         }
         if (!recoverycode.getCode().equals(request.getCode())) {
             throw new IllegalStateException("The codes are not the same");
+        }
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new IllegalStateException("Password are the same with current!");
         }
         if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
             throw new IllegalStateException("Password are not the same!");
@@ -113,14 +103,5 @@ public class UserService {
                 .build();
         recoverycodeRepository.save(recoverycode);
         return recoverycode;
-    }
-
-
-    private String extractJwtFromRequest(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);
-        }
-        throw new IllegalArgumentException("Invalid authorization header!");
     }
 }

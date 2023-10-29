@@ -4,7 +4,7 @@ import com.vitrum.api.dto.Response.*;
 import com.vitrum.api.member.Member;
 import com.vitrum.api.member.MemberRepository;
 import com.vitrum.api.dto.Request.TeamCreationRequest;
-import com.vitrum.api.user.User;
+import com.vitrum.api.credentials.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;

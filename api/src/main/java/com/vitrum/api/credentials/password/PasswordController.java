@@ -1,9 +1,7 @@
-package com.vitrum.api.user;
+package com.vitrum.api.credentials.password;
 
 import com.vitrum.api.dto.Request.ChangePasswordRequest;
-import com.vitrum.api.dto.Request.GenerateRecoverycodeRequest;
 import com.vitrum.api.dto.Request.ResetPasswordRequest;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,21 +12,9 @@ import java.security.Principal;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-public class UserController {
+public class PasswordController {
 
-    private final UserService service;
-
-    @GetMapping("/profile")
-    public ResponseEntity<?> profile(
-            HttpServletRequest request
-    ) {
-        try {
-            return ResponseEntity.ok(service.profile(request));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
+    private final PasswordService service;
 
     @PatchMapping("/password")
     public ResponseEntity<?> changePassword(
@@ -43,12 +29,12 @@ public class UserController {
         }
     }
 
-    @GetMapping("/password/recoverycode")
+    @GetMapping("/password/recoverycode/{email}")
     public ResponseEntity<?> getRecoverycode(
-            @RequestBody GenerateRecoverycodeRequest request
+            @PathVariable String email
     ) {
         try {
-            service.getRecoverycode(request.getEmail());
+            service.getRecoverycode(email);
             return ResponseEntity.ok().body("Sent");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

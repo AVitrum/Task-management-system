@@ -1,4 +1,4 @@
-package com.vitrum.api.authentication;
+package com.vitrum.api.credentials.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vitrum.api.dto.Request.AuthenticationRequest;
@@ -7,9 +7,9 @@ import com.vitrum.api.dto.Request.RegisterRequest;
 import com.vitrum.api.token.Token;
 import com.vitrum.api.token.TokenRepository;
 import com.vitrum.api.token.TokenType;
-import com.vitrum.api.user.Role;
-import com.vitrum.api.user.User;
-import com.vitrum.api.user.UserRepository;
+import com.vitrum.api.credentials.user.Role;
+import com.vitrum.api.credentials.user.User;
+import com.vitrum.api.credentials.user.UserRepository;
 import com.vitrum.api.config.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,6 +42,7 @@ public class AuthService {
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
                     .role(Role.USER)
+                    .isBanned(false)
                     .build();
 
             var savedUser = repository.save(user);
@@ -60,6 +61,9 @@ public class AuthService {
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         var user = repository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("Wrong username"));
+        if (!user.isAccountNonLocked()) {
+            throw new IllegalStateException("The account is blocked");
+        }
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -119,7 +123,7 @@ public class AuthService {
         tokenRepository.save(token);
     }
 
-    private void revokeAllUserTokens(User user) {
+    public void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
         if (validUserTokens.isEmpty())
             return;

@@ -1,4 +1,4 @@
-package com.vitrum.api.user;
+package com.vitrum.api.credentials.user;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

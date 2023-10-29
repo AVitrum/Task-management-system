@@ -1,4 +1,4 @@
-package com.vitrum.api.authentication;
+package com.vitrum.api.credentials.authentication;
 
 import com.vitrum.api.token.TokenRepository;
 import jakarta.servlet.http.HttpServletRequest;

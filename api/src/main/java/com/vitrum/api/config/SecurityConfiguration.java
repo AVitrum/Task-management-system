@@ -15,8 +15,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.web.cors.CorsConfiguration;
 
-import static com.vitrum.api.user.Role.ADMIN;
-import static com.vitrum.api.user.Role.USER;
+import static com.vitrum.api.credentials.user.Role.ADMIN;
+import static com.vitrum.api.credentials.user.Role.USER;
 
 @Configuration
 @EnableWebSecurity
@@ -38,9 +38,15 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/api/users/password/recoverycode",
+                                "/api/users/password/recoverycode/**",
                                 "/api/users/password/reset")
                             .permitAll()
+                        .requestMatchers(
+                                "/api/users/changeCredentials",
+                                "/api/users/ban",
+                                "/api/users/create",
+                                "api/users/delete"
+                        ).hasRole(ADMIN.name())
                         .requestMatchers(
                                 "/api/users/**"
                         ).hasAnyRole(USER.name(), ADMIN.name())

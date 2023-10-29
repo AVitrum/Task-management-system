@@ -1,4 +1,4 @@
-package com.vitrum.api.user;
+package com.vitrum.api.credentials.user;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.vitrum.api.user.Permission.*;
+import static com.vitrum.api.credentials.user.Permission.*;
 
 @Getter
 @RequiredArgsConstructor

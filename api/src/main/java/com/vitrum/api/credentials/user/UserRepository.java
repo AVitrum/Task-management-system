@@ -1,4 +1,4 @@
-package com.vitrum.api.user;
+package com.vitrum.api.credentials.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
