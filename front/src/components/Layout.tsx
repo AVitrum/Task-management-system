@@ -5,17 +5,17 @@ import Footer from "./Footer";
 
 export default function Layout() {
     return (
-        <div className="min-h-screen flex flex-col bg-gradient-to-r from-purple-800 to-pink-800">
+        <div className="flex flex-col min-h-screen bg-gradient-to-r from-purple-800 to-pink-800 fixed w-full top-0">
             <header >
                 <Header />
             </header>
 
-            <main className="w-screen mt-16 mb-16" >
+            <main className="flex-grow  mt-14 mb-14" >
                 <Outlet />
                 
             </main>
 
-            <footer className=" mt-auto   ">
+            <footer className="  ">
                 <Footer/>
             </footer>
         </div>
