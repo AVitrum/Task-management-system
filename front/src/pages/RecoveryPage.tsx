@@ -122,14 +122,14 @@ export default function RecoveryPage() {
                                 className="customInput " />
 
                             <h2 className="textOverInputField"> New Password</h2>
-                            <input type="text"
+                            <input type="password"
                                 placeholder="Type your new password"
                                 value={newPassword}
                                 onChange={ev => setNewPassword(ev.target.value)}
                                 className="customInput" />
 
                             <h2 className="textOverInputField"> Confirm Password</h2>
-                            <input type="text"
+                            <input type="password"
                                 placeholder="Type your confirm password"
                                 value={confirmationPassword}
                                 onChange={ev => setconfirmationPassword(ev.target.value)}

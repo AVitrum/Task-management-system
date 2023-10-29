@@ -73,9 +73,15 @@ export default function Header() {
 
                         </>
                     ) : (
-                        <button className="regLogLinks hover:text-red-500  "
-                            onClick={logout}>
-                            Logout <span aria-hidden="true">&#10094;</span></button>
+                        <>
+                            <Link to="/reset" className="regLogLinks hover:text-red-500">
+                                Change Password
+                                <span aria-hidden="true">&#10094;</span>
+                            </Link>
+                            <button className="regLogLinks hover:text-red-500" onClick={logout}>
+                                Logout
+                                <span aria-hidden="true">&#10094;</span></button>
+                        </>
                     )}
 
                 </div>

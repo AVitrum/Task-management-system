@@ -59,21 +59,21 @@ export default function ResetPage() {
                     <h1 className="text-black tracking-wide text-3xl font-black mb-8 centerForm">Reset Password</h1>
 
                     <h2 className="textOverInputField">Сurrent Password</h2>
-                    <input type="text"
+                    <input type="password"
                         placeholder="Type your current password"
                         value={currentPassword}
                         onChange={ev => setcurrentPassword(ev.target.value)}
                         className="customInput " />
 
                     <h2 className="textOverInputField"> New Password</h2>
-                    <input type="text"
+                    <input type="password"
                         placeholder="Type your new password"
                         value={newPassword}
                         onChange={ev => setNewPassword(ev.target.value)}
                         className="customInput" />
 
                     <h2 className="textOverInputField"> Confirm Password</h2>
-                    <input type="text"
+                    <input type="password"
                         placeholder="Type your confirm password"
                         value={confirmationPassword}
                         onChange={ev => setconfirmationPassword(ev.target.value)}
