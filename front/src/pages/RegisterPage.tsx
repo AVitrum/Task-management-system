@@ -73,7 +73,8 @@ export default function RegisterPage() {
 
 
                     <input type="password"
-                        placeholder="Type your password"
+                        placeholder="Password must contain 8 character and 1 big letter"
+                    
                         value={password}
                         onChange={ev => setPassword(ev.target.value)}
                         className="customInput" />

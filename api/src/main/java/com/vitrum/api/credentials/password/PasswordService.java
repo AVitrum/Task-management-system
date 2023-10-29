@@ -1,6 +1,5 @@
 package com.vitrum.api.credentials.password;
 
-import com.vitrum.api.config.JwtService;
 import com.vitrum.api.credentials.user.User;
 import com.vitrum.api.credentials.user.UserRepository;
 import com.vitrum.api.dto.Request.ChangePasswordRequest;

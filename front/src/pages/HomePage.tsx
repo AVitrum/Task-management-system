@@ -18,6 +18,8 @@ export default function HomePage() {
           {userInfo.id}
           </>
           <br/>
+  
+      
           <>
           {userInfo.email}
           </>
