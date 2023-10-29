@@ -64,4 +64,16 @@ public class UserController {
         }
     }
 
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> delete(
+        @RequestBody Map<String, String> username
+    ) {
+        try {
+            service.delete(username.get("username"));
+            return ResponseEntity.ok("Deleted");
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }

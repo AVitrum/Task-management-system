@@ -44,7 +44,8 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/api/users/changeCredentials",
                                 "/api/users/ban",
-                                "/api/users/create"
+                                "/api/users/create",
+                                "api/users/delete"
                         ).hasRole(ADMIN.name())
                         .requestMatchers(
                                 "/api/users/**"

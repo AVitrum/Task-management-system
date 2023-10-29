@@ -45,6 +45,13 @@ public class UserService {
         }
     }
 
+    public void delete(String username) {
+        var user = repository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        authService.revokeAllUserTokens(user);
+        repository.delete(user);
+    }
+
     public void changeCredentials(ChangeUserCredentials request) {
         var user = repository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
