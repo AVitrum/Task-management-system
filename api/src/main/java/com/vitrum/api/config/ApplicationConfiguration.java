@@ -1,7 +1,7 @@
 package com.vitrum.api.config;
 
 import com.vitrum.api.auditing.ApplicationAuditAware;
-import com.vitrum.api.user.UserRepository;
+import com.vitrum.api.credentials.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
