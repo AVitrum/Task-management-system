@@ -49,7 +49,8 @@ public class SecurityConfiguration {
                                 "api/users/delete"
                         ).hasRole(ADMIN.name())
                         .requestMatchers(
-                                "/api/users/**"
+                                "/api/users/**",
+                                "/api/teams/tasks/**"
                         ).hasAnyRole(USER.name(), ADMIN.name())
                         .requestMatchers(
                                 "/api/teams/**"
