@@ -4,10 +4,9 @@ import com.vitrum.api.credentials.user.User;
 import com.vitrum.api.credentials.user.UserRepository;
 import com.vitrum.api.dto.Request.ChangePasswordRequest;
 import com.vitrum.api.dto.Request.ResetPasswordRequest;
-import com.vitrum.api.recoverycode.Recoverycode;
-import com.vitrum.api.recoverycode.RecoverycodeRepository;
+import com.vitrum.api.credentials.password.recoverycode.Recoverycode;
+import com.vitrum.api.credentials.password.recoverycode.RecoverycodeRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,8 +27,7 @@ public class PasswordService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository repository;
     private final RecoverycodeRepository recoverycodeRepository;
-    @Autowired
-    private JavaMailSender emailSender;
+    private final JavaMailSender emailSender;
 
 
     public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
