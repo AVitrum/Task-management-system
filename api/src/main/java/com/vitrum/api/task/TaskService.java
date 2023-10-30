@@ -5,6 +5,7 @@ import com.vitrum.api.dto.Request.TaskCreationRequest;
 import com.vitrum.api.member.MemberRepository;
 import com.vitrum.api.team.TeamRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class TaskService {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
             var task = Task.builder()
-                    .name(request.getName())
+                    .title(request.getTitle())
                     .description(request.getDescription())
                     .priority(request.getPriority())
                     .creationTime(LocalDateTime.now())
@@ -41,6 +42,8 @@ public class TaskService {
             repository.save(task);
         } catch (IllegalStateException e) {
             throw new IllegalStateException("Can't create");
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("Title is a required field");
         }
     }
 }

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TaskCreationRequest {
 
-    private String name;
+    private String title;
     private String description;
     private String dueDate;
     private Long priority;

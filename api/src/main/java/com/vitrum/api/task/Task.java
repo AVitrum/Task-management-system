@@ -21,7 +21,8 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    @Column(nullable = false)
+    private String title;
     private String description;
     private LocalDateTime creationTime;
     private LocalDateTime dueDate;
