@@ -1,5 +1,6 @@
 package com.vitrum.api.member;
 
+import com.vitrum.api.task.Task;
 import com.vitrum.api.team.Team;
 import com.vitrum.api.team.RoleInTeam;
 import com.vitrum.api.credentials.user.User;
@@ -8,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Table(name = "member")
@@ -31,6 +34,9 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     private RoleInTeam role;
+
+    @OneToMany(mappedBy = "member")
+    private List<Task> tasks;
 
 //    private Date joinDate;
 
