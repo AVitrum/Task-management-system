@@ -1,4 +1,4 @@
-package com.vitrum.api.task;
+package com.vitrum.api.manager.task;
 
 import com.vitrum.api.dto.Request.TaskRequest;
 import lombok.RequiredArgsConstructor;

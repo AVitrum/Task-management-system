@@ -1,6 +1,6 @@
 package com.vitrum.api.credentials.authentication;
 
-import com.vitrum.api.token.TokenRepository;
+import com.vitrum.api.credentials.token.TokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

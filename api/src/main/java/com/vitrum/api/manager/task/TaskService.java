@@ -1,10 +1,10 @@
-package com.vitrum.api.task;
+package com.vitrum.api.manager.task;
 
 import com.vitrum.api.credentials.user.User;
 import com.vitrum.api.dto.Request.TaskRequest;
-import com.vitrum.api.member.Member;
-import com.vitrum.api.member.MemberRepository;
-import com.vitrum.api.team.TeamRepository;
+import com.vitrum.api.manager.member.Member;
+import com.vitrum.api.manager.member.MemberRepository;
+import com.vitrum.api.manager.team.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

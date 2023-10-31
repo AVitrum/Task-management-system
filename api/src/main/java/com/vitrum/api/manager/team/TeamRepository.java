@@ -1,4 +1,4 @@
-package com.vitrum.api.team;
+package com.vitrum.api.manager.team;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -1,7 +1,7 @@
 package com.vitrum.api.credentials.user;
 
 import com.vitrum.api.credentials.password.recoverycode.Recoverycode;
-import com.vitrum.api.token.Token;
+import com.vitrum.api.credentials.token.Token;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

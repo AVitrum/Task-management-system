@@ -1,8 +1,8 @@
-package com.vitrum.api.member;
+package com.vitrum.api.manager.member;
 
-import com.vitrum.api.team.Team;
+import com.vitrum.api.manager.team.Team;
 import com.vitrum.api.credentials.user.User;
-import com.vitrum.api.team.TeamRepository;
+import com.vitrum.api.manager.team.TeamRepository;
 import com.vitrum.api.credentials.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

@@ -1,7 +1,7 @@
-package com.vitrum.api.member;
+package com.vitrum.api.manager.member;
 
 import com.vitrum.api.credentials.user.User;
-import com.vitrum.api.team.Team;
+import com.vitrum.api.manager.team.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

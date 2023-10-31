@@ -1,6 +1,6 @@
-package com.vitrum.api.task;
+package com.vitrum.api.manager.task;
 
-import com.vitrum.api.member.Member;
+import com.vitrum.api.manager.member.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

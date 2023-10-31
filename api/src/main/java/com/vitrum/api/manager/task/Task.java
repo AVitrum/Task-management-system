@@ -1,6 +1,6 @@
-package com.vitrum.api.task;
+package com.vitrum.api.manager.task;
 
-import com.vitrum.api.member.Member;
+import com.vitrum.api.manager.member.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
