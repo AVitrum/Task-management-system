@@ -17,7 +17,7 @@ public class TaskController {
     private final TaskService service;
 
     @PostMapping("/{team}/create")
-    public ResponseEntity<?> createTask(
+    public ResponseEntity<?> create(
             @RequestBody TaskRequest request,
             @PathVariable String team,
             Principal connectedUser
