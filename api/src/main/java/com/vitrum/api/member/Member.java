@@ -2,7 +2,6 @@ package com.vitrum.api.member;
 
 import com.vitrum.api.task.Task;
 import com.vitrum.api.team.Team;
-import com.vitrum.api.team.RoleInTeam;
 import com.vitrum.api.credentials.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

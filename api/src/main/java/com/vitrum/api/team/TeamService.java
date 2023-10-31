@@ -4,6 +4,7 @@ import com.vitrum.api.dto.Response.*;
 import com.vitrum.api.member.MemberRepository;
 import com.vitrum.api.dto.Request.TeamCreationRequest;
 import com.vitrum.api.credentials.user.User;
+import com.vitrum.api.member.RoleInTeam;
 import com.vitrum.api.util.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;

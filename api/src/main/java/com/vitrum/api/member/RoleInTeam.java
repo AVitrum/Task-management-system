@@ -1,4 +1,4 @@
-package com.vitrum.api.team;
+package com.vitrum.api.member;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

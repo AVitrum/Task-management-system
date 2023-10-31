@@ -28,6 +28,9 @@ public class Task {
     private LocalDateTime dueDate;
     private Long priority;
 
+    @Enumerated(EnumType.STRING)
+    private Status status;
+
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
