@@ -1,4 +1,4 @@
-package com.vitrum.api.manager.task;
+package com.vitrum.api.manager.task.main;
 
 import com.vitrum.api.manager.member.Member;
 import org.springframework.data.jpa.repository.JpaRepository;

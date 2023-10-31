@@ -1,4 +1,4 @@
-package com.vitrum.api.manager.task;
+package com.vitrum.api.manager.task.main;
 
 import com.vitrum.api.dto.Request.TaskRequest;
 import lombok.RequiredArgsConstructor;
@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 
 @RestController
-@RequestMapping("/api/teams/tasks")
+@RequestMapping("/api/teams/{team}/tasks")
 @RequiredArgsConstructor
 public class TaskController {
 
     private final TaskService service;
 
-    @PostMapping("/{team}/create")
+    @PostMapping("/create")
     public ResponseEntity<?> create(
             @RequestBody TaskRequest request,
             @PathVariable String team,
@@ -30,7 +30,7 @@ public class TaskController {
         }
     }
 
-    @PutMapping("/{team}/change/{taskTitle}")
+    @PutMapping("/change/{taskTitle}")
     public ResponseEntity<?> change(
             @RequestBody TaskRequest request,
             @PathVariable String team,
@@ -43,7 +43,20 @@ public class TaskController {
         } catch (IllegalArgumentException | UsernameNotFoundException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
 
+    @DeleteMapping("/delete/{taskTitle}")
+    public ResponseEntity<?> delete(
+            @PathVariable String team,
+            @PathVariable String taskTitle,
+            Principal connectedUser
+    ) {
+        try {
+            service.delete(taskTitle, connectedUser, team);
+            return ResponseEntity.ok("Deleted");
+        } catch (IllegalArgumentException | UsernameNotFoundException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 

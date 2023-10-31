@@ -1,10 +1,13 @@
-package com.vitrum.api.manager.task;
+package com.vitrum.api.manager.task.main;
 
 import com.vitrum.api.credentials.user.User;
 import com.vitrum.api.dto.Request.TaskRequest;
 import com.vitrum.api.manager.member.Member;
 import com.vitrum.api.manager.member.MemberRepository;
+import com.vitrum.api.manager.task.history.OldTask;
+import com.vitrum.api.manager.task.history.OldTaskRepository;
 import com.vitrum.api.manager.team.TeamRepository;
+import com.vitrum.api.util.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,8 +23,10 @@ import java.time.format.DateTimeFormatter;
 public class TaskService {
 
     private final TaskRepository repository;
+    private final OldTaskRepository oldTaskRepository;
     private final MemberRepository memberRepository;
     private final TeamRepository teamRepository;
+    private final Converter converter;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public void create(TaskRequest request, Principal connectedUser, String teamName) {
@@ -49,6 +54,7 @@ public class TaskService {
             var member = findMember(connectedUser, teamName);
             var task = repository.findByTitleAndMember(taskTitle, member)
                     .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+            OldTask oldTask = converter.mapTaskToOldTask(task);
             if (request.getTitle() != null) {
                 task.setTitle(request.getTitle());
             }
@@ -64,9 +70,23 @@ public class TaskService {
             if (request.getStatus() != null) {
                 task.setStatus(Status.valueOf(request.getStatus().toUpperCase()));
             }
+            oldTaskRepository.save(oldTask);
             repository.save(task);
         } catch (IllegalStateException e) {
             throw new IllegalStateException("Can't change");
+        }
+    }
+
+    public void delete(String taskTitle, Principal connectedUser, String teamName) {
+        try {
+            var member = findMember(connectedUser, teamName);
+            var task = repository.findByTitleAndMember(taskTitle, member)
+                    .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+            var oldTask = converter.mapTaskToOldTask(task);
+            oldTask.setStatus(Status.DELETED);
+            oldTaskRepository.save(oldTask);
+        } catch (IllegalStateException e) {
+            throw new IllegalStateException("Can't delete");
         }
     }
 

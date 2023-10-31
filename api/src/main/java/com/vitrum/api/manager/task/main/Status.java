@@ -1,4 +1,4 @@
-package com.vitrum.api.manager.task;
+package com.vitrum.api.manager.task.main;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -19,5 +19,6 @@ public enum Status {
     IN_REVIEW,
     IN_TESTING,
     ON_TRACK,
-    DELAYED
+    DELAYED,
+    DELETED
 }

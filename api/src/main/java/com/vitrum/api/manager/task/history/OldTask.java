@@ -1,6 +1,7 @@
-package com.vitrum.api.manager.task;
+package com.vitrum.api.manager.task.history;
 
 import com.vitrum.api.manager.member.Member;
+import com.vitrum.api.manager.task.main.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,12 +11,12 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "task")
+@Table(name = "old_task")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Task {
+public class OldTask {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +27,7 @@ public class Task {
     private String description;
     private LocalDateTime creationTime;
     private LocalDateTime dueDate;
+    private LocalDateTime changeTime;
     private Long priority;
 
     @Enumerated(EnumType.STRING)
