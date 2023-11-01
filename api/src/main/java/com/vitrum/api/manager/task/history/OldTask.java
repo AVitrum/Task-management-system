@@ -2,6 +2,7 @@ package com.vitrum.api.manager.task.history;
 
 import com.vitrum.api.manager.member.Member;
 import com.vitrum.api.manager.task.main.Status;
+import com.vitrum.api.manager.task.main.Task;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,4 +37,9 @@ public class OldTask {
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @ManyToOne
+    @JoinColumn(name = "task_id")
+    private Task task;
+
 }

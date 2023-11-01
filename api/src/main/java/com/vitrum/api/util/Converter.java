@@ -57,6 +57,22 @@ public class Converter {
                 .changeTime(LocalDateTime.now())
                 .member(task.getMember())
                 .status(task.getStatus())
+                .task(task)
+                .build();
+    }
+
+    public HistoryResponse mapOldTaskToHistoryResponse(OldTask oldTask) {
+        return HistoryResponse.builder()
+                .taskId(oldTask.getTask().getId())
+                .id(oldTask.getId())
+                .title(oldTask.getTitle())
+                .description(oldTask.getDescription())
+                .priority(oldTask.getPriority())
+                .status(oldTask.getStatus().name())
+                .changeTime(oldTask.getChangeTime())
+                .creationTime(oldTask.getCreationTime())
+                .dueDate(oldTask.getDueDate())
+                .creator(mapMemberToMemberResponse(oldTask.getMember()))
                 .build();
     }
 }

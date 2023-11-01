@@ -1,6 +1,7 @@
 package com.vitrum.api.manager.task.main;
 
 import com.vitrum.api.credentials.user.User;
+import com.vitrum.api.credentials.user.UserRepository;
 import com.vitrum.api.dto.Request.TaskRequest;
 import com.vitrum.api.manager.member.Member;
 import com.vitrum.api.manager.member.MemberRepository;
@@ -26,12 +27,15 @@ public class TaskService {
     private final OldTaskRepository oldTaskRepository;
     private final MemberRepository memberRepository;
     private final TeamRepository teamRepository;
+    private final UserRepository userRepository;
     private final Converter converter;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public void create(TaskRequest request, Principal connectedUser, String teamName) {
         try {
             var member = findMember(connectedUser, teamName);
+            if (repository.findByTitleAndMember(request.getTitle(), member).isPresent())
+                throw new IllegalArgumentException("A task with that name already exists in this team");
             var task = Task.builder()
                     .title(request.getTitle())
                     .description(request.getDescription())
@@ -54,6 +58,11 @@ public class TaskService {
             var member = findMember(connectedUser, teamName);
             var task = repository.findByTitleAndMember(taskTitle, member)
                     .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+
+            if (task.getStatus() == Status.DELETED)
+                throw new IllegalArgumentException(
+                        "The task is not available for modification as it has been deleted"
+                );
             OldTask oldTask = converter.mapTaskToOldTask(task);
             if (request.getTitle() != null) {
                 task.setTitle(request.getTitle());
@@ -82,12 +91,27 @@ public class TaskService {
             var member = findMember(connectedUser, teamName);
             var task = repository.findByTitleAndMember(taskTitle, member)
                     .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+            if (task.getStatus() == Status.DELETED)
+                throw new IllegalArgumentException(
+                        "The task has already been deleted and cannot be deleted again"
+                );
             var oldTask = converter.mapTaskToOldTask(task);
             oldTask.setStatus(Status.DELETED);
             oldTaskRepository.save(oldTask);
         } catch (IllegalStateException e) {
             throw new IllegalStateException("Can't delete");
         }
+    }
+
+    public Task getTask(String taskTitle ,String creatorName, String teamName) {
+        var team = teamRepository.findByName(teamName)
+                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
+        var user = userRepository.findByUsername(creatorName)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        var member = memberRepository.findByUserAndTeam(user, team)
+                .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
+        return repository.findByTitleAndMember(taskTitle, member)
+                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
     }
 
     private Member findMember(Principal connectedUser, String teamName) {

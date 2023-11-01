@@ -1,6 +1,7 @@
 package com.vitrum.api.manager.task.main;
 
 import com.vitrum.api.manager.member.Member;
+import com.vitrum.api.manager.task.history.OldTask;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "task")
@@ -34,4 +36,7 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @OneToMany(mappedBy = "task")
+    private List<OldTask> oldTasks;
 }
