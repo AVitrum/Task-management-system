@@ -30,7 +30,7 @@ public class TaskController {
         }
     }
 
-    @PutMapping("/change/{taskTitle}")
+    @PatchMapping("/change/{taskTitle}")
     public ResponseEntity<?> change(
             @RequestBody TaskRequest request,
             @PathVariable String team,
