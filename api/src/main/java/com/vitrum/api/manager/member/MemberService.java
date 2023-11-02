@@ -21,11 +21,14 @@ public class MemberService {
                 .orElseThrow(() -> new IllegalArgumentException("Can't find team by this name"));
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Can't find user"));
+
         if (inTeam(user, team)) {
             return "The user is already in the team";
         }
+
         var member = team.addUser(user, RoleInTeam.MEMBER);
         repository.save(member);
+
         return "The user has been added to the team";
     }
 

@@ -32,13 +32,16 @@ public class TeamService {
                     .members(new ArrayList<>())
                     .build();
             repository.save(team);
+
             var member = team.addUser(user, RoleInTeam.LEADER);
             memberRepository.save(member);
+
             return TeamCreationResponse.builder()
                     .id(team.getId())
                     .name(team.getName())
                     .creator(converter.mapUserToUserProfileResponse(user))
                     .build();
+
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException("Can't create");
         } catch (DataIntegrityViolationException e) {

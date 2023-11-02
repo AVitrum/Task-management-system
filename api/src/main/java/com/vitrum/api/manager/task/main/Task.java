@@ -29,6 +29,7 @@ public class Task {
     private LocalDateTime creationTime;
     private LocalDateTime dueDate;
     private Long priority;
+    private Long version;
 
     @Enumerated(EnumType.STRING)
     private Status status;

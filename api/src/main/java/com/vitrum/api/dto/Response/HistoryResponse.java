@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class HistoryResponse {
     private Long taskId;
     private Long id;
+    private Long version;
     private String title;
     private String description;
     private LocalDateTime creationTime;

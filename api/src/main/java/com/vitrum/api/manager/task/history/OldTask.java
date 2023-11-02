@@ -30,6 +30,7 @@ public class OldTask {
     private LocalDateTime dueDate;
     private LocalDateTime changeTime;
     private Long priority;
+    private Long version;
 
     @Enumerated(EnumType.STRING)
     private Status status;

@@ -27,6 +27,7 @@ public class UserService {
         String userEmail = jwtService.extractEmail(jwt);
         User user = repository.findByEmail(userEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
         return converter.mapUserToUserProfileResponse(user);
     }
 
@@ -56,6 +57,7 @@ public class UserService {
                 user.setUsername(request.getNewUsername());
             }
             repository.save(user);
+
         } catch (IllegalArgumentException e) {
             user.setRole(Role.USER);
             repository.save(user);

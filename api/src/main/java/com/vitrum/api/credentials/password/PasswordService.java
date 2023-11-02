@@ -32,6 +32,7 @@ public class PasswordService {
 
     public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
         var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             throw new IllegalStateException("Wrong password!");
         }
@@ -41,6 +42,7 @@ public class PasswordService {
         if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
             throw new IllegalStateException("Password are not the same!");
         }
+
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         repository.save(user);
     }
@@ -49,6 +51,7 @@ public class PasswordService {
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Wrong email!"));
         var recoverycode = user.getRecoverycode().get(0);
+
         if (recoverycode.isExpired()) {
             recoverycodeRepository.delete(recoverycode);
             throw new IllegalStateException("Code is expired");
@@ -62,6 +65,7 @@ public class PasswordService {
         if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
             throw new IllegalStateException("Password are not the same!");
         }
+
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         repository.save(user);
         recoverycodeRepository.delete(recoverycode);

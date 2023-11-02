@@ -34,18 +34,22 @@ public class TaskService {
     public void create(TaskRequest request, Principal connectedUser, String teamName) {
         try {
             var member = findMember(connectedUser, teamName);
+
             if (repository.findByTitleAndMember(request.getTitle(), member).isPresent())
                 throw new IllegalArgumentException("A task with that name already exists in this team");
+
             var task = Task.builder()
                     .title(request.getTitle())
                     .description(request.getDescription())
                     .priority(request.getPriority())
+                    .version(0L)
                     .creationTime(LocalDateTime.now())
                     .status(Status.PENDING)
                     .dueDate(LocalDateTime.parse(request.getDueDate(), formatter))
                     .build();
             task.setMember(member);
             repository.save(task);
+
         } catch (IllegalStateException e) {
             throw new IllegalStateException("Can't create");
         } catch (DataIntegrityViolationException e) {
@@ -63,7 +67,10 @@ public class TaskService {
                 throw new IllegalArgumentException(
                         "The task is not available for modification as it has been deleted"
                 );
+
             OldTask oldTask = converter.mapTaskToOldTask(task);
+            oldTaskRepository.save(oldTask);
+
             if (request.getTitle() != null) {
                 task.setTitle(request.getTitle());
             }
@@ -79,8 +86,9 @@ public class TaskService {
             if (request.getStatus() != null) {
                 task.setStatus(Status.valueOf(request.getStatus().toUpperCase()));
             }
-            oldTaskRepository.save(oldTask);
+            task.setVersion(task.getVersion() + 1);
             repository.save(task);
+
         } catch (IllegalStateException e) {
             throw new IllegalStateException("Can't change");
         }
@@ -91,25 +99,32 @@ public class TaskService {
             var member = findMember(connectedUser, teamName);
             var task = repository.findByTitleAndMember(taskTitle, member)
                     .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+
             if (task.getStatus() == Status.DELETED)
                 throw new IllegalArgumentException(
                         "The task has already been deleted and cannot be deleted again"
                 );
+
+            task.setStatus(Status.DELETED);
+            task.setVersion(task.getVersion());
+            repository.save(task);
+
             var oldTask = converter.mapTaskToOldTask(task);
-            oldTask.setStatus(Status.DELETED);
             oldTaskRepository.save(oldTask);
+
         } catch (IllegalStateException e) {
             throw new IllegalStateException("Can't delete");
         }
     }
 
-    public Task getTask(String taskTitle ,String creatorName, String teamName) {
+    public Task getTask(String taskTitle, String creatorName, String teamName) {
         var team = teamRepository.findByName(teamName)
                 .orElseThrow(() -> new IllegalArgumentException("Team not found"));
         var user = userRepository.findByUsername(creatorName)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         var member = memberRepository.findByUserAndTeam(user, team)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
+
         return repository.findByTitleAndMember(taskTitle, member)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
     }
@@ -118,6 +133,7 @@ public class TaskService {
         var team = teamRepository.findByName(teamName)
                 .orElseThrow(() -> new IllegalArgumentException("Team not found"));
         var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+
         return memberRepository.findByUserAndTeam(user, team)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
     }

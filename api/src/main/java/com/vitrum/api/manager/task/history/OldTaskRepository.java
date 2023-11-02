@@ -12,4 +12,6 @@ public interface OldTaskRepository extends JpaRepository<OldTask, Long> {
     Optional<OldTask> findByTitleAndMember(String title, Member member);
 
     Optional<List<OldTask>> findAllByTitleAndMember(String title, Member member);
+
+    Optional<OldTask> findByTitleAndMemberAndVersion(String title, Member member, Long version);
 }
