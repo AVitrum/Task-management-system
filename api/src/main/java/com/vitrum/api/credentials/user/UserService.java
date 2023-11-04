@@ -5,6 +5,7 @@ import com.vitrum.api.dto.Request.ChangeUserCredentials;
 import com.vitrum.api.config.JwtService;
 import com.vitrum.api.dto.Request.RegisterRequest;
 import com.vitrum.api.dto.Response.UserProfileResponse;
+import com.vitrum.api.util.Converter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -18,6 +19,7 @@ public class UserService {
 
     private final UserRepository repository;
     private final AuthService authService;
+    private final Converter converter;
     private final JwtService jwtService;
 
     public UserProfileResponse profile(HttpServletRequest request) {
@@ -25,12 +27,8 @@ public class UserService {
         String userEmail = jwtService.extractEmail(jwt);
         User user = repository.findByEmail(userEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return UserProfileResponse.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .username(user.getTrueUsername())
-                .role(user.getRole())
-                .build();
+
+        return converter.mapUserToUserProfileResponse(user);
     }
 
     public void create(RegisterRequest request) {
@@ -43,13 +41,6 @@ public class UserService {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Error");
         }
-    }
-
-    public void delete(String username) {
-        var user = repository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        authService.revokeAllUserTokens(user);
-        repository.delete(user);
     }
 
     public void changeCredentials(ChangeUserCredentials request) {
@@ -66,6 +57,7 @@ public class UserService {
                 user.setUsername(request.getNewUsername());
             }
             repository.save(user);
+
         } catch (IllegalArgumentException e) {
             user.setRole(Role.USER);
             repository.save(user);

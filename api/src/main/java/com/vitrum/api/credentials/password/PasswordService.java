@@ -4,13 +4,11 @@ import com.vitrum.api.credentials.user.User;
 import com.vitrum.api.credentials.user.UserRepository;
 import com.vitrum.api.dto.Request.ChangePasswordRequest;
 import com.vitrum.api.dto.Request.ResetPasswordRequest;
-import com.vitrum.api.recoverycode.Recoverycode;
-import com.vitrum.api.recoverycode.RecoverycodeRepository;
+import com.vitrum.api.credentials.password.recoverycode.Recoverycode;
+import com.vitrum.api.credentials.password.recoverycode.RecoverycodeRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,12 +26,12 @@ public class PasswordService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository repository;
     private final RecoverycodeRepository recoverycodeRepository;
-    @Autowired
-    private JavaMailSender emailSender;
+    private final JavaMailSender emailSender;
 
 
     public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
-        var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        var user = User.getUserFromPrincipal(connectedUser);
+
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             throw new IllegalStateException("Wrong password!");
         }
@@ -43,6 +41,7 @@ public class PasswordService {
         if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
             throw new IllegalStateException("Password are not the same!");
         }
+
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         repository.save(user);
     }
@@ -51,6 +50,7 @@ public class PasswordService {
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Wrong email!"));
         var recoverycode = user.getRecoverycode().get(0);
+
         if (recoverycode.isExpired()) {
             recoverycodeRepository.delete(recoverycode);
             throw new IllegalStateException("Code is expired");
@@ -64,6 +64,7 @@ public class PasswordService {
         if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
             throw new IllegalStateException("Password are not the same!");
         }
+
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         repository.save(user);
         recoverycodeRepository.delete(recoverycode);

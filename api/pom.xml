@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.vitrum</groupId>
 	<artifactId>api</artifactId>
-	<version>0.0.2</version>
+	<version>0.1.0</version>
 	<name>api</name>
 	<description>Backend for TMS</description>
 	<properties>
@@ -47,6 +47,8 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+			<version>1.18.30</version>
+			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
