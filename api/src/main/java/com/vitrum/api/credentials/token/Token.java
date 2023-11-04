@@ -1,4 +1,4 @@
-package com.vitrum.api.token;
+package com.vitrum.api.credentials.token;
 
 import com.vitrum.api.credentials.user.User;
 import jakarta.persistence.*;

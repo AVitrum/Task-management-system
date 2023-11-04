@@ -40,7 +40,7 @@ public class UserController {
         }
     }
 
-    @PutMapping("/changeCredentials")
+    @PatchMapping("/changeCredentials")
     public ResponseEntity<?> changeCredentials(
             @RequestBody ChangeUserCredentials request
     ) {

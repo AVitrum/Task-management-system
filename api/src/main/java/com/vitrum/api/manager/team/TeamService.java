@@ -1,13 +1,13 @@
-package com.vitrum.api.team;
+package com.vitrum.api.manager.team;
 
 import com.vitrum.api.dto.Response.*;
-import com.vitrum.api.member.MemberRepository;
+import com.vitrum.api.manager.member.MemberRepository;
 import com.vitrum.api.dto.Request.TeamCreationRequest;
 import com.vitrum.api.credentials.user.User;
+import com.vitrum.api.manager.member.RoleInTeam;
 import com.vitrum.api.util.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -25,19 +25,22 @@ public class TeamService {
 
     public TeamCreationResponse create(TeamCreationRequest request, Principal connectedUser) {
         try {
-            var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+            var user = User.getUserFromPrincipal(connectedUser);
             var team = Team.builder()
                     .name(request.getName())
                     .members(new ArrayList<>())
                     .build();
             repository.save(team);
+
             var member = team.addUser(user, RoleInTeam.LEADER);
             memberRepository.save(member);
+
             return TeamCreationResponse.builder()
                     .id(team.getId())
                     .name(team.getName())
                     .creator(converter.mapUserToUserProfileResponse(user))
                     .build();
+
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException("Can't create");
         } catch (DataIntegrityViolationException e) {

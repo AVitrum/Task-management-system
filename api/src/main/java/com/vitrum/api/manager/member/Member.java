@@ -1,8 +1,8 @@
-package com.vitrum.api.member;
+package com.vitrum.api.manager.member;
 
-import com.vitrum.api.task.Task;
-import com.vitrum.api.team.Team;
-import com.vitrum.api.team.RoleInTeam;
+import com.vitrum.api.manager.task.history.OldTask;
+import com.vitrum.api.manager.task.main.Task;
+import com.vitrum.api.manager.team.Team;
 import com.vitrum.api.credentials.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -35,9 +35,9 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private RoleInTeam role;
 
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "creator")
     private List<Task> tasks;
 
-//    private Date joinDate;
-
+    @OneToMany(mappedBy = "creator")
+    private List<OldTask> oldTasks;
 }
