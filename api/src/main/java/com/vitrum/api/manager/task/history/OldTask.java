@@ -36,8 +36,8 @@ public class OldTask {
     private Status status;
 
     @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "creator_id")
+    private Member creator;
 
     @ManyToOne
     @JoinColumn(name = "task_id")

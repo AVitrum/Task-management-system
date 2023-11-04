@@ -8,7 +8,6 @@ import com.vitrum.api.manager.member.RoleInTeam;
 import com.vitrum.api.util.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -26,7 +25,7 @@ public class TeamService {
 
     public TeamCreationResponse create(TeamCreationRequest request, Principal connectedUser) {
         try {
-            var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+            var user = User.getUserFromPrincipal(connectedUser);
             var team = Team.builder()
                     .name(request.getName())
                     .members(new ArrayList<>())

@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    Optional<Task> findByMember(Member member);
-    Optional<Task> findByTitleAndMember(String title, Member member);
+    Optional<Task> findByCreator(Member member);
+    Optional<Task> findByTitleAndCreator(String title, Member creator);
 }

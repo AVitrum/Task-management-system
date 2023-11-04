@@ -7,9 +7,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
 
@@ -44,6 +46,10 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user")
     private List<Recoverycode> recoverycode;
+
+    public static User getUserFromPrincipal(Principal connectedUser) {
+        return (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

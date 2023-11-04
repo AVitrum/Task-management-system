@@ -8,10 +8,10 @@ import java.util.Optional;
 
 public interface OldTaskRepository extends JpaRepository<OldTask, Long> {
 
-    Optional<OldTask> findByMember(Member member);
-    Optional<OldTask> findByTitleAndMember(String title, Member member);
+    Optional<OldTask> findByCreator(Member creator);
+    Optional<OldTask> findByTitleAndCreator(String title, Member creator);
 
-    Optional<List<OldTask>> findAllByTitleAndMember(String title, Member member);
+    Optional<List<OldTask>> findAllByTitleAndCreator(String title, Member creator);
 
-    Optional<OldTask> findByTitleAndMemberAndVersion(String title, Member member, Long version);
+    Optional<OldTask> findByTitleAndCreatorAndVersion(String title, Member creator, Long version);
 }

@@ -11,7 +11,6 @@ import com.vitrum.api.manager.team.TeamRepository;
 import com.vitrum.api.util.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +34,7 @@ public class TaskService {
         try {
             var member = findMember(connectedUser, teamName);
 
-            if (repository.findByTitleAndMember(request.getTitle(), member).isPresent())
+            if (repository.findByTitleAndCreator(request.getTitle(), member).isPresent())
                 throw new IllegalArgumentException("A task with that name already exists in this team");
 
             var task = Task.builder()
@@ -47,7 +46,7 @@ public class TaskService {
                     .status(Status.PENDING)
                     .dueDate(LocalDateTime.parse(request.getDueDate(), formatter))
                     .build();
-            task.setMember(member);
+            task.setCreator(member);
             repository.save(task);
 
         } catch (IllegalStateException e) {
@@ -60,7 +59,7 @@ public class TaskService {
     public void change(TaskRequest request, String taskTitle, Principal connectedUser, String teamName) {
         try {
             var member = findMember(connectedUser, teamName);
-            var task = repository.findByTitleAndMember(taskTitle, member)
+            var task = repository.findByTitleAndCreator(taskTitle, member)
                     .orElseThrow(() -> new IllegalArgumentException("Task not found"));
 
             if (task.getStatus() == Status.DELETED)
@@ -97,7 +96,7 @@ public class TaskService {
     public void delete(String taskTitle, Principal connectedUser, String teamName) {
         try {
             var member = findMember(connectedUser, teamName);
-            var task = repository.findByTitleAndMember(taskTitle, member)
+            var task = repository.findByTitleAndCreator(taskTitle, member)
                     .orElseThrow(() -> new IllegalArgumentException("Task not found"));
 
             if (task.getStatus() == Status.DELETED)
@@ -125,14 +124,14 @@ public class TaskService {
         var member = memberRepository.findByUserAndTeam(user, team)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
 
-        return repository.findByTitleAndMember(taskTitle, member)
+        return repository.findByTitleAndCreator(taskTitle, member)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
     }
 
     private Member findMember(Principal connectedUser, String teamName) {
         var team = teamRepository.findByName(teamName)
                 .orElseThrow(() -> new IllegalArgumentException("Team not found"));
-        var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        var user = User.getUserFromPrincipal(connectedUser);
 
         return memberRepository.findByUserAndTeam(user, team)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));

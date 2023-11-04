@@ -35,8 +35,8 @@ public class Task {
     private Status status;
 
     @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "creator_id")
+    private Member creator;
 
     @OneToMany(mappedBy = "task")
     private List<OldTask> oldTasks;
