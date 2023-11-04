@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vitrum.api.dto.Request.AuthenticationRequest;
 import com.vitrum.api.dto.Response.AuthenticationResponse;
 import com.vitrum.api.dto.Request.RegisterRequest;
-import com.vitrum.api.token.Token;
-import com.vitrum.api.token.TokenRepository;
-import com.vitrum.api.token.TokenType;
+import com.vitrum.api.credentials.token.Token;
+import com.vitrum.api.credentials.token.TokenRepository;
+import com.vitrum.api.credentials.token.TokenType;
 import com.vitrum.api.credentials.user.Role;
 import com.vitrum.api.credentials.user.User;
 import com.vitrum.api.credentials.user.UserRepository;
@@ -61,9 +61,11 @@ public class AuthService {
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         var user = repository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("Wrong username"));
+
         if (!user.isAccountNonLocked()) {
             throw new IllegalStateException("The account is blocked");
         }
+
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -76,8 +78,10 @@ public class AuthService {
         }
             var jwtToken = jwtService.generateToken(user);
             var refreshToken = jwtService.generateRefreshToken(user);
+
             revokeAllUserTokens(user);
             saveUserToken(user, jwtToken);
+
             return AuthenticationResponse.builder()
                     .accessToken(jwtToken)
                     .refreshToken(refreshToken)
