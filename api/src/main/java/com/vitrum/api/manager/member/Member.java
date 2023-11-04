@@ -41,6 +41,5 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private List<OldTask> oldTasks;
 
-//    private Date joinDate;
 
 }

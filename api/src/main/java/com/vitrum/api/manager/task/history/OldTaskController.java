@@ -44,7 +44,7 @@ public class OldTaskController {
         }
     }
 
-    @PatchMapping("/{creator}/{taskTitle}/{version}")
+    @PutMapping("/{creator}/{taskTitle}/{version}")
     public ResponseEntity<?> restore(
             @PathVariable String team,
             @PathVariable String taskTitle,
