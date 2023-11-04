@@ -35,11 +35,9 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private RoleInTeam role;
 
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "creator")
     private List<Task> tasks;
 
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "creator")
     private List<OldTask> oldTasks;
-
-
 }

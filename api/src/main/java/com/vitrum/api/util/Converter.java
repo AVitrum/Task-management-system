@@ -56,7 +56,7 @@ public class Converter {
                 .creationTime(task.getCreationTime())
                 .dueDate(task.getDueDate())
                 .changeTime(LocalDateTime.now())
-                .member(task.getMember())
+                .creator(task.getCreator())
                 .status(task.getStatus())
                 .task(task)
                 .build();
@@ -74,7 +74,7 @@ public class Converter {
                 .changeTime(oldTask.getChangeTime())
                 .creationTime(oldTask.getCreationTime())
                 .dueDate(oldTask.getDueDate())
-                .creator(mapMemberToMemberResponse(oldTask.getMember()))
+                .creator(mapMemberToMemberResponse(oldTask.getCreator()))
                 .build();
     }
 }

@@ -41,13 +41,13 @@ public class OldTaskService {
         var member = memberRepository.findByUserAndTeam(user, team)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
 
-        return repository.findByTitleAndMemberAndVersion(taskTitle, member, version)
+        return repository.findByTitleAndCreatorAndVersion(taskTitle, member, version)
                 .orElseThrow(() -> new IllegalArgumentException("Task version not found"));
     }
 
     public void restore(String taskTitle, String creatorName, String teamName, Long version) {
         var oldTask = getByVersion(taskTitle, creatorName, teamName, version);
-        var task = taskRepository.findByTitleAndMember(oldTask.getTitle(), oldTask.getMember())
+        var task = taskRepository.findByTitleAndCreator(oldTask.getTitle(), oldTask.getCreator())
                 .orElseThrow(() -> new IllegalArgumentException("Task or Task version not found"));
 
         List<OldTask> oldTasks = getOldTasks(taskTitle, creatorName, teamName);
@@ -58,7 +58,7 @@ public class OldTaskService {
         task.setDescription(oldTask.getDescription());
         task.setVersion(oldTask.getVersion());
         task.setDueDate(oldTask.getDueDate());
-        task.setMember(oldTask.getMember());
+        task.setCreator(oldTask.getCreator());
         task.setStatus(oldTask.getStatus());
 
         taskRepository.save(task);
@@ -80,7 +80,7 @@ public class OldTaskService {
         var member = memberRepository.findByUserAndTeam(user, team)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
 
-        return repository.findAllByTitleAndMember(taskTitle, member)
+        return repository.findAllByTitleAndCreator(taskTitle, member)
                 .orElseThrow(() -> new IllegalArgumentException("Wrong member or title"));
     }
 
