@@ -16,6 +16,7 @@ public enum Status {
     OVERDUE,
     APPROVED,
     REJECTED,
+    RESTORED,
     IN_REVIEW,
     IN_TESTING,
     ON_TRACK,

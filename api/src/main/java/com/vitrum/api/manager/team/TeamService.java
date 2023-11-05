@@ -1,6 +1,8 @@
 package com.vitrum.api.manager.team;
 
+import com.vitrum.api.credentials.user.UserRepository;
 import com.vitrum.api.dto.Response.*;
+import com.vitrum.api.manager.member.Member;
 import com.vitrum.api.manager.member.MemberRepository;
 import com.vitrum.api.dto.Request.TeamCreationRequest;
 import com.vitrum.api.credentials.user.User;
@@ -8,6 +10,7 @@ import com.vitrum.api.manager.member.RoleInTeam;
 import com.vitrum.api.util.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -21,6 +24,7 @@ public class TeamService {
 
     private final TeamRepository repository;
     private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
     private final Converter converter;
 
     public TeamCreationResponse create(TeamCreationRequest request, Principal connectedUser) {
@@ -31,9 +35,13 @@ public class TeamService {
                     .members(new ArrayList<>())
                     .build();
             repository.save(team);
-
-            var member = team.addUser(user, RoleInTeam.LEADER);
+            var member = Member.builder()
+                    .user(user)
+                    .role(RoleInTeam.LEADER)
+                    .team(team)
+                    .build();
             memberRepository.save(member);
+            repository.save(team);
 
             return TeamCreationResponse.builder()
                     .id(team.getId())
@@ -48,6 +56,27 @@ public class TeamService {
         }
     }
 
+    public String addToTeam(String username, String teamName) {
+        var team = repository.findByName(teamName)
+                .orElseThrow(() -> new IllegalArgumentException("Can't find team by this name"));
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Can't find user"));
+
+        if (inTeam(user, team)) {
+            return "The user is already in the team";
+        }
+
+        var member = Member.builder()
+                .user(user)
+                .role(RoleInTeam.MEMBER)
+                .team(team)
+                .build();
+        memberRepository.save(member);
+        repository.save(team);
+
+        return "The user has been added to the team";
+    }
+
     public List<TeamResponse> getAll() {
         var teams = repository.findAll();
         return teams.stream().map(converter::mapTeamToTeamResponse).collect(Collectors.toList());
@@ -56,5 +85,10 @@ public class TeamService {
     public TeamResponse findByName(String name) {
         var team = repository.findByName(name).orElseThrow(() -> new IllegalArgumentException("Team not found"));
         return converter.mapTeamToTeamResponse(team);
+    }
+
+    private Boolean inTeam(User user, Team team) {
+        return team.getMembers().contains(memberRepository.findByUser(user)
+                .orElse(null));
     }
 }

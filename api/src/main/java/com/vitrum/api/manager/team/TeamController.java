@@ -4,9 +4,11 @@ import com.vitrum.api.dto.Request.TeamCreationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/teams")
@@ -23,6 +25,19 @@ public class TeamController {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request, connectedUser));
         } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{team}/addMember")
+    public ResponseEntity<?> addMember(
+            @PathVariable String team,
+            @RequestBody Map<String, String> request
+    ) {
+        String username = request.get("username");
+        try {
+            return ResponseEntity.ok().body(service.addToTeam(username, team));
+        } catch (UsernameNotFoundException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

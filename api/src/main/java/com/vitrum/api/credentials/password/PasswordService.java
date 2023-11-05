@@ -22,12 +22,10 @@ import java.util.Random;
 @Service
 @RequiredArgsConstructor
 public class PasswordService {
-
     private final PasswordEncoder passwordEncoder;
     private final UserRepository repository;
     private final RecoverycodeRepository recoverycodeRepository;
     private final JavaMailSender emailSender;
-
 
     public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
         var user = User.getUserFromPrincipal(connectedUser);
@@ -36,10 +34,10 @@ public class PasswordService {
             throw new IllegalStateException("Wrong password!");
         }
         if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
-            throw new IllegalStateException("Password are the same with current!");
+            throw new IllegalStateException("Password is the same as the current one!");
         }
         if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
-            throw new IllegalStateException("Password are not the same!");
+            throw new IllegalStateException("Passwords do not match!");
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -56,13 +54,13 @@ public class PasswordService {
             throw new IllegalStateException("Code is expired");
         }
         if (!recoverycode.getCode().equals(request.getCode())) {
-            throw new IllegalStateException("The codes are not the same");
+            throw new IllegalStateException("The codes do not match");
         }
         if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
-            throw new IllegalStateException("Password are the same with current!");
+            throw new IllegalStateException("Password is the same as the current one!");
         }
         if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
-            throw new IllegalStateException("Password are not the same!");
+            throw new IllegalStateException("Passwords do not match!");
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -74,34 +72,38 @@ public class PasswordService {
         try {
             var user = repository.findByEmail(email)
                     .orElseThrow(() -> new UsernameNotFoundException("Wrong email!"));
-            var recoverycode = getRecoverycode(user);
-            MimeMessage message = emailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message);
-
-            helper.setFrom("tms.team.noreply@gmail.com");
-            helper.setTo(user.getUsername());
-            helper.setSubject("TMS Recovery code");
-            helper.setText("Your password recovery code: " + recoverycode.getCode());
-
-            emailSender.send(message);
+            var recoverycode = generateRecoverycode(user);
+            sendRecoverycodeByEmail(user, recoverycode);
         } catch (MessagingException e) {
             throw new RuntimeException("Something went wrong!");
         }
     }
 
-    private Recoverycode getRecoverycode(User user) {
-        if (recoverycodeRepository.findByUser(user).isPresent()) {
-            var recoverycode = recoverycodeRepository.findByUser(user)
-                    .orElseThrow(() -> new IllegalArgumentException("Wrong User!"));
+    private Recoverycode generateRecoverycode(User user) {
+        if (!user.getRecoverycode().isEmpty()) {
+            Recoverycode recoverycode = user.getRecoverycode().get(0);
             recoverycodeRepository.delete(recoverycode);
         }
 
-        var recoverycode = Recoverycode.builder()
-                .code(new Random().nextLong(999999 - 100000 + 1) + 100000)
+        long code = new Random().nextLong(999999 - 100000 + 1) + 100000;
+        Recoverycode recoverycode = Recoverycode.builder()
+                .code(code)
                 .creationTime(LocalTime.now())
                 .user(user)
                 .build();
         recoverycodeRepository.save(recoverycode);
         return recoverycode;
+    }
+
+    private void sendRecoverycodeByEmail(User user, Recoverycode recoverycode) throws MessagingException {
+        MimeMessage message = emailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+
+        helper.setFrom("tms.team.noreply@gmail.com");
+        helper.setTo(user.getUsername());
+        helper.setSubject("TMS Recovery code");
+        helper.setText("Your password recovery code: " + recoverycode.getCode());
+
+        emailSender.send(message);
     }
 }

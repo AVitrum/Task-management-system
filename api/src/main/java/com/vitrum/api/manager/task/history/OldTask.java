@@ -35,11 +35,11 @@ public class OldTask {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id")
     private Member creator;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id")
     private Task task;
 
