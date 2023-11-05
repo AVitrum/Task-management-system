@@ -1,8 +1,6 @@
 package com.vitrum.api.manager.team;
 
 import com.vitrum.api.manager.member.Member;
-import com.vitrum.api.credentials.user.User;
-import com.vitrum.api.manager.member.RoleInTeam;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,16 +26,5 @@ public class Team {
     private String name;
 
     @OneToMany(mappedBy = "team")
-    private List<Member> members = new ArrayList<>();
-
-    public Member addUser(User user, RoleInTeam role) {
-        var member = Member.builder()
-                .user(user)
-                .role(role)
-                .team(this)
-                .build();
-        members.add(member);
-        return member;
-    }
-
+    private List<Member> members;
 }

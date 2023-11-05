@@ -1,9 +1,8 @@
 package com.vitrum.api.manager.member;
 
-import com.vitrum.api.manager.team.Team;
 import com.vitrum.api.credentials.user.User;
-import com.vitrum.api.manager.team.TeamRepository;
 import com.vitrum.api.credentials.user.UserRepository;
+import com.vitrum.api.manager.team.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -16,26 +15,9 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class MemberService {
-
     private final MemberRepository repository;
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
-
-    public String addToTeam(String username, String teamName) {
-        var team = teamRepository.findByName(teamName)
-                .orElseThrow(() -> new IllegalArgumentException("Can't find team by this name"));
-        var user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Can't find user"));
-
-        if (inTeam(user, team)) {
-            return "The user is already in the team";
-        }
-
-        var member = team.addUser(user, RoleInTeam.MEMBER);
-        repository.save(member);
-
-        return "The user has been added to the team";
-    }
 
     public void changeRole(Principal connectedUser, Map<String, String> request, String teamName) {
         List<Member> members = getPerformerAndTarget(connectedUser, request, teamName);
@@ -43,13 +25,12 @@ public class MemberService {
         var target = members.get(1);
 
         RoleInTeam role = RoleInTeam.valueOf(request.get("role").toUpperCase());
+
         if (!performer.getRole().canChangeTo(role)) {
             throw new IllegalArgumentException("You do not have permission to perform actions on this user");
         }
 
-        if ((performer.getRole().equals(RoleInTeam.LEADER) && role.equals(RoleInTeam.LEADER))
-                && (!performer.equals(target))
-        ) {
+        if (performer.getRole() == RoleInTeam.LEADER && role == RoleInTeam.LEADER && !performer.equals(target)) {
             performer.setRole(RoleInTeam.CO_LEADER);
             repository.save(performer);
         }
@@ -67,7 +48,7 @@ public class MemberService {
             throw new IllegalArgumentException("You do not have permission to perform actions on this user");
         }
 
-        if (performer.equals(target) && performer.getRole().equals(RoleInTeam.LEADER)) {
+        if (performer.equals(target) && performer.getRole() == RoleInTeam.LEADER) {
             throw new IllegalArgumentException("First, put someone else in the leadership role");
         }
 
@@ -81,21 +62,16 @@ public class MemberService {
         var performer = repository.findByUserAndTeam(user, team)
                 .orElseThrow(() -> new UsernameNotFoundException("Admin not found"));
 
-        user = userRepository.findByUsername(request.get("username"))
+        var username = request.get("username");
+        var target = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        var target = repository.findByUserAndTeam(user, team)
+        var targetMember = repository.findByUserAndTeam(target, team)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
 
         List<Member> container = new ArrayList<>();
         container.add(performer);
-        container.add(target);
+        container.add(targetMember);
 
         return container;
-    }
-
-
-    private Boolean inTeam(User user, Team team) {
-        return team.getMembers().contains(repository.findByUser(user)
-                .orElse(null));
     }
 }

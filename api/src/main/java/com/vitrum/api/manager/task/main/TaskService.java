@@ -10,7 +10,6 @@ import com.vitrum.api.manager.task.history.OldTaskRepository;
 import com.vitrum.api.manager.team.TeamRepository;
 import com.vitrum.api.util.Converter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -21,99 +20,55 @@ import java.time.format.DateTimeFormatter;
 @Service
 @RequiredArgsConstructor
 public class TaskService {
-
     private final TaskRepository repository;
     private final OldTaskRepository oldTaskRepository;
     private final MemberRepository memberRepository;
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
     private final Converter converter;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public void create(TaskRequest request, Principal connectedUser, String teamName) {
-        try {
-            var member = findMember(connectedUser, teamName);
+        var creator = findCreator(connectedUser, teamName);
 
-            if (repository.findByTitleAndCreator(request.getTitle(), member).isPresent())
-                throw new IllegalArgumentException("A task with that name already exists in this team");
-
-            var task = Task.builder()
-                    .title(request.getTitle())
-                    .description(request.getDescription())
-                    .priority(request.getPriority())
-                    .version(0L)
-                    .creationTime(LocalDateTime.now())
-                    .status(Status.PENDING)
-                    .dueDate(LocalDateTime.parse(request.getDueDate(), formatter))
-                    .build();
-            task.setCreator(member);
-            repository.save(task);
-
-        } catch (IllegalStateException e) {
-            throw new IllegalStateException("Can't create");
-        } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("Title is a required field");
+        if (repository.findByTitleAndCreator(request.getTitle(), creator).isPresent()) {
+            throw new IllegalArgumentException("A task with that name already exists in this team");
         }
+
+        var task = createTask(request, creator);
+        repository.save(task);
     }
 
     public void change(TaskRequest request, String taskTitle, Principal connectedUser, String teamName) {
-        try {
-            var member = findMember(connectedUser, teamName);
-            var task = repository.findByTitleAndCreator(taskTitle, member)
-                    .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+        var creator = findCreator(connectedUser, teamName);
+        var task = findTaskByTitleAndCreator(taskTitle, creator);
 
-            if (task.getStatus() == Status.DELETED)
-                throw new IllegalArgumentException(
-                        "The task is not available for modification as it has been deleted"
-                );
-
-            OldTask oldTask = converter.mapTaskToOldTask(task);
-            oldTaskRepository.save(oldTask);
-
-            if (request.getTitle() != null) {
-                task.setTitle(request.getTitle());
-            }
-            if (request.getDescription() != null) {
-                task.setDescription(request.getDescription());
-            }
-            if (request.getPriority() != null) {
-                task.setPriority(request.getPriority());
-            }
-            if (request.getDueDate() != null) {
-                task.setDueDate(LocalDateTime.parse(request.getDueDate(), formatter));
-            }
-            if (request.getStatus() != null) {
-                task.setStatus(Status.valueOf(request.getStatus().toUpperCase()));
-            }
-            task.setVersion(task.getVersion() + 1);
-            repository.save(task);
-
-        } catch (IllegalStateException e) {
-            throw new IllegalStateException("Can't change");
+        if (task.getStatus() == Status.DELETED) {
+            throw new IllegalArgumentException("The task is not available for modification as it has been deleted");
         }
+
+        OldTask oldTask = converter.mapTaskToOldTask(task);
+        oldTaskRepository.save(oldTask);
+
+        updateTaskFields(request, task);
+        repository.save(task);
     }
 
     public void delete(String taskTitle, Principal connectedUser, String teamName) {
-        try {
-            var member = findMember(connectedUser, teamName);
-            var task = repository.findByTitleAndCreator(taskTitle, member)
-                    .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+        var creator = findCreator(connectedUser, teamName);
+        var task = findTaskByTitleAndCreator(taskTitle, creator);
 
-            if (task.getStatus() == Status.DELETED)
-                throw new IllegalArgumentException(
-                        "The task has already been deleted and cannot be deleted again"
-                );
-
-            task.setStatus(Status.DELETED);
-            task.setVersion(task.getVersion());
-            repository.save(task);
-
-            var oldTask = converter.mapTaskToOldTask(task);
-            oldTaskRepository.save(oldTask);
-
-        } catch (IllegalStateException e) {
-            throw new IllegalStateException("Can't delete");
+        if (task.getStatus() == Status.DELETED) {
+            throw new IllegalArgumentException("The task has already been deleted and cannot be deleted again");
         }
+
+        task.setStatus(Status.DELETED);
+        task.setVersion(task.getVersion());
+        repository.save(task);
+
+        var oldTask = converter.mapTaskToOldTask(task);
+        oldTaskRepository.save(oldTask);
     }
 
     public Task getTask(String taskTitle, String creatorName, String teamName) {
@@ -128,12 +83,49 @@ public class TaskService {
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
     }
 
-    private Member findMember(Principal connectedUser, String teamName) {
+    private Member findCreator(Principal connectedUser, String teamName) {
         var team = teamRepository.findByName(teamName)
                 .orElseThrow(() -> new IllegalArgumentException("Team not found"));
         var user = User.getUserFromPrincipal(connectedUser);
 
         return memberRepository.findByUserAndTeam(user, team)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
+    }
+
+    private Task createTask(TaskRequest request, Member creator) {
+        return Task.builder()
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .priority(request.getPriority())
+                .version(0L)
+                .creationTime(LocalDateTime.now())
+                .status(Status.PENDING)
+                .dueDate(LocalDateTime.parse(request.getDueDate(), formatter))
+                .creator(creator)
+                .build();
+    }
+
+    private Task findTaskByTitleAndCreator(String taskTitle, Member creator) {
+        return repository.findByTitleAndCreator(taskTitle, creator)
+                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+    }
+
+    private void updateTaskFields(TaskRequest request, Task task) {
+        if (request.getTitle() != null) {
+            task.setTitle(request.getTitle());
+        }
+        if (request.getDescription() != null) {
+            task.setDescription(request.getDescription());
+        }
+        if (request.getPriority() != null) {
+            task.setPriority(request.getPriority());
+        }
+        if (request.getDueDate() != null) {
+            task.setDueDate(LocalDateTime.parse(request.getDueDate(), formatter));
+        }
+        if (request.getStatus() != null) {
+            task.setStatus(Status.valueOf(request.getStatus().toUpperCase()));
+        }
+        task.setVersion(task.getVersion() + 1);
     }
 }
