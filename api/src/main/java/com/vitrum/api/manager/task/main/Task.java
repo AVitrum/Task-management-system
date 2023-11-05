@@ -38,6 +38,10 @@ public class Task {
     @JoinColumn(name = "creator_id")
     private Member creator;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "performer_id")
+    private Member performer;
+
     @OneToMany(mappedBy = "task")
     private List<OldTask> oldTasks;
 }

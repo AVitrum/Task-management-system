@@ -36,7 +36,10 @@ public class Member {
     private RoleInTeam role;
 
     @OneToMany(mappedBy = "creator")
-    private List<Task> tasks;
+    private List<Task> creatorTasks;
+
+    @OneToMany(mappedBy = "performer")
+    private List<Task> performerTasks;
 
     @OneToMany(mappedBy = "creator")
     private List<OldTask> oldTasks;

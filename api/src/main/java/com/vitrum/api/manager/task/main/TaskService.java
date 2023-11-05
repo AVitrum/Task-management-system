@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +38,15 @@ public class TaskService {
         }
 
         var task = createTask(request, creator);
+        repository.save(task);
+    }
+
+    public void changePerformer(Map<String, String> request, String taskTitle, Principal connectedUser, String teamName) {
+        var creator = findCreator(connectedUser, teamName);
+        var performer = findPerformer(request.get("performer"), teamName);
+        var task = findTaskByTitleAndCreator(taskTitle, creator);
+
+        task.setPerformer(performer);
         repository.save(task);
     }
 
@@ -83,14 +93,25 @@ public class TaskService {
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
     }
 
-    private Member findCreator(Principal connectedUser, String teamName) {
+    private Member findMemberByUsernameAndTeam(String username, String teamName) {
         var team = teamRepository.findByName(teamName)
                 .orElseThrow(() -> new IllegalArgumentException("Team not found"));
-        var user = User.getUserFromPrincipal(connectedUser);
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return memberRepository.findByUserAndTeam(user, team)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
     }
+
+    private Member findCreator(Principal connectedUser, String teamName) {
+        var user = User.getUserFromPrincipal(connectedUser);
+        return findMemberByUsernameAndTeam(user.getTrueUsername(), teamName);
+    }
+
+    private Member findPerformer(String performer, String teamName) {
+        return findMemberByUsernameAndTeam(performer, teamName);
+    }
+
 
     private Task createTask(TaskRequest request, Member creator) {
         return Task.builder()
@@ -102,6 +123,7 @@ public class TaskService {
                 .status(Status.PENDING)
                 .dueDate(LocalDateTime.parse(request.getDueDate(), formatter))
                 .creator(creator)
+                .performer(creator)
                 .build();
     }
 

@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/teams/{team}/tasks")
@@ -30,29 +31,44 @@ public class TaskController {
         }
     }
 
-    @PatchMapping("/change/{taskTitle}")
-    public ResponseEntity<?> change(
-            @RequestBody TaskRequest request,
+    @PatchMapping("/changePerformer/{task}")
+    public ResponseEntity<?> changePerformer(
+            @RequestBody Map<String, String> request,
             @PathVariable String team,
-            @PathVariable String taskTitle,
+            @PathVariable String task,
             Principal connectedUser
     ) {
         try {
-            service.change(request, taskTitle, connectedUser, team);
+            service.changePerformer(request, task, connectedUser, team);
+            return ResponseEntity.ok("Added");
+        } catch (IllegalArgumentException | UsernameNotFoundException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PatchMapping("/change/{task}")
+    public ResponseEntity<?> change(
+            @RequestBody TaskRequest request,
+            @PathVariable String team,
+            @PathVariable String task,
+            Principal connectedUser
+    ) {
+        try {
+            service.change(request, task, connectedUser, team);
             return ResponseEntity.ok("Changed");
         } catch (IllegalArgumentException | UsernameNotFoundException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @DeleteMapping("/delete/{taskTitle}")
+    @DeleteMapping("/delete/{task}")
     public ResponseEntity<?> delete(
             @PathVariable String team,
-            @PathVariable String taskTitle,
+            @PathVariable String task,
             Principal connectedUser
     ) {
         try {
-            service.delete(taskTitle, connectedUser, team);
+            service.delete(task, connectedUser, team);
             return ResponseEntity.ok("Deleted");
         } catch (IllegalArgumentException | UsernameNotFoundException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
