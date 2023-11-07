@@ -25,9 +25,11 @@ public class TaskController {
     ) {
         try {
             service.create(request, connectedUser, team);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Created");
-        } catch (IllegalArgumentException | UsernameNotFoundException | IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CREATED).body("Task created successfully");
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
@@ -40,9 +42,11 @@ public class TaskController {
     ) {
         try {
             service.changePerformer(request, task, connectedUser, team);
-            return ResponseEntity.ok("Added");
-        } catch (IllegalArgumentException | UsernameNotFoundException | IllegalStateException e) {
+            return ResponseEntity.ok("Performer changed successfully");
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
@@ -55,9 +59,11 @@ public class TaskController {
     ) {
         try {
             service.change(request, task, connectedUser, team);
-            return ResponseEntity.ok("Changed");
-        } catch (IllegalArgumentException | UsernameNotFoundException | IllegalStateException e) {
+            return ResponseEntity.ok("Task changed successfully");
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
@@ -69,11 +75,11 @@ public class TaskController {
     ) {
         try {
             service.delete(task, connectedUser, team);
-            return ResponseEntity.ok("Deleted");
-        } catch (IllegalArgumentException | UsernameNotFoundException | IllegalStateException e) {
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
-
-
 }
