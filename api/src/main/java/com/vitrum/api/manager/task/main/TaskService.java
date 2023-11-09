@@ -10,9 +10,13 @@ import com.vitrum.api.manager.task.history.OldTaskRepository;
 import com.vitrum.api.manager.team.TeamRepository;
 import com.vitrum.api.util.Converter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -26,6 +30,7 @@ public class TaskService {
     private final MemberRepository memberRepository;
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
+    private final JavaMailSender emailSender;
     private final Converter converter;
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -48,6 +53,8 @@ public class TaskService {
 
         task.setPerformer(performer);
         repository.save(task);
+
+        sendMessage(performer, task.toString(), "A task has been added to you!");
     }
 
     public void change(TaskRequest request, String taskTitle, Principal connectedUser, String teamName) {
@@ -63,6 +70,8 @@ public class TaskService {
 
         updateTaskFields(request, task);
         repository.save(task);
+
+        sendMessage(task.getPerformer(), task.toString(), "The task has been changed");
     }
 
     public void delete(String taskTitle, Principal connectedUser, String teamName) {
@@ -79,6 +88,8 @@ public class TaskService {
 
         var oldTask = converter.mapTaskToOldTask(task);
         oldTaskRepository.save(oldTask);
+
+        sendMessage(task.getPerformer(), task.toString(), "The task has been deleted");
     }
 
     public Task getTask(String taskTitle, String creatorName, String teamName) {
@@ -91,6 +102,25 @@ public class TaskService {
 
         return repository.findByTitleAndCreator(taskTitle, member)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+    }
+
+    private void sendMessage(Member member, String text, String subject) {
+        try {
+            var user = member.getUser();
+            MimeMessage message = emailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message);
+
+            helper.setFrom("tms.team.noreply@gmail.com");
+            helper.setTo(user.getUsername());
+            helper.setSubject(subject);
+            helper.setText(text);
+
+            emailSender.send(message);
+
+
+        } catch (MessagingException e) {
+            throw new RuntimeException("Something went wrong!");
+        }
     }
 
     private Member findMemberByUsernameAndTeam(String username, String teamName) {

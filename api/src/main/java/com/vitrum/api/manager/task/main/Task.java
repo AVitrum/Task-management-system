@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Entity
@@ -44,4 +45,22 @@ public class Task {
 
     @OneToMany(mappedBy = "task")
     private List<OldTask> oldTasks;
+
+    @Override
+    public String toString() {
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        String formattedCreationTime = creationTime.format(dateFormatter);
+        String formattedDueDate = dueDate.format(dateFormatter);
+
+        return "Task: " + title + '\n' +
+                "description: " + description + '\n' +
+                "creationTime: " + formattedCreationTime + '\n' +
+                "dueDate: " + formattedDueDate + '\n' +
+                "priority: " + priority + '\n' +
+                "version: " + version + '\n' +
+                "status: " + status.name() + '\n' +
+                "creator: " + creator.getUser().getEmail() + '\n' +
+                "performer: " + performer.getUser().getEmail();
+    }
 }

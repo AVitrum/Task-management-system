@@ -136,7 +136,7 @@ public class AuthService {
             token.setRevoked(true);
         });
         tokenRepository.saveAll(validUserTokens);
-        deleteAllExpiredUserTokens(user);
+//        deleteAllExpiredUserTokens(user);
     }
 
     private void deleteAllExpiredUserTokens(User user) {

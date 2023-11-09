@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +20,7 @@ import java.io.IOException;
 public class AuthController {
 
     private final AuthService service;
+    private final LogoutService logoutService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
@@ -43,6 +45,11 @@ public class AuthController {
     @PostMapping("/refresh-token")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         service.refreshToken(request, response);
+    }
+
+    @DeleteMapping("/logout")
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        logoutService.logout(request, response, SecurityContextHolder.getContext().getAuthentication());
     }
 
 }
