@@ -56,6 +56,17 @@ public class TeamController {
         }
     }
 
+    @GetMapping("/findByUser")
+    public ResponseEntity<?> showIfInTeam(
+            Principal connectedUser
+    ) {
+        try {
+            return ResponseEntity.ok(service.findIfInTeam(connectedUser));
+        } catch (IllegalArgumentException | UsernameNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @GetMapping
     public ResponseEntity<?> showAll() {
         return ResponseEntity.ok(service.getAll());

@@ -56,14 +56,14 @@ public class TeamService {
         }
     }
 
-    public String addToTeam(String username, String teamName) {
+    public void addToTeam(String username, String teamName) {
         var team = repository.findByName(teamName)
                 .orElseThrow(() -> new IllegalArgumentException("Can't find team by this name"));
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Can't find user"));
 
         if (inTeam(user, team)) {
-            return "The user is already in the team";
+            throw new IllegalArgumentException("The user is already in the team");
         }
 
         var member = Member.builder()
@@ -73,13 +73,21 @@ public class TeamService {
                 .build();
         memberRepository.save(member);
         repository.save(team);
-
-        return "The user has been added to the team";
     }
 
     public List<TeamResponse> getAll() {
         var teams = repository.findAll();
         return teams.stream().map(converter::mapTeamToTeamResponse).collect(Collectors.toList());
+    }
+
+    public List<TeamResponse> findIfInTeam(Principal connectedUser) {
+        var user = User.getUserFromPrincipal(connectedUser);
+        List<Member> members = memberRepository.findAllByUser(user)
+                .orElseThrow(() -> new IllegalArgumentException("Can't find"));
+
+        return members.stream()
+                .map(member -> converter.mapTeamToTeamResponse(member.getTeam()))
+                .collect(Collectors.toList());
     }
 
     public TeamResponse findByName(String name) {
@@ -91,4 +99,5 @@ public class TeamService {
         return team.getMembers().contains(memberRepository.findByUser(user)
                 .orElse(null));
     }
+
 }
