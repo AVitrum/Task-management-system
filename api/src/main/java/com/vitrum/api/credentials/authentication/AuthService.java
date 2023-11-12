@@ -35,7 +35,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationResponse register(RegisterRequest request) {
+    public void register(RegisterRequest request) {
         try {
             var user = User.builder()
                     .username(request.getUsername())
@@ -47,12 +47,7 @@ public class AuthService {
 
             var savedUser = repository.save(user);
             var jwtToken = jwtService.generateToken(user);
-            var refreshToken = jwtService.generateRefreshToken(user);
             saveUserToken(savedUser, jwtToken);
-            return AuthenticationResponse.builder()
-                    .accessToken(jwtToken)
-                    .refreshToken(refreshToken)
-                    .build();
         } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("User with the same email/username already exists.");
         }

@@ -50,9 +50,6 @@ public class SecurityConfiguration {
                         ).hasRole(ADMIN.name())
                         .requestMatchers(
                                 "/api/users/**",
-                                "/api/teams/tasks/**"
-                        ).hasAnyRole(USER.name(), ADMIN.name())
-                        .requestMatchers(
                                 "/api/teams/**"
                         ).hasAnyRole(USER.name(), ADMIN.name())
                 )

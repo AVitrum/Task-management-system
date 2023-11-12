@@ -1,6 +1,6 @@
 package com.vitrum.api.manager.task.main;
 
-import com.vitrum.api.manager.member.Member;
+import com.vitrum.api.manager.bundle.Bundle;
 import com.vitrum.api.manager.task.history.OldTask;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -36,12 +36,8 @@ public class Task {
     private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_id")
-    private Member creator;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "performer_id")
-    private Member performer;
+    @JoinColumn(name = "bundle_id")
+    private Bundle bundle;
 
     @OneToMany(mappedBy = "task")
     private List<OldTask> oldTasks;
@@ -60,7 +56,7 @@ public class Task {
                 "priority: " + priority + '\n' +
                 "version: " + version + '\n' +
                 "status: " + status.name() + '\n' +
-                "creator: " + creator.getUser().getEmail() + '\n' +
-                "performer: " + performer.getUser().getEmail();
+                "creator: " + bundle.getCreator().getUser().getEmail() + '\n' +
+                "performer: " + bundle.getPerformer().getUser().getEmail();
     }
 }

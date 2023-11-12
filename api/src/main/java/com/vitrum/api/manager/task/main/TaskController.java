@@ -8,10 +8,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.Map;
 
 @RestController
-@RequestMapping("/api/teams/{team}/tasks")
+@RequestMapping("/api/teams/{team}/bundles/{bundle}/tasks")
 @RequiredArgsConstructor
 public class TaskController {
 
@@ -21,28 +20,12 @@ public class TaskController {
     public ResponseEntity<?> create(
             @RequestBody TaskRequest request,
             @PathVariable String team,
+            @PathVariable String bundle,
             Principal connectedUser
     ) {
         try {
-            service.create(request, connectedUser, team);
+            service.create(request, connectedUser, team, bundle);
             return ResponseEntity.status(HttpStatus.CREATED).body("Task created successfully");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-        }
-    }
-
-    @PatchMapping("/changePerformer/{task}")
-    public ResponseEntity<?> changePerformer(
-            @RequestBody Map<String, String> request,
-            @PathVariable String team,
-            @PathVariable String task,
-            Principal connectedUser
-    ) {
-        try {
-            service.changePerformer(request, task, connectedUser, team);
-            return ResponseEntity.ok("Performer changed successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (UsernameNotFoundException e) {
@@ -55,10 +38,11 @@ public class TaskController {
             @RequestBody TaskRequest request,
             @PathVariable String team,
             @PathVariable String task,
+            @PathVariable String bundle,
             Principal connectedUser
     ) {
         try {
-            service.change(request, task, connectedUser, team);
+            service.change(request, task, connectedUser, team, bundle);
             return ResponseEntity.ok("Task changed successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -71,10 +55,11 @@ public class TaskController {
     public ResponseEntity<?> delete(
             @PathVariable String team,
             @PathVariable String task,
+            @PathVariable String bundle,
             Principal connectedUser
     ) {
         try {
-            service.delete(task, connectedUser, team);
+            service.delete(task, connectedUser, team, bundle);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
