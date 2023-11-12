@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 
 @RestController
-@RequestMapping("/api/teams/{team}/tasks")
+@RequestMapping("/api/teams/{team}/bundles/{bundle}/tasks")
 @RequiredArgsConstructor
 public class TaskController {
 
@@ -20,44 +20,51 @@ public class TaskController {
     public ResponseEntity<?> create(
             @RequestBody TaskRequest request,
             @PathVariable String team,
+            @PathVariable String bundle,
             Principal connectedUser
     ) {
         try {
-            service.create(request, connectedUser, team);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Created");
-        } catch (IllegalArgumentException | UsernameNotFoundException | IllegalStateException e) {
+            service.create(request, connectedUser, team, bundle);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Task created successfully");
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
-    @PatchMapping("/change/{taskTitle}")
+    @PatchMapping("/change/{task}")
     public ResponseEntity<?> change(
             @RequestBody TaskRequest request,
             @PathVariable String team,
-            @PathVariable String taskTitle,
+            @PathVariable String task,
+            @PathVariable String bundle,
             Principal connectedUser
     ) {
         try {
-            service.change(request, taskTitle, connectedUser, team);
-            return ResponseEntity.ok("Changed");
-        } catch (IllegalArgumentException | UsernameNotFoundException | IllegalStateException e) {
+            service.change(request, task, connectedUser, team, bundle);
+            return ResponseEntity.ok("Task changed successfully");
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
-    @DeleteMapping("/delete/{taskTitle}")
+    @DeleteMapping("/delete/{task}")
     public ResponseEntity<?> delete(
             @PathVariable String team,
-            @PathVariable String taskTitle,
+            @PathVariable String task,
+            @PathVariable String bundle,
             Principal connectedUser
     ) {
         try {
-            service.delete(taskTitle, connectedUser, team);
-            return ResponseEntity.ok("Deleted");
-        } catch (IllegalArgumentException | UsernameNotFoundException | IllegalStateException e) {
+            service.delete(task, connectedUser, team, bundle);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
-
-
 }

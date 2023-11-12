@@ -1,6 +1,7 @@
 package com.vitrum.api.manager.member;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
@@ -17,15 +18,17 @@ public class MemberController {
 
     @PatchMapping("/changeRole")
     public ResponseEntity<?> changeRole(
-        Principal connectedUser,
-        @RequestBody Map<String, String> request,
-        @PathVariable String team
+            Principal connectedUser,
+            @RequestBody Map<String, String> request,
+            @PathVariable String team
     ) {
         try {
             service.changeRole(connectedUser, request, team);
-            return ResponseEntity.ok("Changed");
-        } catch (IllegalArgumentException | UsernameNotFoundException e) {
+            return ResponseEntity.ok("Role changed successfully");
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
@@ -37,9 +40,12 @@ public class MemberController {
     ) {
         try {
             service.kick(connectedUser, request, team);
-            return ResponseEntity.ok("Kicked");
-        } catch (IllegalArgumentException | UsernameNotFoundException e) {
+            return ResponseEntity.ok("Kicked successfully");
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 }
+

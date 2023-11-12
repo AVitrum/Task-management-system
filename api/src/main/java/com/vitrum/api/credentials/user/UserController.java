@@ -4,6 +4,7 @@ import com.vitrum.api.dto.Request.ChangeUserCredentials;
 import com.vitrum.api.dto.Request.RegisterRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
@@ -18,21 +19,19 @@ public class UserController {
     private final UserService service;
 
     @PostMapping("/create")
-    public ResponseEntity<?> create(
-            @RequestBody RegisterRequest request
-    ) {
+    public ResponseEntity<?> create(@RequestBody RegisterRequest request) {
         try {
             service.create(request);
             return ResponseEntity.ok("Created");
-        } catch (UsernameNotFoundException | IllegalArgumentException e) {
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<?> profile(
-            HttpServletRequest request
-    ) {
+    public ResponseEntity<?> profile(HttpServletRequest request) {
         try {
             return ResponseEntity.ok(service.profile(request));
         } catch (IllegalArgumentException e) {
@@ -41,9 +40,7 @@ public class UserController {
     }
 
     @PatchMapping("/changeCredentials")
-    public ResponseEntity<?> changeCredentials(
-            @RequestBody ChangeUserCredentials request
-    ) {
+    public ResponseEntity<?> changeCredentials(@RequestBody ChangeUserCredentials request) {
         try {
             service.changeCredentials(request);
             return ResponseEntity.ok("Changed");
@@ -53,14 +50,12 @@ public class UserController {
     }
 
     @PutMapping("/ban")
-    public ResponseEntity<?> ban(
-        @RequestBody Map<String, String> username
-    ) {
+    public ResponseEntity<?> ban(@RequestBody Map<String, String> username) {
         try {
             service.ban(username.get("username"));
             return ResponseEntity.ok("Okay");
         } catch (UsernameNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 }

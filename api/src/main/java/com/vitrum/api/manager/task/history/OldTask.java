@@ -1,6 +1,5 @@
 package com.vitrum.api.manager.task.history;
 
-import com.vitrum.api.manager.member.Member;
 import com.vitrum.api.manager.task.main.Status;
 import com.vitrum.api.manager.task.main.Task;
 import jakarta.persistence.*;
@@ -34,10 +33,6 @@ public class OldTask {
 
     @Enumerated(EnumType.STRING)
     private Status status;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_id")
-    private Member creator;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id")

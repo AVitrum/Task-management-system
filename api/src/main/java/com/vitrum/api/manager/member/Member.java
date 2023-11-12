@@ -1,7 +1,6 @@
 package com.vitrum.api.manager.member;
 
-import com.vitrum.api.manager.task.history.OldTask;
-import com.vitrum.api.manager.task.main.Task;
+import com.vitrum.api.manager.bundle.Bundle;
 import com.vitrum.api.manager.team.Team;
 import com.vitrum.api.credentials.user.User;
 import jakarta.persistence.*;
@@ -36,8 +35,8 @@ public class Member {
     private RoleInTeam role;
 
     @OneToMany(mappedBy = "creator")
-    private List<Task> tasks;
+    private List<Bundle> creatorBundles;
 
-    @OneToMany(mappedBy = "creator")
-    private List<OldTask> oldTasks;
+    @OneToMany(mappedBy = "performer")
+    private List<Bundle> performerBundles;
 }

@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,35 +20,37 @@ import java.io.IOException;
 public class AuthController {
 
     private final AuthService service;
+    private final LogoutService logoutService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(
-            @Valid @RequestBody RegisterRequest request
-    ) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(service.register(request));
+            service.register(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body("");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<?> authenticate(
-            @RequestBody AuthenticationRequest request
-    ) {
+    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request) {
         try {
             return ResponseEntity.ok(service.authenticate(request));
-        } catch (IllegalArgumentException | IllegalStateException | UsernameNotFoundException e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException | IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
     @PostMapping("/refresh-token")
-    public void refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) throws IOException {
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         service.refreshToken(request, response);
     }
-}
 
+    @DeleteMapping("/logout")
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        logoutService.logout(request, response, SecurityContextHolder.getContext().getAuthentication());
+    }
+
+}

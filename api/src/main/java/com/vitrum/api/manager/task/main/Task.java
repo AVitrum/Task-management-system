@@ -1,6 +1,6 @@
 package com.vitrum.api.manager.task.main;
 
-import com.vitrum.api.manager.member.Member;
+import com.vitrum.api.manager.bundle.Bundle;
 import com.vitrum.api.manager.task.history.OldTask;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Entity
@@ -35,9 +36,27 @@ public class Task {
     private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_id")
-    private Member creator;
+    @JoinColumn(name = "bundle_id")
+    private Bundle bundle;
 
     @OneToMany(mappedBy = "task")
     private List<OldTask> oldTasks;
+
+    @Override
+    public String toString() {
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        String formattedCreationTime = creationTime.format(dateFormatter);
+        String formattedDueDate = dueDate.format(dateFormatter);
+
+        return "Task: " + title + '\n' +
+                "description: " + description + '\n' +
+                "creationTime: " + formattedCreationTime + '\n' +
+                "dueDate: " + formattedDueDate + '\n' +
+                "priority: " + priority + '\n' +
+                "version: " + version + '\n' +
+                "status: " + status.name() + '\n' +
+                "creator: " + bundle.getCreator().getUser().getEmail() + '\n' +
+                "performer: " + bundle.getPerformer().getUser().getEmail();
+    }
 }

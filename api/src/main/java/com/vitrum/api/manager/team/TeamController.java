@@ -19,8 +19,8 @@ public class TeamController {
 
     @PostMapping("/create")
     public ResponseEntity<?> create(
-        @RequestBody TeamCreationRequest request,
-        Principal connectedUser
+            @RequestBody TeamCreationRequest request,
+            Principal connectedUser
     ) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request, connectedUser));
@@ -36,15 +36,18 @@ public class TeamController {
     ) {
         String username = request.get("username");
         try {
-            return ResponseEntity.ok().body(service.addToTeam(username, team));
-        } catch (UsernameNotFoundException | IllegalArgumentException e) {
+            service.addToTeam(username, team);
+            return ResponseEntity.ok("Member added successfully");
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @GetMapping("/{name}")
     public ResponseEntity<?> showByName(
-        @PathVariable String name
+            @PathVariable String name
     ) {
         try {
             return ResponseEntity.ok(service.findByName(name));
@@ -53,9 +56,20 @@ public class TeamController {
         }
     }
 
+    @GetMapping("/findByUser")
+    public ResponseEntity<?> showIfInTeam(
+            Principal connectedUser
+    ) {
+        try {
+            return ResponseEntity.ok(service.findIfInTeam(connectedUser));
+        } catch (IllegalArgumentException | UsernameNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @GetMapping
     public ResponseEntity<?> showAll() {
         return ResponseEntity.ok(service.getAll());
     }
-
 }
+

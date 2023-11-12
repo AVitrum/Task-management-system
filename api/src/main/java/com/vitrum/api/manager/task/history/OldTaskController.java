@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/teams/{team}/tasks/history")
+@RequestMapping("/api/teams/{team}/bundles/{bundle}/tasks/history")
 @RequiredArgsConstructor
 public class OldTaskController {
 
@@ -18,10 +18,11 @@ public class OldTaskController {
     public ResponseEntity<?> findAllByTitle(
             @PathVariable String team,
             @PathVariable String taskTitle,
-            @PathVariable String creator
+            @PathVariable String creator,
+            @PathVariable String bundle
     ) {
         try {
-            return ResponseEntity.ok(service.findAllByTitle(taskTitle, creator, team));
+            return ResponseEntity.ok(service.findAllByTitle(taskTitle, creator, team, bundle));
         } catch (UsernameNotFoundException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -32,12 +33,13 @@ public class OldTaskController {
             @PathVariable String team,
             @PathVariable String taskTitle,
             @PathVariable String creator,
+            @PathVariable String bundle,
             @PathVariable Long version
 
     ) {
         try {
             return ResponseEntity.ok(converter.mapOldTaskToHistoryResponse(
-                    service.getByVersion(taskTitle, creator, team, version))
+                    service.getByVersion(taskTitle, creator, team, bundle, version))
             );
         } catch (UsernameNotFoundException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -49,11 +51,12 @@ public class OldTaskController {
             @PathVariable String team,
             @PathVariable String taskTitle,
             @PathVariable String creator,
+            @PathVariable String bundle,
             @PathVariable Long version
 
     ) {
         try {
-            service.restore(taskTitle, creator, team, version);
+            service.restore(taskTitle, creator, team, bundle, version);
             return ResponseEntity.ok("Restored");
         } catch (UsernameNotFoundException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -64,10 +67,11 @@ public class OldTaskController {
     public ResponseEntity<?> delete(
             @PathVariable String team,
             @PathVariable String taskTitle,
-            @PathVariable String creator
+            @PathVariable String creator,
+            @PathVariable String bundle
     ) {
         try {
-            service.delete(taskTitle, creator, team);
+            service.delete(taskTitle, creator, team, bundle);
             return ResponseEntity.ok("Deleted");
         } catch (UsernameNotFoundException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
