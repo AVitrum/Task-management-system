@@ -39,4 +39,8 @@ public class Member {
 
     @OneToMany(mappedBy = "performer")
     private List<Bundle> performerBundles;
+
+    public boolean checkPermissionToCreate() {
+        return this.getRole().equals(RoleInTeam.MEMBER);
+    }
 }

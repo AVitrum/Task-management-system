@@ -6,15 +6,12 @@ import com.vitrum.api.dto.Request.ChangePasswordRequest;
 import com.vitrum.api.dto.Request.ResetPasswordRequest;
 import com.vitrum.api.credentials.password.recoverycode.Recoverycode;
 import com.vitrum.api.credentials.password.recoverycode.RecoverycodeRepository;
+import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import java.security.Principal;
 import java.time.LocalTime;
 import java.util.Random;
@@ -22,10 +19,11 @@ import java.util.Random;
 @Service
 @RequiredArgsConstructor
 public class PasswordService {
+
     private final PasswordEncoder passwordEncoder;
     private final UserRepository repository;
     private final RecoverycodeRepository recoverycodeRepository;
-    private final JavaMailSender emailSender;
+    private final MessageUtil messageUtil;
 
     public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
         var user = User.getUserFromPrincipal(connectedUser);
@@ -69,14 +67,11 @@ public class PasswordService {
     }
 
     public void getRecoverycode(String email) {
-        try {
-            var user = repository.findByEmail(email)
-                    .orElseThrow(() -> new UsernameNotFoundException("Wrong email!"));
-            var recoverycode = generateRecoverycode(user);
-            sendRecoverycodeByEmail(user, recoverycode);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Something went wrong!");
-        }
+        var user = repository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Wrong email!"));
+        var recoverycode = generateRecoverycode(user);
+
+        messageUtil.sendRecoverycodeByEmail(user, recoverycode);
     }
 
     private Recoverycode generateRecoverycode(User user) {
@@ -93,17 +88,5 @@ public class PasswordService {
                 .build();
         recoverycodeRepository.save(recoverycode);
         return recoverycode;
-    }
-
-    private void sendRecoverycodeByEmail(User user, Recoverycode recoverycode) throws MessagingException {
-        MimeMessage message = emailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message);
-
-        helper.setFrom("tms.team.noreply@gmail.com");
-        helper.setTo(user.getUsername());
-        helper.setSubject("TMS Recovery code");
-        helper.setText("Your password recovery code: " + recoverycode.getCode());
-
-        emailSender.send(message);
     }
 }

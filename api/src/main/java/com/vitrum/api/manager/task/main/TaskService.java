@@ -11,14 +11,11 @@ import com.vitrum.api.manager.task.history.OldTask;
 import com.vitrum.api.manager.task.history.OldTaskRepository;
 import com.vitrum.api.manager.team.TeamRepository;
 import com.vitrum.api.util.Converter;
+import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -32,13 +29,16 @@ public class TaskService {
     private final TeamRepository teamRepository;
     private final BundleRepository bundleRepository;
     private final UserRepository userRepository;
-    private final JavaMailSender emailSender;
     private final Converter converter;
+    private final MessageUtil messageUtil;
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public void create(TaskRequest request, Principal connectedUser, String teamName, String bundleName) {
         var creator = findCreator(connectedUser, teamName);
+
+        if (creator.checkPermissionToCreate())
+            throw new IllegalArgumentException("You do not have permission to perform this action");
 
         var bundle = findBundle(bundleName, creator);
 
@@ -65,7 +65,7 @@ public class TaskService {
         updateTaskFields(request, task);
         repository.save(task);
 
-        sendMessage(bundle.getPerformer(), task.toString(), "The task has been changed");
+        messageUtil.sendMessage(bundle.getPerformer(), task.toString(), "The task has been changed");
     }
 
     public void delete(String taskTitle, Principal connectedUser, String teamName, String bundleName) {
@@ -84,7 +84,7 @@ public class TaskService {
         var oldTask = converter.mapTaskToOldTask(task);
         oldTaskRepository.save(oldTask);
 
-        sendMessage(task.getBundle().getPerformer(), task.toString(), "The task has been deleted");
+        messageUtil.sendMessage(task.getBundle().getPerformer(), task.toString(), "The task has been deleted");
     }
 
     public Task getTask(String taskTitle, String creatorName, String teamName, String bundleName) {
@@ -98,25 +98,6 @@ public class TaskService {
 
         return repository.findByTitleAndBundle(taskTitle, bundle)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
-    }
-
-    private void sendMessage(Member member, String text, String subject) {
-        try {
-            var user = member.getUser();
-            MimeMessage message = emailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message);
-
-            helper.setFrom("tms.team.noreply@gmail.com");
-            helper.setTo(user.getUsername());
-            helper.setSubject(subject);
-            helper.setText(text);
-
-            emailSender.send(message);
-
-
-        } catch (MessagingException e) {
-            throw new RuntimeException("Something went wrong!");
-        }
     }
 
     private Bundle findBundle(String bundleName, Member creator) {
