@@ -44,4 +44,17 @@ public class BundleController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/{bundle}/findByUser")
+    public ResponseEntity<?> findByUser(
+            @PathVariable String team,
+            @PathVariable String bundle,
+            Principal connectedUser
+    ) {
+        try {
+            return ResponseEntity.ok(service.findByUser(team, bundle, connectedUser));
+        } catch (IllegalArgumentException | UsernameNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

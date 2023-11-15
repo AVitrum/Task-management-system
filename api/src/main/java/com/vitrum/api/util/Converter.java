@@ -2,6 +2,7 @@ package com.vitrum.api.util;
 
 import com.vitrum.api.credentials.user.User;
 import com.vitrum.api.dto.Response.*;
+import com.vitrum.api.manager.bundle.Bundle;
 import com.vitrum.api.manager.member.Member;
 import com.vitrum.api.manager.task.history.OldTask;
 import com.vitrum.api.manager.task.main.Task;
@@ -74,6 +75,27 @@ public class Converter {
                 .creationTime(oldTask.getCreationTime())
                 .dueDate(oldTask.getDueDate())
                 .creator(mapMemberToMemberResponse(oldTask.getTask().getBundle().getCreator()))
+                .build();
+    }
+
+    public TaskResponse mapTaskToTaskResponse(Task task) {
+        return TaskResponse.builder()
+                .title(task.getTitle())
+                .description(task.getDescription())
+                .version(task.getVersion())
+                .creationTime(task.getCreationTime())
+                .dueDate(task.getDueDate())
+                .status(task.getStatus().name())
+                .priority(task.getPriority())
+                .build();
+    }
+
+    public BundleResponse mapBundleToBundleResponse(Bundle bundle) {
+        return BundleResponse.builder()
+                .title(bundle.getTitle())
+                .creatorEmail(bundle.getCreator().getUser().getTrueUsername())
+                .performerEmail(bundle.getPerformer().getUser().getTrueUsername())
+                .tasks(bundle.getTasks().stream().map(this::mapTaskToTaskResponse).collect(Collectors.toList()))
                 .build();
     }
 }
