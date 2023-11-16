@@ -1,6 +1,6 @@
 package com.vitrum.api.dto.Response;
 
-import com.vitrum.api.manager.member.RoleInTeam;
+import com.vitrum.api.models.enums.RoleInTeam;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
