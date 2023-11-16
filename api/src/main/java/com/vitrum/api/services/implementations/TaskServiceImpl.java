@@ -62,7 +62,7 @@ public class TaskServiceImpl implements TaskService {
         OldTask oldTask = converter.mapTaskToOldTask(task);
         oldTaskRepository.save(oldTask);
 
-        updateTaskFields(request, task);
+        updateTaskFields(request, task, bundle);
         repository.save(task);
 
         messageUtil.sendMessage(bundle.getPerformer(), task.toString(), "The task has been changed");
@@ -145,8 +145,9 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
     }
 
-    private void updateTaskFields(TaskRequest request, Task task) {
-        if (request.getTitle() != null) {
+    private void updateTaskFields(TaskRequest request, Task task, Bundle bundle) {
+        if (request.getTitle() != null
+                && !repository.existsByTitleAndBundle(request.getTitle(), bundle)) {
             task.setTitle(request.getTitle());
         }
         if (request.getDescription() != null) {
