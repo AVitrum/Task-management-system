@@ -15,6 +15,7 @@ import com.vitrum.api.repositories.TeamRepository;
 import com.vitrum.api.services.OldTaskService;
 import com.vitrum.api.services.TaskService;
 import com.vitrum.api.util.Converter;
+import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class OldTaskServiceImpl implements OldTaskService {
     private final TeamRepository teamRepository;
     private final BundleRepository bundleRepository;
     private final TaskService taskService;
+    private final MessageUtil messageUtil;
     private final Converter converter;
 
     @Override
@@ -85,6 +87,8 @@ public class OldTaskServiceImpl implements OldTaskService {
 
         task.setStatus(Status.RESTORED);
         taskRepository.save(task);
+
+        messageUtil.sendMessage(bundle.getPerformer(), task.toString(), "The task has been restored");
     }
 
     @Override
@@ -97,6 +101,11 @@ public class OldTaskServiceImpl implements OldTaskService {
         repository.deleteAll(oldTasks);
 
         taskRepository.delete(taskService.getTask(taskTitle, creatorName, teamName, bundleName));
+        messageUtil.sendMessage(
+                bundle.getPerformer(),
+                "The task has been deleted by " + creator.getUser().getEmail(),
+                task.getTitle() + "has been deleted"
+        );
     }
 
     private Task findTaskByTitleAndBundle(String taskTitle, Bundle bundle) {
