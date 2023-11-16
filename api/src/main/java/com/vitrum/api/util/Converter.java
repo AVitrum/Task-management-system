@@ -1,12 +1,12 @@
 package com.vitrum.api.util;
 
-import com.vitrum.api.credentials.user.User;
+import com.vitrum.api.models.User;
 import com.vitrum.api.dto.Response.*;
-import com.vitrum.api.manager.bundle.Bundle;
-import com.vitrum.api.manager.member.Member;
-import com.vitrum.api.manager.task.history.OldTask;
-import com.vitrum.api.manager.task.main.Task;
-import com.vitrum.api.manager.team.Team;
+import com.vitrum.api.models.Bundle;
+import com.vitrum.api.models.Member;
+import com.vitrum.api.models.submodels.OldTask;
+import com.vitrum.api.models.Task;
+import com.vitrum.api.models.Team;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

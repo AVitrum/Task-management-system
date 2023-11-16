@@ -1,6 +1,6 @@
 package com.vitrum.api.config;
 
-import com.vitrum.api.credentials.token.TokenRepository;
+import com.vitrum.api.repositories.TokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
