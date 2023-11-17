@@ -1,22 +1,21 @@
-package com.vitrum.api.services.implementations;
+package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.models.Team;
-import com.vitrum.api.repositories.TeamRepository;
-import com.vitrum.api.repositories.UserRepository;
-import com.vitrum.api.dto.Response.*;
-import com.vitrum.api.models.Member;
-import com.vitrum.api.repositories.MemberRepository;
 import com.vitrum.api.dto.Request.TeamCreationRequest;
+import com.vitrum.api.dto.Response.TeamCreationResponse;
+import com.vitrum.api.dto.Response.TeamResponse;
+import com.vitrum.api.models.Member;
+import com.vitrum.api.models.Team;
 import com.vitrum.api.models.User;
 import com.vitrum.api.models.enums.RoleInTeam;
+import com.vitrum.api.repositories.MemberRepository;
+import com.vitrum.api.repositories.TeamRepository;
+import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.services.TeamService;
 import com.vitrum.api.util.Converter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,9 +30,13 @@ public class TeamServiceImpl implements TeamService {
     private final Converter converter;
 
     @Override
-    public TeamCreationResponse create(TeamCreationRequest request, Principal connectedUser) {
+    public TeamCreationResponse create(TeamCreationRequest request) {
         try {
-            var user = User.getUserFromPrincipal(connectedUser);
+            var user = User.getAuthUser(userRepository);
+
+            if (repository.existsByName(request.getName()))
+                throw new IllegalArgumentException("Team with the same name already exists");
+
             var team = Team.builder()
                     .name(request.getName())
                     .members(new ArrayList<>())
@@ -55,8 +58,6 @@ public class TeamServiceImpl implements TeamService {
 
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException("Can't create");
-        } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("Team with the same name already exists");
         }
     }
 
@@ -67,7 +68,7 @@ public class TeamServiceImpl implements TeamService {
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Can't find user"));
 
-        if (inTeam(user, team)) {
+        if (memberRepository.existsByUserAndTeam(user, team)) {
             throw new IllegalArgumentException("The user is already in the team");
         }
 
@@ -77,7 +78,6 @@ public class TeamServiceImpl implements TeamService {
                 .team(team)
                 .build();
         memberRepository.save(member);
-        repository.save(team);
     }
 
     public List<TeamResponse> getAll() {
@@ -86,10 +86,9 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public List<TeamResponse> findIfInTeam(Principal connectedUser) {
-        var user = User.getUserFromPrincipal(connectedUser);
-        List<Member> members = memberRepository.findAllByUser(user)
-                .orElseThrow(() -> new IllegalArgumentException("Can't find"));
+    public List<TeamResponse> findIfInTeam() {
+        var user = User.getAuthUser(userRepository);
+        List<Member> members = memberRepository.findAllByUser(user);
 
         return members.stream()
                 .map(member -> converter.mapTeamToTeamResponse(member.getTeam()))
@@ -100,11 +99,6 @@ public class TeamServiceImpl implements TeamService {
     public TeamResponse findByName(String name) {
         var team = repository.findByName(name).orElseThrow(() -> new IllegalArgumentException("Team not found"));
         return converter.mapTeamToTeamResponse(team);
-    }
-
-    private Boolean inTeam(User user, Team team) {
-        return team.getMembers().contains(memberRepository.findByUser(user)
-                .orElse(null));
     }
 
 }

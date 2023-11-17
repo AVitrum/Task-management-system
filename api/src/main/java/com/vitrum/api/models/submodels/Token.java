@@ -2,13 +2,15 @@ package com.vitrum.api.models.submodels;
 
 import com.vitrum.api.models.User;
 import com.vitrum.api.models.enums.TokenType;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
+@Document(collection = "tokens")
 @Data
 @Builder
 @AllArgsConstructor
@@ -16,20 +18,16 @@ import lombok.NoArgsConstructor;
 public class Token {
 
     @Id
-    @GeneratedValue
-    public Long id;
+    private String id;
 
-    @Column(unique = true)
-    public String token;
+    private String token;
 
-    @Enumerated(EnumType.STRING)
-    public TokenType tokenType = TokenType.BEARER;
+    private TokenType tokenType = TokenType.BEARER;
 
-    public boolean revoked;
+    private boolean revoked;
 
-    public boolean expired;
+    private boolean expired;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    public User user;
+    @DBRef
+    private User user;
 }

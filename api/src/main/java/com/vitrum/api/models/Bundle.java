@@ -1,15 +1,16 @@
 package com.vitrum.api.models;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
-@Entity
-@Table(name = "bundle")
+@Document(collection = "bundles")
 @Data
 @Builder
 @NoArgsConstructor
@@ -17,20 +18,16 @@ import java.util.List;
 public class Bundle {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     private String title;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_id")
+    @DBRef
     private Member creator;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "performer_id")
+    @DBRef
     private Member performer;
 
-    @OneToMany(mappedBy = "bundle")
+    @DBRef
     private List<Task> tasks;
 }
-

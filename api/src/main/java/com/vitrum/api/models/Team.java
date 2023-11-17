@@ -1,15 +1,15 @@
 package com.vitrum.api.models;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
-@Entity
-@Table(name = "team")
+@Document(collection = "teams")
 @Data
 @Builder
 @NoArgsConstructor
@@ -17,12 +17,9 @@ import java.util.List;
 public class Team {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "team")
     private List<Member> members;
 }

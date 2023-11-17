@@ -1,11 +1,11 @@
-package com.vitrum.api.services.implementations;
+package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.models.User;
-import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.dto.Request.ChangePasswordRequest;
 import com.vitrum.api.dto.Request.ResetPasswordRequest;
+import com.vitrum.api.models.User;
 import com.vitrum.api.models.submodels.Recoverycode;
 import com.vitrum.api.repositories.RecoverycodeRepository;
+import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.services.PasswordService;
 import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class PasswordServiceImpl implements PasswordService {
 
     @Override
     public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
-        var user = User.getUserFromPrincipal(connectedUser);
+        var user = User.getAuthUser(repository);
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             throw new IllegalStateException("Wrong password!");
@@ -48,7 +48,8 @@ public class PasswordServiceImpl implements PasswordService {
     public void resetPassword(ResetPasswordRequest request) {
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Wrong email!"));
-        var recoverycode = user.getRecoverycode().get(0);
+        var recoverycode = recoverycodeRepository.findByUser(user)
+                .orElseThrow(() -> new IllegalArgumentException("Code not found"));
 
         if (recoverycode.isExpired()) {
             recoverycodeRepository.delete(recoverycode);
@@ -79,8 +80,9 @@ public class PasswordServiceImpl implements PasswordService {
     }
 
     private Recoverycode generateRecoverycode(User user) {
-        if (!user.getRecoverycode().isEmpty()) {
-            Recoverycode recoverycode = user.getRecoverycode().get(0);
+        if (recoverycodeRepository.findByUser(user).isPresent()) {
+            Recoverycode recoverycode = recoverycodeRepository.findByUser(user)
+                    .orElseThrow(() -> new IllegalArgumentException("Code not found"));
             recoverycodeRepository.delete(recoverycode);
         }
 

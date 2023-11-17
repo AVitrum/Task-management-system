@@ -2,18 +2,19 @@ package com.vitrum.api.models;
 
 import com.vitrum.api.models.enums.Status;
 import com.vitrum.api.models.submodels.OldTask;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-@Entity
-@Table(name = "task")
+@Document(collection = "tasks")
 @Data
 @Builder
 @NoArgsConstructor
@@ -21,10 +22,8 @@ import java.util.List;
 public class Task {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(nullable = false, unique = true)
     private String title;
     private String description;
     private LocalDateTime creationTime;
@@ -32,14 +31,12 @@ public class Task {
     private Long priority;
     private Long version;
 
-    @Enumerated(EnumType.STRING)
     private Status status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "bundle_id")
+    @DBRef
     private Bundle bundle;
 
-    @OneToMany(mappedBy = "task")
+    @DBRef
     private List<OldTask> oldTasks;
 
     @Override

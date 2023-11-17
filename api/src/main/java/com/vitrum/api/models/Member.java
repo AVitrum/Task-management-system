@@ -1,16 +1,17 @@
 package com.vitrum.api.models;
 
 import com.vitrum.api.models.enums.RoleInTeam;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
-@Entity
-@Table(name = "member")
+@Document(collection = "members")
 @Data
 @Builder
 @NoArgsConstructor
@@ -18,24 +19,20 @@ import java.util.List;
 public class Member {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_id")
+    @DBRef
     private Team team;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @DBRef
     private User user;
 
-    @Enumerated(EnumType.STRING)
     private RoleInTeam role;
 
-    @OneToMany(mappedBy = "creator")
+    @DBRef
     private List<Bundle> creatorBundles;
 
-    @OneToMany(mappedBy = "performer")
+    @DBRef
     private List<Bundle> performerBundles;
 
     public boolean checkPermissionToCreate() {

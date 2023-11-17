@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.Map;
 
 @RestController
@@ -20,11 +19,10 @@ public class BundleController {
     @PostMapping("/create")
     public ResponseEntity<?> create(
            @RequestBody Map<String, String> request,
-           @PathVariable String team,
-           Principal connectedUser
+           @PathVariable String team
     ) {
         try {
-            service.create(team, connectedUser, request.get("title"));
+            service.create(team, request.get("title"));
             return ResponseEntity.status(HttpStatus.CREATED).body("Created");
         } catch (IllegalArgumentException | UsernameNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -35,11 +33,10 @@ public class BundleController {
     public ResponseEntity<?> addPerformer(
             @RequestBody Map<String, String> request,
             @PathVariable String team,
-            @PathVariable String bundle,
-            Principal connectedUser
+            @PathVariable String bundle
     ) {
         try {
-            service.addPerformer(team, bundle, connectedUser, request.get("performer"));
+            service.addPerformer(team, bundle, request.get("performer"));
             return ResponseEntity.ok("Added");
         } catch (IllegalArgumentException | UsernameNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -49,11 +46,10 @@ public class BundleController {
     @GetMapping("/{bundle}/findByUser")
     public ResponseEntity<?> findByUser(
             @PathVariable String team,
-            @PathVariable String bundle,
-            Principal connectedUser
+            @PathVariable String bundle
     ) {
         try {
-            return ResponseEntity.ok(service.findByUser(team, bundle, connectedUser));
+            return ResponseEntity.ok(service.findByUser(team, bundle));
         } catch (IllegalArgumentException | UsernameNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

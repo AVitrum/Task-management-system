@@ -1,17 +1,12 @@
-package com.vitrum.api.services.implementations;
+package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.models.submodels.OldTask;
-import com.vitrum.api.repositories.OldTaskRepository;
-import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.dto.Response.HistoryResponse;
 import com.vitrum.api.models.Bundle;
-import com.vitrum.api.repositories.BundleRepository;
 import com.vitrum.api.models.Member;
-import com.vitrum.api.repositories.MemberRepository;
-import com.vitrum.api.models.enums.Status;
 import com.vitrum.api.models.Task;
-import com.vitrum.api.repositories.TaskRepository;
-import com.vitrum.api.repositories.TeamRepository;
+import com.vitrum.api.models.enums.Status;
+import com.vitrum.api.models.submodels.OldTask;
+import com.vitrum.api.repositories.*;
 import com.vitrum.api.services.OldTaskService;
 import com.vitrum.api.services.TaskService;
 import com.vitrum.api.util.Converter;
@@ -114,8 +109,7 @@ public class OldTaskServiceImpl implements OldTaskService {
     }
 
     private List<OldTask> getOldTasks(Task task) {
-        return repository.findAllByTask(task)
-                .orElseThrow(() -> new IllegalArgumentException("Wrong task title"));
+        return repository.findAllByTask(task);
     }
     private Bundle findBundle(String bundleName, Member creator) {
         return bundleRepository.findByCreatorAndTitle(creator, bundleName)
