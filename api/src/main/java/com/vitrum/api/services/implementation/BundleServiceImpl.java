@@ -1,20 +1,18 @@
-package com.vitrum.api.services.implementations;
+package com.vitrum.api.services.implementation;
 
+import com.vitrum.api.dto.Response.BundleResponse;
 import com.vitrum.api.models.Bundle;
+import com.vitrum.api.models.Member;
 import com.vitrum.api.models.User;
 import com.vitrum.api.repositories.BundleRepository;
-import com.vitrum.api.repositories.UserRepository;
-import com.vitrum.api.dto.Response.BundleResponse;
-import com.vitrum.api.models.Member;
 import com.vitrum.api.repositories.MemberRepository;
 import com.vitrum.api.repositories.TeamRepository;
+import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.services.BundleService;
 import com.vitrum.api.util.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.security.Principal;
 
 @Service
 @RequiredArgsConstructor
@@ -27,11 +25,13 @@ public class BundleServiceImpl implements BundleService {
     private final Converter converter;
 
     @Override
-    public void create(String teamName, Principal connectedUser, String title) {
-        var creator = findCreator(connectedUser, teamName);
+    public void create(String teamName, String title) {
+        var creator = findCreator(teamName);
 
         if (creator.checkPermissionToCreate())
             throw new IllegalArgumentException("You do not have permission to perform this action");
+        if (repository.existsByCreatorAndTitle(creator, title))
+            throw new IllegalArgumentException("Bundle with the same title exists");
 
         var bundle = Bundle.builder()
                 .creator(creator)
@@ -42,8 +42,8 @@ public class BundleServiceImpl implements BundleService {
     }
 
     @Override
-    public void addPerformer(String teamName, String bundleTitle, Principal connectedUser, String performerName) {
-        var creator = findCreator(connectedUser, teamName);
+    public void addPerformer(String teamName, String bundleTitle, String performerName) {
+        var creator = findCreator(teamName);
         var bundle = findBundleByCreator(bundleTitle, creator);
         var performer = findPerformer(performerName, teamName);
 
@@ -52,8 +52,8 @@ public class BundleServiceImpl implements BundleService {
     }
 
     @Override
-    public BundleResponse findByUser(String teamName, String bundleTitle, Principal connectedUser) {
-        var user = User.getUserFromPrincipal(connectedUser);
+    public BundleResponse findByUser(String teamName, String bundleTitle) {
+        var user = User.getAuthUser(userRepository);
         var member = findMemberByUsernameAndTeam(user.getTrueUsername(), teamName);
 
         Bundle bundle;
@@ -79,8 +79,8 @@ public class BundleServiceImpl implements BundleService {
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
     }
 
-    private Member findCreator(Principal connectedUser, String teamName) {
-        var user = User.getUserFromPrincipal(connectedUser);
+    private Member findCreator(String teamName) {
+        var user = User.getAuthUser(userRepository);
         return findMemberByUsernameAndTeam(user.getTrueUsername(), teamName);
     }
 

@@ -1,12 +1,12 @@
-package com.vitrum.api.services.implementations;
+package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.models.enums.Role;
-import com.vitrum.api.models.User;
-import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.config.JwtService;
 import com.vitrum.api.dto.Request.ChangeUserCredentials;
 import com.vitrum.api.dto.Request.RegisterRequest;
 import com.vitrum.api.dto.Response.UserProfileResponse;
+import com.vitrum.api.models.User;
+import com.vitrum.api.models.enums.Role;
+import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.services.UserService;
 import com.vitrum.api.util.Converter;
 import jakarta.servlet.http.HttpServletRequest;

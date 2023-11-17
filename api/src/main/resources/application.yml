@@ -1,11 +1,8 @@
 spring:
-  datasource:
-    url: jdbc:postgresql://database-1.cgkybqnrfkrn.eu-north-1.rds.amazonaws.com:5432/postgres
-    username: postgres
-    password: postgres
-  jpa:
-    hibernate:
-      ddl-auto: update
+  data:
+    mongodb:
+      uri: mongodb+srv://andreyalmashi:XeWGWloipUYReZeC@cluster0.okas9po.mongodb.net/tms-api-db?retryWrites=true&w=majority
+
   mail:
     host: smtp.gmail.com
     port: 587

@@ -1,4 +1,4 @@
-package com.vitrum.api.services.implementations;
+package com.vitrum.api.services.implementation;
 
 import com.vitrum.api.repositories.TokenRepository;
 import jakarta.servlet.http.HttpServletRequest;

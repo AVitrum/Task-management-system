@@ -1,11 +1,13 @@
-package com.vitrum.api.services.implementations;
+package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.models.*;
+import com.vitrum.api.dto.Request.TaskRequest;
+import com.vitrum.api.models.Bundle;
+import com.vitrum.api.models.Member;
+import com.vitrum.api.models.Task;
+import com.vitrum.api.models.User;
 import com.vitrum.api.models.enums.Status;
 import com.vitrum.api.models.submodels.OldTask;
 import com.vitrum.api.repositories.*;
-import com.vitrum.api.dto.Request.TaskRequest;
-import com.vitrum.api.repositories.TeamRepository;
 import com.vitrum.api.services.TaskService;
 import com.vitrum.api.util.Converter;
 import com.vitrum.api.util.MessageUtil;
@@ -13,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -33,8 +34,8 @@ public class TaskServiceImpl implements TaskService {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
-    public void create(TaskRequest request, Principal connectedUser, String teamName, String bundleName) {
-        var creator = findCreator(connectedUser, teamName);
+    public void create(TaskRequest request, String teamName, String bundleName) {
+        var creator = findCreator(teamName);
 
         if (creator.checkPermissionToCreate())
             throw new IllegalArgumentException("You do not have permission to perform this action");
@@ -50,8 +51,8 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void change(TaskRequest request, String taskTitle, Principal connectedUser, String teamName,String bundleName) {
-        var creator = findCreator(connectedUser, teamName);
+    public void change(TaskRequest request, String taskTitle, String teamName,String bundleName) {
+        var creator = findCreator(teamName);
         var bundle = findBundle(bundleName, creator);
         var task = findTaskByTitleAndBundle(taskTitle, bundle);
 
@@ -69,8 +70,8 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void delete(String taskTitle, Principal connectedUser, String teamName, String bundleName) {
-        var creator = findCreator(connectedUser, teamName);
+    public void delete(String taskTitle, String teamName, String bundleName) {
+        var creator = findCreator(teamName);
         var bundle = findBundle(bundleName, creator);
         var task = findTaskByTitleAndBundle(taskTitle, bundle);
 
@@ -117,8 +118,8 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
     }
 
-    private Member findCreator(Principal connectedUser, String teamName) {
-        var user = User.getUserFromPrincipal(connectedUser);
+    private Member findCreator(String teamName) {
+        var user = User.getAuthUser(userRepository);
         return findMemberByUsernameAndTeam(user.getTrueUsername(), teamName);
     }
 

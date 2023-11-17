@@ -1,12 +1,11 @@
 package com.vitrum.api.util;
 
-import com.vitrum.api.models.User;
 import com.vitrum.api.dto.Response.*;
-import com.vitrum.api.models.Bundle;
-import com.vitrum.api.models.Member;
+import com.vitrum.api.models.*;
 import com.vitrum.api.models.submodels.OldTask;
-import com.vitrum.api.models.Task;
-import com.vitrum.api.models.Team;
+import com.vitrum.api.repositories.MemberRepository;
+import com.vitrum.api.repositories.TaskRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,7 +13,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class Converter {
+
+    private final MemberRepository memberRepository;
+    private final TaskRepository taskRepository;
 
     public TeamResponse mapTeamToTeamResponse(Team team) {
         return TeamResponse.builder()
@@ -34,17 +37,19 @@ public class Converter {
     }
 
     public List<MemberResponse> getMemberResponse(Team team) {
-        List<Member> members = team.getMembers();
+
+        List<Member> members = memberRepository.findAllByTeam(team);
         return members.stream()
                 .map(this::mapMemberToMemberResponse)
                 .collect(Collectors.toList());
     }
 
-    public MemberResponse mapMemberToMemberResponse(Member membership) {
+    public MemberResponse mapMemberToMemberResponse(Member member) {
+
         return MemberResponse.builder()
-                .id(membership.getId())
-                .name(membership.getUser().getTrueUsername())
-                .role(membership.getRole())
+                .id(member.getId())
+                .name(member.getUser().getTrueUsername())
+                .role(member.getRole())
                 .build();
     }
 
@@ -91,11 +96,14 @@ public class Converter {
     }
 
     public BundleResponse mapBundleToBundleResponse(Bundle bundle) {
+
+        List<Task> tasks = taskRepository.findAllByBundle(bundle);
+
         return BundleResponse.builder()
                 .title(bundle.getTitle())
                 .creatorEmail(bundle.getCreator().getUser().getTrueUsername())
                 .performerEmail(bundle.getPerformer().getUser().getTrueUsername())
-                .tasks(bundle.getTasks().stream().map(this::mapTaskToTaskResponse).collect(Collectors.toList()))
+                .tasks(tasks.stream().map(this::mapTaskToTaskResponse).collect(Collectors.toList()))
                 .build();
     }
 }

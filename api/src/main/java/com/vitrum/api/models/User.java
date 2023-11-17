@@ -1,56 +1,56 @@
 package com.vitrum.api.models;
 
 import com.vitrum.api.models.enums.Role;
+//import com.vitrum.api.models.submodels.Recoverycode;
+//import com.vitrum.api.models.submodels.Token;
 import com.vitrum.api.models.submodels.Recoverycode;
 import com.vitrum.api.models.submodels.Token;
-import jakarta.persistence.*;
+import com.vitrum.api.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
 
-@Entity
-@Table(name = "_user")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Document(collection = "users")
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(unique = true, length = 50, nullable = false)
     private String username;
 
-    @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
     private String password;
 
-    @Column(name = "is_banned")
     private Boolean isBanned;
 
-    @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany(mappedBy = "user")
     private List<Token> tokens;
 
-    @OneToMany(mappedBy = "user")
     private List<Recoverycode> recoverycode;
 
-    public static User getUserFromPrincipal(Principal connectedUser) {
-        return (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+    public static User getAuthUser(UserRepository repository) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            return repository.findByEmail(userDetails.getUsername()).orElseThrow();
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     @Override

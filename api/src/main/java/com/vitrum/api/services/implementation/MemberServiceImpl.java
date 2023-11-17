@@ -1,17 +1,16 @@
-package com.vitrum.api.services.implementations;
+package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.models.enums.RoleInTeam;
 import com.vitrum.api.models.Member;
 import com.vitrum.api.models.User;
+import com.vitrum.api.models.enums.RoleInTeam;
 import com.vitrum.api.repositories.MemberRepository;
-import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.repositories.TeamRepository;
+import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.services.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +24,8 @@ public class MemberServiceImpl implements MemberService {
     private final UserRepository userRepository;
 
     @Override
-    public void changeRole(Principal connectedUser, Map<String, String> request, String teamName) {
-        List<Member> members = getPerformerAndTarget(connectedUser, request, teamName);
+    public void changeRole(Map<String, String> request, String teamName) {
+        List<Member> members = getPerformerAndTarget(request, teamName);
         var performer = members.get(0);
         var target = members.get(1);
 
@@ -46,8 +45,8 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public void kick(Principal connectedUser, Map<String, String> request, String teamName) {
-        List<Member> members = getPerformerAndTarget(connectedUser, request, teamName);
+    public void kick(Map<String, String> request, String teamName) {
+        List<Member> members = getPerformerAndTarget(request, teamName);
         var performer = members.get(0);
         var target = members.get(1);
 
@@ -62,8 +61,8 @@ public class MemberServiceImpl implements MemberService {
         repository.delete(target);
     }
 
-    private List<Member> getPerformerAndTarget(Principal connectedUser, Map<String, String> request, String teamName) {
-        var user = User.getUserFromPrincipal(connectedUser);
+    private List<Member> getPerformerAndTarget(Map<String, String> request, String teamName) {
+        var user = User.getAuthUser(userRepository);
         var team = teamRepository.findByName(teamName)
                 .orElseThrow(() -> new IllegalArgumentException("Team not found"));
         var performer = repository.findByUserAndTeam(user, team)

@@ -1,21 +1,20 @@
-package com.vitrum.api.services.implementations;
+package com.vitrum.api.services.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vitrum.api.config.JwtService;
 import com.vitrum.api.dto.Request.AuthenticationRequest;
-import com.vitrum.api.dto.Response.AuthenticationResponse;
 import com.vitrum.api.dto.Request.RegisterRequest;
+import com.vitrum.api.dto.Response.AuthenticationResponse;
+import com.vitrum.api.models.User;
+import com.vitrum.api.models.enums.Role;
+import com.vitrum.api.models.enums.TokenType;
 import com.vitrum.api.models.submodels.Token;
 import com.vitrum.api.repositories.TokenRepository;
-import com.vitrum.api.models.enums.TokenType;
-import com.vitrum.api.models.enums.Role;
-import com.vitrum.api.models.User;
 import com.vitrum.api.repositories.UserRepository;
-import com.vitrum.api.config.JwtService;
 import com.vitrum.api.services.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -38,21 +37,21 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public void register(RegisterRequest request) {
-        try {
-            var user = User.builder()
-                    .username(request.getUsername())
-                    .email(request.getEmail())
-                    .password(passwordEncoder.encode(request.getPassword()))
-                    .role(Role.USER)
-                    .isBanned(false)
-                    .build();
 
-            var savedUser = repository.save(user);
-            var jwtToken = jwtService.generateToken(user);
-            saveUserToken(savedUser, jwtToken);
-        } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("User with the same email/username already exists.");
-        }
+        if (repository.existsByEmailOrUsername(request.getEmail(), request.getUsername()))
+            throw new IllegalArgumentException("User with the same email/username already exists");
+
+        var user = User.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.USER)
+                .isBanned(false)
+                .build();
+
+        var savedUser = repository.save(user);
+        var jwtToken = jwtService.generateToken(user);
+        saveUserToken(savedUser, jwtToken);
     }
 
     @Override

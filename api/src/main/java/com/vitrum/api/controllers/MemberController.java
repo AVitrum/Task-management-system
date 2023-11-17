@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.Map;
 
 @RestController
@@ -19,12 +18,11 @@ public class MemberController {
 
     @PatchMapping("/changeRole")
     public ResponseEntity<?> changeRole(
-            Principal connectedUser,
             @RequestBody Map<String, String> request,
             @PathVariable String team
     ) {
         try {
-            service.changeRole(connectedUser, request, team);
+            service.changeRole(request, team);
             return ResponseEntity.ok("Role changed successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -35,12 +33,11 @@ public class MemberController {
 
     @DeleteMapping("/kick")
     public ResponseEntity<?> kick(
-            Principal connectedUser,
             @RequestBody Map<String, String> request,
             @PathVariable String team
     ) {
         try {
-            service.kick(connectedUser, request, team);
+            service.kick(request, team);
             return ResponseEntity.ok("Kicked successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
