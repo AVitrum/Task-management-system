@@ -72,6 +72,7 @@ public class SecurityConfiguration {
         config.addAllowedOrigin("*"); // change to IP when the development is finished
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
