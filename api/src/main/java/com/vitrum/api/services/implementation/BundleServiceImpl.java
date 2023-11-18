@@ -1,6 +1,6 @@
 package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.dto.Response.BundleResponse;
+import com.vitrum.api.dto.response.BundleResponse;
 import com.vitrum.api.models.Bundle;
 import com.vitrum.api.models.Member;
 import com.vitrum.api.models.User;
@@ -30,6 +30,7 @@ public class BundleServiceImpl implements BundleService {
 
         if (creator.checkPermissionToCreate())
             throw new IllegalArgumentException("You do not have permission to perform this action");
+
         if (repository.existsByCreatorAndTitle(creator, title))
             throw new IllegalArgumentException("Bundle with the same title exists");
 
@@ -48,6 +49,7 @@ public class BundleServiceImpl implements BundleService {
         var performer = findPerformer(performerName, teamName);
 
         bundle.setPerformer(performer);
+
         repository.save(bundle);
     }
 
@@ -55,8 +57,8 @@ public class BundleServiceImpl implements BundleService {
     public BundleResponse findByUser(String teamName, String bundleTitle) {
         var user = User.getAuthUser(userRepository);
         var member = findMemberByUsernameAndTeam(user.getTrueUsername(), teamName);
-
         Bundle bundle;
+
         if (repository.existsByCreatorAndTitle(member, bundleTitle)) {
             bundle = findBundleByCreator(bundleTitle, member);
         } else if (repository.existsByPerformerAndTitle(member, bundleTitle)) {

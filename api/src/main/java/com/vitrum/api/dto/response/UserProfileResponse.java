@@ -1,4 +1,4 @@
-package com.vitrum.api.dto.Response;
+package com.vitrum.api.dto.response;
 
 import com.vitrum.api.models.enums.Role;
 import lombok.AllArgsConstructor;

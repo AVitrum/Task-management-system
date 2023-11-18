@@ -1,8 +1,8 @@
 package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.dto.Request.TeamCreationRequest;
-import com.vitrum.api.dto.Response.TeamCreationResponse;
-import com.vitrum.api.dto.Response.TeamResponse;
+import com.vitrum.api.dto.request.TeamCreationRequest;
+import com.vitrum.api.dto.response.TeamCreationResponse;
+import com.vitrum.api.dto.response.TeamResponse;
 import com.vitrum.api.models.Member;
 import com.vitrum.api.models.Team;
 import com.vitrum.api.models.User;
@@ -42,13 +42,13 @@ public class TeamServiceImpl implements TeamService {
                     .members(new ArrayList<>())
                     .build();
             repository.save(team);
+
             var member = Member.builder()
                     .user(user)
                     .role(RoleInTeam.LEADER)
                     .team(team)
                     .build();
             memberRepository.save(member);
-            repository.save(team);
 
             return TeamCreationResponse.builder()
                     .id(team.getId())
@@ -68,9 +68,8 @@ public class TeamServiceImpl implements TeamService {
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Can't find user"));
 
-        if (memberRepository.existsByUserAndTeam(user, team)) {
+        if (memberRepository.existsByUserAndTeam(user, team))
             throw new IllegalArgumentException("The user is already in the team");
-        }
 
         var member = Member.builder()
                 .user(user)
@@ -81,8 +80,10 @@ public class TeamServiceImpl implements TeamService {
     }
 
     public List<TeamResponse> getAll() {
-        var teams = repository.findAll();
-        return teams.stream().map(converter::mapTeamToTeamResponse).collect(Collectors.toList());
+        return repository.findAll()
+                .stream()
+                .map(converter::mapTeamToTeamResponse)
+                .collect(Collectors.toList());
     }
 
     @Override

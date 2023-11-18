@@ -1,4 +1,4 @@
-package com.vitrum.api.dto.Response;
+package com.vitrum.api.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TeamCreationResponse {
+public class TeamCreationRequest {
 
-    private String id;
     private String name;
-    private UserProfileResponse creator;
 }

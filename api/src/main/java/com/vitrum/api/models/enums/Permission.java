@@ -16,7 +16,5 @@ public enum Permission {
     USER_CREATE("user:create"),
     USER_DELETE("user:delete");
 
-
-
     private final String permission;
 }

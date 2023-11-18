@@ -1,4 +1,4 @@
-package com.vitrum.api.dto.Response;
+package com.vitrum.api.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

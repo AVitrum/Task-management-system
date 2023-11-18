@@ -1,4 +1,4 @@
-package com.vitrum.api.dto.Request;
+package com.vitrum.api.dto.request;
 
 import com.vitrum.api.validation.PasswordConstraint;
 import lombok.AllArgsConstructor;
@@ -8,13 +8,14 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class ResetPasswordRequest {
+@NoArgsConstructor
+public class RegisterRequest {
 
+    private String username;
     private String email;
-    private Long code;
     @PasswordConstraint
-    private String newPassword;
-    private String confirmationPassword;
+    private String password;
+    private String role;
+
 }

@@ -2,9 +2,9 @@ package com.vitrum.api.services.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vitrum.api.config.JwtService;
-import com.vitrum.api.dto.Request.AuthenticationRequest;
-import com.vitrum.api.dto.Request.RegisterRequest;
-import com.vitrum.api.dto.Response.AuthenticationResponse;
+import com.vitrum.api.dto.request.AuthenticationRequest;
+import com.vitrum.api.dto.request.RegisterRequest;
+import com.vitrum.api.dto.response.AuthenticationResponse;
 import com.vitrum.api.models.User;
 import com.vitrum.api.models.enums.Role;
 import com.vitrum.api.models.enums.TokenType;
@@ -76,7 +76,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             var jwtToken = jwtService.generateToken(user);
             var refreshToken = jwtService.generateRefreshToken(user);
 
-//            revokeAllUserTokens(user);
+            revokeAllUserTokens(user);
             saveUserToken(user, jwtToken);
 
             return AuthenticationResponse.builder()
@@ -93,11 +93,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         final String refreshToken;
         final String userEmail;
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return;
         }
+
         refreshToken = authHeader.substring(7);
         userEmail = jwtService.extractEmail(refreshToken);
+
         if (userEmail != null) {
             var user = this.repository.findByEmail(userEmail)
                     .orElseThrow();
@@ -105,6 +108,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 var accessToken = jwtService.generateToken(user);
                 revokeAllUserTokens(user);
                 saveUserToken(user, accessToken);
+
                 var authResponse = AuthenticationResponse.builder()
                         .accessToken(accessToken)
                         .refreshToken(refreshToken)
@@ -127,22 +131,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
+
         if (validUserTokens.isEmpty())
             return;
+
         validUserTokens.forEach(token -> {
             token.setExpired(true);
             token.setRevoked(true);
         });
+
         tokenRepository.saveAll(validUserTokens);
-//        deleteAllExpiredUserTokens(user);
     }
-
-    private void deleteAllExpiredUserTokens(User user) {
-        var expiredUserTokens = tokenRepository.findAllExpiredTokenByUser(user.getId());
-        if (expiredUserTokens.isEmpty())
-            return;
-        tokenRepository.deleteAll(expiredUserTokens);
-    }
-
 }
 

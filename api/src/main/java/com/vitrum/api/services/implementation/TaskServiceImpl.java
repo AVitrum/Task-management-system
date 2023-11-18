@@ -1,6 +1,6 @@
 package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.dto.Request.TaskRequest;
+import com.vitrum.api.dto.request.TaskRequest;
 import com.vitrum.api.models.Bundle;
 import com.vitrum.api.models.Member;
 import com.vitrum.api.models.Task;
@@ -147,18 +147,18 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private void updateTaskFields(TaskRequest request, Task task) {
-        if (request.getDescription() != null) {
+        if (request.getDescription() != null)
             task.setDescription(request.getDescription());
-        }
-        if (request.getPriority() != null) {
+
+        if (request.getPriority() != null)
             task.setPriority(request.getPriority());
-        }
-        if (request.getDueDate() != null) {
+
+        if (request.getDueDate() != null)
             task.setDueDate(LocalDateTime.parse(request.getDueDate(), formatter));
-        }
-        if (request.getStatus() != null) {
+
+        if (request.getStatus() != null)
             task.setStatus(Status.valueOf(request.getStatus().toUpperCase()));
-        }
+
         task.setVersion(task.getVersion() + 1);
     }
 }

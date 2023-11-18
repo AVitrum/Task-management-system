@@ -1,6 +1,6 @@
 package com.vitrum.api.util;
 
-import com.vitrum.api.dto.Response.*;
+import com.vitrum.api.dto.response.*;
 import com.vitrum.api.models.*;
 import com.vitrum.api.models.submodels.OldTask;
 import com.vitrum.api.repositories.MemberRepository;

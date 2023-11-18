@@ -1,19 +1,19 @@
-package com.vitrum.api.dto.Response;
+package com.vitrum.api.dto.response;
 
-//import com.vitrum.api.models.enums.RoleInTeam;
-import com.vitrum.api.models.enums.RoleInTeam;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberResponse {
+public class TeamResponse {
 
     private String id;
     private String name;
-    private RoleInTeam role;
+    private List<MemberResponse> members;
 }

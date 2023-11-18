@@ -1,6 +1,6 @@
 package com.vitrum.api.services;
 
-import com.vitrum.api.dto.Response.HistoryResponse;
+import com.vitrum.api.dto.response.HistoryResponse;
 import com.vitrum.api.models.submodels.OldTask;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.vitrum.api.dto.Response;
+package com.vitrum.api.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,15 +9,18 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class TaskResponse {
-
+@NoArgsConstructor
+public class HistoryResponse {
+    private String taskId;
+    private String id;
+    private Long version;
     private String title;
     private String description;
     private LocalDateTime creationTime;
     private LocalDateTime dueDate;
+    private LocalDateTime changeTime;
     private Long priority;
-    private Long version;
     private String status;
+    private MemberResponse creator;
 }
