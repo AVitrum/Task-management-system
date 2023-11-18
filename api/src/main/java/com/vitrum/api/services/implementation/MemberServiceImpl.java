@@ -3,10 +3,12 @@ package com.vitrum.api.services.implementation;
 import com.vitrum.api.models.Member;
 import com.vitrum.api.models.User;
 import com.vitrum.api.models.enums.RoleInTeam;
+import com.vitrum.api.repositories.BundleRepository;
 import com.vitrum.api.repositories.MemberRepository;
 import com.vitrum.api.repositories.TeamRepository;
 import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.services.MemberService;
+import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,8 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository repository;
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
+    private final BundleRepository bundleRepository;
+    private final MessageUtil messageUtil;
 
     @Override
     public void changeRole(Map<String, String> request, String teamName) {
@@ -50,12 +54,24 @@ public class MemberServiceImpl implements MemberService {
         var performer = members.get(0);
         var target = members.get(1);
 
-        if (!performer.getRole().canChangeTo(target.getRole())) {
+        if (!performer.getRole().canChangeTo(target.getRole()))
             throw new IllegalArgumentException("You do not have permission to perform actions on this user");
-        }
 
-        if (performer.equals(target) && performer.getRole() == RoleInTeam.LEADER) {
+        if (performer.equals(target) && performer.getRole() == RoleInTeam.LEADER)
             throw new IllegalArgumentException("First, put someone else in the leadership role");
+
+        if (bundleRepository.existsByCreatorAndPerformer(performer, target)) {
+            var bundle = bundleRepository.findByCreatorAndPerformer(performer, target)
+                    .orElseThrow(() -> new IllegalArgumentException("Bundle not found"));
+            var creator = bundle.getCreator();
+            bundle.setPerformer(creator);
+            bundleRepository.save(bundle);
+            messageUtil.sendMessage(
+                    creator,
+                    String.format("The performer of your task (%s) has been removed from the team," +
+                            " you are now the performer", target.getUser().getEmail()),
+                    teamName + " Info!"
+            );
         }
 
         repository.delete(target);

@@ -1,8 +1,6 @@
 package com.vitrum.api.models;
 
 import com.vitrum.api.models.enums.Role;
-//import com.vitrum.api.models.submodels.Recoverycode;
-//import com.vitrum.api.models.submodels.Token;
 import com.vitrum.api.models.submodels.Recoverycode;
 import com.vitrum.api.models.submodels.Token;
 import com.vitrum.api.repositories.UserRepository;

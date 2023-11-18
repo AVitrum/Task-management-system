@@ -1,4 +1,4 @@
-package com.vitrum.api.dto.Request;
+package com.vitrum.api.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,10 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangeUserCredentials {
+public class AuthenticationRequest {
 
     private String username;
-    private String role;
-    private String email;
-    private String newUsername;
+    private String password;
 }

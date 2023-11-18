@@ -14,7 +14,6 @@ import static com.vitrum.api.models.enums.Permission.*;
 @RequiredArgsConstructor
 public enum Role {
 
-
     USER(Set.of(
             USER_CREATE,
             USER_UPDATE,

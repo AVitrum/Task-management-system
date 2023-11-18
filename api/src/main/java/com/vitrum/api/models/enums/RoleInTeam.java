@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum RoleInTeam {
+
     MEMBER, CO_LEADER, LEADER;
 
     public boolean canChangeRole() {

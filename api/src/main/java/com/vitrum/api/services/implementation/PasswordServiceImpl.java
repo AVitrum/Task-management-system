@@ -1,7 +1,7 @@
 package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.dto.Request.ChangePasswordRequest;
-import com.vitrum.api.dto.Request.ResetPasswordRequest;
+import com.vitrum.api.dto.request.ChangePasswordRequest;
+import com.vitrum.api.dto.request.ResetPasswordRequest;
 import com.vitrum.api.models.User;
 import com.vitrum.api.models.submodels.Recoverycode;
 import com.vitrum.api.repositories.RecoverycodeRepository;
@@ -30,15 +30,15 @@ public class PasswordServiceImpl implements PasswordService {
     public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
         var user = User.getAuthUser(repository);
 
-        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword()))
             throw new IllegalStateException("Wrong password!");
-        }
-        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword()))
             throw new IllegalStateException("Password is the same as the current one!");
-        }
-        if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
+
+        if (!request.getNewPassword().equals(request.getConfirmationPassword()))
             throw new IllegalStateException("Passwords do not match!");
-        }
+
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         repository.save(user);
@@ -55,15 +55,15 @@ public class PasswordServiceImpl implements PasswordService {
             recoverycodeRepository.delete(recoverycode);
             throw new IllegalStateException("Code is expired");
         }
-        if (!recoverycode.getCode().equals(request.getCode())) {
+        if (!recoverycode.getCode().equals(request.getCode()))
             throw new IllegalStateException("The codes do not match");
-        }
-        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword()))
             throw new IllegalStateException("Password is the same as the current one!");
-        }
-        if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
+
+        if (!request.getNewPassword().equals(request.getConfirmationPassword()))
             throw new IllegalStateException("Passwords do not match!");
-        }
+
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         repository.save(user);

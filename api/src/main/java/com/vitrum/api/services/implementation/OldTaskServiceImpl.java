@@ -1,6 +1,6 @@
 package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.dto.Response.HistoryResponse;
+import com.vitrum.api.dto.response.HistoryResponse;
 import com.vitrum.api.models.Bundle;
 import com.vitrum.api.models.Member;
 import com.vitrum.api.models.Task;
@@ -111,6 +111,7 @@ public class OldTaskServiceImpl implements OldTaskService {
     private List<OldTask> getOldTasks(Task task) {
         return repository.findAllByTask(task);
     }
+
     private Bundle findBundle(String bundleName, Member creator) {
         return bundleRepository.findByCreatorAndTitle(creator, bundleName)
                 .orElseThrow(() -> new IllegalArgumentException("Bundle not found"));

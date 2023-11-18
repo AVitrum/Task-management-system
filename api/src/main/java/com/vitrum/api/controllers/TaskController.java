@@ -1,6 +1,6 @@
 package com.vitrum.api.controllers;
 
-import com.vitrum.api.dto.Request.TaskRequest;
+import com.vitrum.api.dto.request.TaskRequest;
 import com.vitrum.api.services.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

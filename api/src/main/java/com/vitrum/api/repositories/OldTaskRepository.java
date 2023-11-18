@@ -10,7 +10,6 @@ import java.util.Optional;
 public interface OldTaskRepository extends MongoRepository<OldTask, String> {
 
     Optional<OldTask> findByTask(Task task);
-
     Optional<OldTask> findByTaskAndVersion(Task task, Long version);
 
     List<OldTask> findAllByTask(Task task);

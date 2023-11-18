@@ -1,7 +1,7 @@
 package com.vitrum.api.controllers;
 
-import com.vitrum.api.dto.Request.ChangePasswordRequest;
-import com.vitrum.api.dto.Request.ResetPasswordRequest;
+import com.vitrum.api.dto.request.ChangePasswordRequest;
+import com.vitrum.api.dto.request.ResetPasswordRequest;
 import com.vitrum.api.services.PasswordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

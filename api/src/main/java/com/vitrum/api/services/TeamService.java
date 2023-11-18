@@ -1,8 +1,8 @@
 package com.vitrum.api.services;
 
-import com.vitrum.api.dto.Request.TeamCreationRequest;
-import com.vitrum.api.dto.Response.TeamCreationResponse;
-import com.vitrum.api.dto.Response.TeamResponse;
+import com.vitrum.api.dto.request.TeamCreationRequest;
+import com.vitrum.api.dto.response.TeamCreationResponse;
+import com.vitrum.api.dto.response.TeamResponse;
 
 import java.util.List;
 
