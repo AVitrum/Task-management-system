@@ -18,20 +18,22 @@ public class MessageUtil {
     private final JavaMailSender emailSender;
 
     public void sendMessage(Member member, String text, String subject) {
-        try {
-            var user = member.getUser();
-            MimeMessage message = emailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message);
+        if (member.isEmailsAllowed()) {
+            try {
+                var user = member.getUser();
+                MimeMessage message = emailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message);
 
-            helper.setFrom("tms.team.noreply@gmail.com");
-            helper.setTo(user.getUsername());
-            helper.setSubject(subject);
-            helper.setText(text);
+                helper.setFrom("tms.team.noreply@gmail.com");
+                helper.setTo(user.getUsername());
+                helper.setSubject(subject);
+                helper.setText(text);
 
-            emailSender.send(message);
+                emailSender.send(message);
 
-        } catch (MessagingException e) {
-            throw new RuntimeException("Something went wrong!");
+            } catch (MessagingException e) {
+                throw new RuntimeException("Something went wrong!");
+            }
         }
     }
 

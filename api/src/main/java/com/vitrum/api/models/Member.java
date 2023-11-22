@@ -29,6 +29,8 @@ public class Member {
 
     private RoleInTeam role;
 
+    private boolean isEmailsAllowed;
+
     @DBRef
     private List<Bundle> creatorBundles;
 

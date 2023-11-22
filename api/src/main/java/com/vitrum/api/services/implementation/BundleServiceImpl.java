@@ -10,6 +10,7 @@ import com.vitrum.api.repositories.TeamRepository;
 import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.services.BundleService;
 import com.vitrum.api.util.Converter;
+import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class BundleServiceImpl implements BundleService {
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
     private final MemberRepository memberRepository;
+    private final MessageUtil messageUtil;
     private final Converter converter;
 
     @Override
@@ -51,6 +53,14 @@ public class BundleServiceImpl implements BundleService {
         bundle.setPerformer(performer);
 
         repository.save(bundle);
+        messageUtil.sendMessage(
+                performer,
+                String.format(
+                        "Team: %s\n" +
+                        "New tasks have been added to you by %s", teamName, creator.getUser().getEmail()
+                ),
+                "TMS Info!"
+        );
     }
 
     @Override

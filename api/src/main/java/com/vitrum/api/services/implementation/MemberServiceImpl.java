@@ -77,6 +77,27 @@ public class MemberServiceImpl implements MemberService {
         repository.delete(target);
     }
 
+    @Override
+    public void changeEmailsMessagingStatus(String teamName) {
+        var team = teamRepository.findByName(teamName)
+                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
+        var member = repository.findByUserAndTeam(User.getAuthUser(userRepository), team)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+
+        member.setEmailsAllowed(!member.isEmailsAllowed());
+        repository.save(member);
+    }
+
+    @Override
+    public boolean getEmailsMessagingStatus(String teamName) {
+        var team = teamRepository.findByName(teamName)
+                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
+        var member = repository.findByUserAndTeam(User.getAuthUser(userRepository), team)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+
+        return member.isEmailsAllowed();
+    }
+
     private List<Member> getPerformerAndTarget(Map<String, String> request, String teamName) {
         var user = User.getAuthUser(userRepository);
         var team = teamRepository.findByName(teamName)

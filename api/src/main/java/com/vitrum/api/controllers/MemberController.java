@@ -31,6 +31,29 @@ public class MemberController {
         }
     }
 
+    @GetMapping("/emailsMessagingStatus")
+    public ResponseEntity<?> emailsMessagingStatus(
+            @PathVariable String team
+    ) {
+        try {
+            return ResponseEntity.ok(service.getEmailsMessagingStatus(team));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PatchMapping("/changeEmailsMessagingStatus")
+    public ResponseEntity<?> changeEmailsMessagingStatus(
+            @PathVariable String team
+    ) {
+        try {
+            service.changeEmailsMessagingStatus(team);
+            return ResponseEntity.ok("Changed");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @DeleteMapping("/kick")
     public ResponseEntity<?> kick(
             @RequestBody Map<String, String> request,

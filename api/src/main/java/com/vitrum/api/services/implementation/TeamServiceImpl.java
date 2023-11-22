@@ -46,6 +46,7 @@ public class TeamServiceImpl implements TeamService {
             var member = Member.builder()
                     .user(user)
                     .role(RoleInTeam.LEADER)
+                    .isEmailsAllowed(true)
                     .team(team)
                     .build();
             memberRepository.save(member);

@@ -99,7 +99,7 @@ public class OldTaskServiceImpl implements OldTaskService {
         messageUtil.sendMessage(
                 bundle.getPerformer(),
                 "The task has been deleted by " + creator.getUser().getEmail(),
-                task.getTitle() + "has been deleted"
+                task.getTitle() + " has been deleted"
         );
     }
 
