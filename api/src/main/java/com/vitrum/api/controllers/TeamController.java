@@ -1,6 +1,6 @@
 package com.vitrum.api.controllers;
 
-import com.vitrum.api.dto.request.TeamCreationRequest;
+import com.vitrum.api.data.request.TeamCreationRequest;
 import com.vitrum.api.services.interfaces.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

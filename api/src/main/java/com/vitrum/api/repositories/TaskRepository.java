@@ -1,7 +1,7 @@
 package com.vitrum.api.repositories;
 
-import com.vitrum.api.models.Bundle;
-import com.vitrum.api.models.Task;
+import com.vitrum.api.data.models.Bundle;
+import com.vitrum.api.data.models.Task;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;

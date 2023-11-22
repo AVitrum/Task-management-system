@@ -1,11 +1,11 @@
 package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.dto.response.HistoryResponse;
-import com.vitrum.api.models.Bundle;
-import com.vitrum.api.models.Member;
-import com.vitrum.api.models.Task;
-import com.vitrum.api.models.enums.Status;
-import com.vitrum.api.models.submodels.OldTask;
+import com.vitrum.api.data.response.HistoryResponse;
+import com.vitrum.api.data.models.Bundle;
+import com.vitrum.api.data.models.Member;
+import com.vitrum.api.data.models.Task;
+import com.vitrum.api.data.enums.Status;
+import com.vitrum.api.data.submodels.OldTask;
 import com.vitrum.api.repositories.*;
 import com.vitrum.api.services.interfaces.OldTaskService;
 import com.vitrum.api.services.interfaces.TaskService;

@@ -1,6 +1,6 @@
 package com.vitrum.api.repositories;
 
-import com.vitrum.api.models.Team;
+import com.vitrum.api.data.models.Team;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;

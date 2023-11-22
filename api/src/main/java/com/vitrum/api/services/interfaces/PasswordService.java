@@ -1,7 +1,7 @@
 package com.vitrum.api.services.interfaces;
 
-import com.vitrum.api.dto.request.ChangePasswordRequest;
-import com.vitrum.api.dto.request.ResetPasswordRequest;
+import com.vitrum.api.data.request.ChangePasswordRequest;
+import com.vitrum.api.data.request.ResetPasswordRequest;
 
 import java.security.Principal;
 

@@ -1,7 +1,7 @@
 package com.vitrum.api.controllers;
 
-import com.vitrum.api.dto.request.ChangeUserCredentials;
-import com.vitrum.api.dto.request.RegisterRequest;
+import com.vitrum.api.data.request.ChangeUserCredentials;
+import com.vitrum.api.data.request.RegisterRequest;
 import com.vitrum.api.services.interfaces.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

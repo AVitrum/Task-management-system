@@ -1,7 +1,7 @@
 package com.vitrum.api.services.interfaces;
 
-import com.vitrum.api.dto.request.TaskRequest;
-import com.vitrum.api.models.Task;
+import com.vitrum.api.data.request.TaskRequest;
+import com.vitrum.api.data.models.Task;
 
 public interface TaskService {
 

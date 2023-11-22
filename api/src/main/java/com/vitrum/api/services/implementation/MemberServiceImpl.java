@@ -1,8 +1,8 @@
 package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.models.Member;
-import com.vitrum.api.models.User;
-import com.vitrum.api.models.enums.RoleInTeam;
+import com.vitrum.api.data.models.Member;
+import com.vitrum.api.data.models.User;
+import com.vitrum.api.data.enums.RoleInTeam;
 import com.vitrum.api.repositories.BundleRepository;
 import com.vitrum.api.repositories.MemberRepository;
 import com.vitrum.api.repositories.TeamRepository;

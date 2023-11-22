@@ -1,8 +1,8 @@
 package com.vitrum.api.util;
 
-import com.vitrum.api.models.submodels.Recoverycode;
-import com.vitrum.api.models.User;
-import com.vitrum.api.models.Member;
+import com.vitrum.api.data.submodels.Recoverycode;
+import com.vitrum.api.data.models.User;
+import com.vitrum.api.data.models.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;

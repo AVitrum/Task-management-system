@@ -1,12 +1,12 @@
 package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.dto.request.TeamCreationRequest;
-import com.vitrum.api.dto.response.TeamCreationResponse;
-import com.vitrum.api.dto.response.TeamResponse;
-import com.vitrum.api.models.Member;
-import com.vitrum.api.models.Team;
-import com.vitrum.api.models.User;
-import com.vitrum.api.models.enums.RoleInTeam;
+import com.vitrum.api.data.request.TeamCreationRequest;
+import com.vitrum.api.data.response.TeamCreationResponse;
+import com.vitrum.api.data.response.TeamResponse;
+import com.vitrum.api.data.models.Member;
+import com.vitrum.api.data.models.Team;
+import com.vitrum.api.data.models.User;
+import com.vitrum.api.data.enums.RoleInTeam;
 import com.vitrum.api.repositories.MemberRepository;
 import com.vitrum.api.repositories.TeamRepository;
 import com.vitrum.api.repositories.UserRepository;

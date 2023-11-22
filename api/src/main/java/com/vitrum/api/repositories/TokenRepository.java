@@ -1,6 +1,6 @@
 package com.vitrum.api.repositories;
 
-import com.vitrum.api.models.submodels.Token;
+import com.vitrum.api.data.submodels.Token;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 

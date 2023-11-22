@@ -1,7 +1,7 @@
 package com.vitrum.api.services.interfaces;
 
-import com.vitrum.api.dto.response.HistoryResponse;
-import com.vitrum.api.models.submodels.OldTask;
+import com.vitrum.api.data.response.HistoryResponse;
+import com.vitrum.api.data.submodels.OldTask;
 
 import java.util.List;
 

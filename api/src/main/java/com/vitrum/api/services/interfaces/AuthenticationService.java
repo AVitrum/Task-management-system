@@ -1,8 +1,8 @@
 package com.vitrum.api.services.interfaces;
 
-import com.vitrum.api.dto.request.AuthenticationRequest;
-import com.vitrum.api.dto.request.RegisterRequest;
-import com.vitrum.api.dto.response.AuthenticationResponse;
+import com.vitrum.api.data.request.AuthenticationRequest;
+import com.vitrum.api.data.request.RegisterRequest;
+import com.vitrum.api.data.response.AuthenticationResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 

@@ -1,8 +1,8 @@
 package com.vitrum.api.util;
 
-import com.vitrum.api.dto.response.*;
-import com.vitrum.api.models.*;
-import com.vitrum.api.models.submodels.OldTask;
+import com.vitrum.api.data.models.*;
+import com.vitrum.api.data.response.*;
+import com.vitrum.api.data.submodels.OldTask;
 import com.vitrum.api.repositories.MemberRepository;
 import com.vitrum.api.repositories.TaskRepository;
 import lombok.RequiredArgsConstructor;

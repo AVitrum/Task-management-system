@@ -1,7 +1,7 @@
 package com.vitrum.api.repositories;
 
-import com.vitrum.api.models.User;
-import com.vitrum.api.models.submodels.Recoverycode;
+import com.vitrum.api.data.models.User;
+import com.vitrum.api.data.submodels.Recoverycode;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;

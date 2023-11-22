@@ -1,8 +1,8 @@
 package com.vitrum.api.services.interfaces;
 
-import com.vitrum.api.dto.request.ChangeUserCredentials;
-import com.vitrum.api.dto.request.RegisterRequest;
-import com.vitrum.api.dto.response.UserProfileResponse;
+import com.vitrum.api.data.request.ChangeUserCredentials;
+import com.vitrum.api.data.request.RegisterRequest;
+import com.vitrum.api.data.response.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface UserService {

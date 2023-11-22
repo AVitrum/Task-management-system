@@ -2,13 +2,13 @@ package com.vitrum.api.services.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vitrum.api.config.JwtService;
-import com.vitrum.api.dto.request.AuthenticationRequest;
-import com.vitrum.api.dto.request.RegisterRequest;
-import com.vitrum.api.dto.response.AuthenticationResponse;
-import com.vitrum.api.models.User;
-import com.vitrum.api.models.enums.Role;
-import com.vitrum.api.models.enums.TokenType;
-import com.vitrum.api.models.submodels.Token;
+import com.vitrum.api.data.request.AuthenticationRequest;
+import com.vitrum.api.data.request.RegisterRequest;
+import com.vitrum.api.data.response.AuthenticationResponse;
+import com.vitrum.api.data.models.User;
+import com.vitrum.api.data.enums.Role;
+import com.vitrum.api.data.enums.TokenType;
+import com.vitrum.api.data.submodels.Token;
 import com.vitrum.api.repositories.TokenRepository;
 import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.services.interfaces.AuthenticationService;
@@ -56,12 +56,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        var user = repository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("Wrong username"));
+        User user;
 
-        if (!user.isAccountNonLocked()) {
+        if (repository.existsByEmail(request.getUsername()))
+            user = repository.findByEmail(request.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("Wrong email"));
+        else if (repository.existsByUsername(request.getUsername()))
+            user = repository.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("Wrong username"));
+        else
+            throw new UsernameNotFoundException("User not found");
+
+        if (!user.isAccountNonLocked())
             throw new IllegalStateException("The account is blocked");
-        }
 
         try {
             authenticationManager.authenticate(

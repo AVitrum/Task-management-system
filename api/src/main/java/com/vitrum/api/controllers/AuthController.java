@@ -1,7 +1,7 @@
 package com.vitrum.api.controllers;
 
-import com.vitrum.api.dto.request.AuthenticationRequest;
-import com.vitrum.api.dto.request.RegisterRequest;
+import com.vitrum.api.data.request.AuthenticationRequest;
+import com.vitrum.api.data.request.RegisterRequest;
 import com.vitrum.api.services.interfaces.AuthenticationService;
 import com.vitrum.api.services.implementation.LogoutServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;

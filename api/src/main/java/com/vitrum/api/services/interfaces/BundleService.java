@@ -1,6 +1,6 @@
 package com.vitrum.api.services.interfaces;
 
-import com.vitrum.api.dto.response.BundleResponse;
+import com.vitrum.api.data.response.BundleResponse;
 
 public interface BundleService {
 
