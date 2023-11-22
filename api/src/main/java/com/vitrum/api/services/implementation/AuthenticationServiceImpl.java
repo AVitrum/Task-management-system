@@ -11,7 +11,7 @@ import com.vitrum.api.models.enums.TokenType;
 import com.vitrum.api.models.submodels.Token;
 import com.vitrum.api.repositories.TokenRepository;
 import com.vitrum.api.repositories.UserRepository;
-import com.vitrum.api.services.AuthenticationService;
+import com.vitrum.api.services.interfaces.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

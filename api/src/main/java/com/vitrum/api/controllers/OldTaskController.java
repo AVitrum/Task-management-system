@@ -1,6 +1,6 @@
 package com.vitrum.api.controllers;
 
-import com.vitrum.api.services.OldTaskService;
+import com.vitrum.api.services.interfaces.OldTaskService;
 import com.vitrum.api.util.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

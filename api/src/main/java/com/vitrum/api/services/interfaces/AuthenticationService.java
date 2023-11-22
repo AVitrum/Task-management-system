@@ -1,4 +1,4 @@
-package com.vitrum.api.services;
+package com.vitrum.api.services.interfaces;
 
 import com.vitrum.api.dto.request.AuthenticationRequest;
 import com.vitrum.api.dto.request.RegisterRequest;

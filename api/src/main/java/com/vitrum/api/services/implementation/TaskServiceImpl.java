@@ -8,7 +8,7 @@ import com.vitrum.api.models.User;
 import com.vitrum.api.models.enums.Status;
 import com.vitrum.api.models.submodels.OldTask;
 import com.vitrum.api.repositories.*;
-import com.vitrum.api.services.TaskService;
+import com.vitrum.api.services.interfaces.TaskService;
 import com.vitrum.api.util.Converter;
 import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;

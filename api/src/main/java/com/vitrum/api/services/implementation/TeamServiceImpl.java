@@ -10,7 +10,7 @@ import com.vitrum.api.models.enums.RoleInTeam;
 import com.vitrum.api.repositories.MemberRepository;
 import com.vitrum.api.repositories.TeamRepository;
 import com.vitrum.api.repositories.UserRepository;
-import com.vitrum.api.services.TeamService;
+import com.vitrum.api.services.interfaces.TeamService;
 import com.vitrum.api.util.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

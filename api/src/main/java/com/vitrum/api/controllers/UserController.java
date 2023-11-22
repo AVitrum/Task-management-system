@@ -2,7 +2,7 @@ package com.vitrum.api.controllers;
 
 import com.vitrum.api.dto.request.ChangeUserCredentials;
 import com.vitrum.api.dto.request.RegisterRequest;
-import com.vitrum.api.services.UserService;
+import com.vitrum.api.services.interfaces.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

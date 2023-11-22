@@ -1,6 +1,6 @@
 package com.vitrum.api.controllers;
 
-import com.vitrum.api.services.MemberService;
+import com.vitrum.api.services.interfaces.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

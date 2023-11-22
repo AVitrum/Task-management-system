@@ -1,4 +1,4 @@
-package com.vitrum.api.services;
+package com.vitrum.api.services.interfaces;
 
 import java.util.Map;
 

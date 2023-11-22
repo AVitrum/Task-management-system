@@ -7,7 +7,7 @@ import com.vitrum.api.dto.response.UserProfileResponse;
 import com.vitrum.api.models.User;
 import com.vitrum.api.models.enums.Role;
 import com.vitrum.api.repositories.UserRepository;
-import com.vitrum.api.services.UserService;
+import com.vitrum.api.services.interfaces.UserService;
 import com.vitrum.api.util.Converter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.vitrum.api.services;
+package com.vitrum.api.services.interfaces;
 
 import com.vitrum.api.dto.request.ChangePasswordRequest;
 import com.vitrum.api.dto.request.ResetPasswordRequest;

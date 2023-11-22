@@ -7,7 +7,7 @@ import com.vitrum.api.repositories.BundleRepository;
 import com.vitrum.api.repositories.MemberRepository;
 import com.vitrum.api.repositories.TeamRepository;
 import com.vitrum.api.repositories.UserRepository;
-import com.vitrum.api.services.MemberService;
+import com.vitrum.api.services.interfaces.MemberService;
 import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

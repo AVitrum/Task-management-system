@@ -1,4 +1,4 @@
-package com.vitrum.api.services;
+package com.vitrum.api.services.interfaces;
 
 import com.vitrum.api.dto.response.HistoryResponse;
 import com.vitrum.api.models.submodels.OldTask;
