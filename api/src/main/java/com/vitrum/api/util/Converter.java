@@ -2,7 +2,9 @@ package com.vitrum.api.util;
 
 import com.vitrum.api.data.models.*;
 import com.vitrum.api.data.response.*;
+import com.vitrum.api.data.submodels.Comment;
 import com.vitrum.api.data.submodels.OldTask;
+import com.vitrum.api.repositories.CommentRepository;
 import com.vitrum.api.repositories.MemberRepository;
 import com.vitrum.api.repositories.TaskRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ public class Converter {
 
     private final MemberRepository memberRepository;
     private final TaskRepository taskRepository;
+    private final CommentRepository commentRepository;
 
     public TeamResponse mapTeamToTeamResponse(Team team) {
         return TeamResponse.builder()
@@ -39,13 +42,29 @@ public class Converter {
     public List<MemberResponse> getMemberResponse(Team team) {
 
         List<Member> members = memberRepository.findAllByTeam(team);
+
         return members.stream()
                 .map(this::mapMemberToMemberResponse)
                 .collect(Collectors.toList());
     }
 
-    public MemberResponse mapMemberToMemberResponse(Member member) {
+    public List<CommentResponse> getCommentResponse(OldTask oldTask) {
 
+        List<Comment> comments = oldTask.getComments();
+
+        return comments.stream()
+                .map(this::mapCommentToCommentResponse)
+                .collect(Collectors.toList());
+    }
+
+    private CommentResponse mapCommentToCommentResponse(Comment comment) {
+        return CommentResponse.builder()
+                .author(comment.getAuthor().getUser().getTrueUsername())
+                .text(comment.getText())
+                .build();
+    }
+
+    public MemberResponse mapMemberToMemberResponse(Member member) {
         return MemberResponse.builder()
                 .id(member.getId())
                 .name(member.getUser().getTrueUsername())
@@ -63,6 +82,7 @@ public class Converter {
                 .dueDate(task.getDueDate())
                 .changeTime(LocalDateTime.now())
                 .status(task.getStatus())
+                .comments(commentRepository.findAllByTask(task))
                 .task(task)
                 .build();
     }
@@ -80,6 +100,7 @@ public class Converter {
                 .creationTime(oldTask.getCreationTime())
                 .dueDate(oldTask.getDueDate())
                 .creator(mapMemberToMemberResponse(oldTask.getTask().getBundle().getCreator()))
+                .comments(getCommentResponse(oldTask))
                 .build();
     }
 

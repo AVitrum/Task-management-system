@@ -1,6 +1,7 @@
 package com.vitrum.api.data.models;
 
 import com.vitrum.api.data.enums.Status;
+import com.vitrum.api.data.submodels.Comment;
 import com.vitrum.api.data.submodels.OldTask;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,6 +39,9 @@ public class Task {
 
     @DBRef
     private List<OldTask> oldTasks;
+
+    @DBRef
+    private List<Comment> comments;
 
     @Override
     public String toString() {

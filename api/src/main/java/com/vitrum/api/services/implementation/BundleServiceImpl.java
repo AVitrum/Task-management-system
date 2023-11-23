@@ -1,5 +1,6 @@
 package com.vitrum.api.services.implementation;
 
+import com.vitrum.api.data.models.Team;
 import com.vitrum.api.data.response.BundleResponse;
 import com.vitrum.api.data.models.Bundle;
 import com.vitrum.api.data.models.Member;
@@ -39,6 +40,7 @@ public class BundleServiceImpl implements BundleService {
         var bundle = Bundle.builder()
                 .creator(creator)
                 .title(title)
+                .team(findTeamByName(teamName))
                 .performer(creator)
                 .build();
         repository.save(bundle);
@@ -82,13 +84,17 @@ public class BundleServiceImpl implements BundleService {
     }
 
     private Member findMemberByUsernameAndTeam(String username, String teamName) {
-        var team = teamRepository.findByName(teamName)
-                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
+        var team = findTeamByName(teamName);
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return memberRepository.findByUserAndTeam(user, team)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
+    }
+
+    private Team findTeamByName(String teamName) {
+        return teamRepository.findByName(teamName)
+                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
     }
 
     private Member findCreator(String teamName) {

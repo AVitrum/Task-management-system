@@ -134,5 +134,6 @@ public class OldTaskServiceImpl implements OldTaskService {
         task.setVersion(oldTask.getVersion());
         task.setDueDate(oldTask.getDueDate());
         task.setStatus(oldTask.getStatus());
+        task.setComments(oldTask.getComments());
     }
 }

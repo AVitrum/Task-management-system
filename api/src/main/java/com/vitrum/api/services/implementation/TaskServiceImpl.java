@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -123,9 +124,9 @@ public class TaskServiceImpl implements TaskService {
         return findMemberByUsernameAndTeam(user.getTrueUsername(), teamName);
     }
 
-    private Member findPerformer(String performer, String teamName) {
-        return findMemberByUsernameAndTeam(performer, teamName);
-    }
+//    private Member findPerformer(String performer, String teamName) {
+//        return findMemberByUsernameAndTeam(performer, teamName);
+//    }
 
 
     private Task createTask(TaskRequest request, Bundle bundle) {
@@ -160,5 +161,6 @@ public class TaskServiceImpl implements TaskService {
             task.setStatus(Status.valueOf(request.getStatus().toUpperCase()));
 
         task.setVersion(task.getVersion() + 1);
+        task.setComments(new ArrayList<>());
     }
 }

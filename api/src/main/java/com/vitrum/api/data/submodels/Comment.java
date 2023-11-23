@@ -1,7 +1,7 @@
 package com.vitrum.api.data.submodels;
 
+import com.vitrum.api.data.models.Member;
 import com.vitrum.api.data.models.Task;
-import com.vitrum.api.data.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,31 +11,27 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-@Document(collection = "old_tasks")
+@Document(collection = "comments")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OldTask {
+public class Comment {
 
     @Id
     private String id;
 
-    private String title;
-    private String description;
-    private LocalDateTime creationTime;
-    private LocalDateTime dueDate;
-    private LocalDateTime changeTime;
-    private Long priority;
-    private Long version;
-
-    private Status status;
+    private String text;
 
     @DBRef
-    private List<Comment> comments;
+    private Member author;
+
+    private LocalDateTime creationTime;
 
     @DBRef
     private Task task;
+
+    @DBRef
+    private OldTask oldTask;
 }

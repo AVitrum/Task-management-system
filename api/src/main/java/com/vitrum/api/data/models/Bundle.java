@@ -23,6 +23,9 @@ public class Bundle {
     private String title;
 
     @DBRef
+    private Team team;
+
+    @DBRef
     private Member creator;
 
     @DBRef

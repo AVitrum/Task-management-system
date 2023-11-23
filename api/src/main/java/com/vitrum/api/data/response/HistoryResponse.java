@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -16,11 +17,12 @@ public class HistoryResponse {
     private String id;
     private Long version;
     private String title;
+    private String status;
     private String description;
     private LocalDateTime creationTime;
     private LocalDateTime dueDate;
     private LocalDateTime changeTime;
     private Long priority;
-    private String status;
+    private List<CommentResponse> comments;
     private MemberResponse creator;
 }
