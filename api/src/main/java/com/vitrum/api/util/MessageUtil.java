@@ -17,7 +17,7 @@ public class MessageUtil {
 
     private final JavaMailSender emailSender;
 
-    public void sendMessage(Member member, String text, String subject) {
+    public void sendMessage(Member member, String subject, String text) {
         if (member.isEmailsAllowed()) {
             try {
                 var user = member.getUser();

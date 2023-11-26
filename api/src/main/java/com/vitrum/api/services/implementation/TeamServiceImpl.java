@@ -12,12 +12,14 @@ import com.vitrum.api.repositories.TeamRepository;
 import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.services.interfaces.TeamService;
 import com.vitrum.api.util.Converter;
+import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +30,7 @@ public class TeamServiceImpl implements TeamService {
     private final MemberRepository memberRepository;
     private final UserRepository userRepository;
     private final Converter converter;
+    private final MessageUtil messageUtil;
 
     @Override
     public TeamCreationResponse create(TeamCreationRequest request) {
@@ -63,10 +66,10 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public void addToTeam(String username, String teamName) {
+    public void addToTeam(String teamName, Map<String, String> request) {
         var team = repository.findByName(teamName)
                 .orElseThrow(() -> new IllegalArgumentException("Can't find team by this name"));
-        var user = userRepository.findByUsername(username)
+        var user = userRepository.findByUsername(request.get("username"))
                 .orElseThrow(() -> new UsernameNotFoundException("Can't find user"));
 
         if (memberRepository.existsByUserAndTeam(user, team))
@@ -78,6 +81,12 @@ public class TeamServiceImpl implements TeamService {
                 .team(team)
                 .build();
         memberRepository.save(member);
+
+        messageUtil.sendMessage(
+                member,
+                String.format("You have been added to the team: %s.", teamName),
+                "TMS Info"
+        );
     }
 
     public List<TeamResponse> getAll() {

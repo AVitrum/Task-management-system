@@ -83,7 +83,7 @@ public class OldTaskServiceImpl implements OldTaskService {
         task.setStatus(Status.RESTORED);
         taskRepository.save(task);
 
-        messageUtil.sendMessage(bundle.getPerformer(), task.toString(), "The task has been restored");
+        messageUtil.sendMessage(bundle.getPerformer(), "The task has been restored", task.toString());
     }
 
     @Override
@@ -98,8 +98,7 @@ public class OldTaskServiceImpl implements OldTaskService {
         taskRepository.delete(taskService.getTask(taskTitle, creatorName, teamName, bundleName));
         messageUtil.sendMessage(
                 bundle.getPerformer(),
-                "The task has been deleted by " + creator.getUser().getEmail(),
-                task.getTitle() + " has been deleted"
+                task.getTitle() + " has been deleted", "The task has been deleted by " + creator.getUser().getEmail()
         );
     }
 

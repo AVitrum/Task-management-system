@@ -76,9 +76,11 @@ public class UserServiceImpl implements UserService {
     public void ban(String username) {
         User user = repository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        user.setIsBanned(true);
 
+        user.setIsBanned(true);
         repository.save(user);
+
+        authenticationServiceImpl.revokeAllUserTokens(user);
     }
 
     private String extractJwtFromRequest(HttpServletRequest request) {

@@ -48,20 +48,27 @@ public class BundleServiceImpl implements BundleService {
 
     @Override
     public void addPerformer(String teamName, String bundleTitle, String performerName) {
+        var performer = findPerformer(performerName, teamName);
+
+        if (repository.existsByPerformer(performer))
+            throw new IllegalArgumentException(
+                    String.format("This team member already has a task: %s", repository.findByPerformer(performer)
+                            .orElseThrow(() -> new IllegalArgumentException("Bundle not found"))
+                            .getTitle())
+            );
+
         var creator = findCreator(teamName);
         var bundle = findBundleByCreator(bundleTitle, creator);
-        var performer = findPerformer(performerName, teamName);
 
         bundle.setPerformer(performer);
 
         repository.save(bundle);
         messageUtil.sendMessage(
                 performer,
-                String.format(
+                "TMS Info!", String.format(
                         "Team: %s\n" +
                         "New tasks have been added to you by %s", teamName, creator.getUser().getEmail()
-                ),
-                "TMS Info!"
+                )
         );
     }
 

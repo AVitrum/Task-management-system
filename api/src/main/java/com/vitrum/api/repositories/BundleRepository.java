@@ -13,8 +13,10 @@ public interface BundleRepository extends MongoRepository<Bundle, String> {
     Optional<Bundle> findByCreatorAndTitle(Member creator, String title);
     Optional<Bundle> findByPerformerAndTitle(Member performer, String title);
     Optional<Bundle> findByTeamAndTitle(Team team, String bundleTitle);
+    Optional<Bundle> findByPerformer(Member performer);
 
     Boolean existsByCreatorAndTitle(Member creator, String title);
+    Boolean existsByPerformer(Member performer);
     Boolean existsByPerformerAndTitle(Member performer, String title);
     Boolean existsByCreatorAndPerformer(Member creator, Member performer);
 }

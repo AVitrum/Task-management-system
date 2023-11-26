@@ -33,9 +33,8 @@ public class TeamController {
             @PathVariable String team,
             @RequestBody Map<String, String> request
     ) {
-        String username = request.get("username");
         try {
-            service.addToTeam(username, team);
+            service.addToTeam(team, request);
             return ResponseEntity.ok("Member added successfully");
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());

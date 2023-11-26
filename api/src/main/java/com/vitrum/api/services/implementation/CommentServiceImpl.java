@@ -33,7 +33,11 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = createComment(task, author, request);
         repository.save(comment);
 
-        messageUtil.sendMessage(bundle.getCreator(), "Your task was commented on by", "TMS Info");
+        messageUtil.sendMessage(
+                bundle.getCreator(),
+                "TMS Info",
+                String.format("Your task - %s, was commented by %s", taskTitle, author.getUser().getTrueUsername())
+        );
     }
 
     private Comment createComment(Task task, Member author, Map<String, String> request) {

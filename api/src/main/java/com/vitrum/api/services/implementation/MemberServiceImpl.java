@@ -68,9 +68,9 @@ public class MemberServiceImpl implements MemberService {
             bundleRepository.save(bundle);
             messageUtil.sendMessage(
                     creator,
+                    teamName + " Info!",
                     String.format("The performer of your task (%s) has been removed from the team," +
-                            " you are now the performer", target.getUser().getEmail()),
-                    teamName + " Info!"
+                            " you are now the performer", target.getUser().getEmail())
             );
         }
 
