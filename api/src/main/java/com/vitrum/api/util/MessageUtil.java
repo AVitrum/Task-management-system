@@ -1,8 +1,8 @@
 package com.vitrum.api.util;
 
-import com.vitrum.api.models.submodels.Recoverycode;
-import com.vitrum.api.models.User;
-import com.vitrum.api.models.Member;
+import com.vitrum.api.data.submodels.Recoverycode;
+import com.vitrum.api.data.models.User;
+import com.vitrum.api.data.models.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -17,21 +17,23 @@ public class MessageUtil {
 
     private final JavaMailSender emailSender;
 
-    public void sendMessage(Member member, String text, String subject) {
-        try {
-            var user = member.getUser();
-            MimeMessage message = emailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message);
+    public void sendMessage(Member member, String subject, String text) {
+        if (member.isEmailsAllowed()) {
+            try {
+                var user = member.getUser();
+                MimeMessage message = emailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message);
 
-            helper.setFrom("tms.team.noreply@gmail.com");
-            helper.setTo(user.getUsername());
-            helper.setSubject(subject);
-            helper.setText(text);
+                helper.setFrom("tms.team.noreply@gmail.com");
+                helper.setTo(user.getUsername());
+                helper.setSubject(subject);
+                helper.setText(text);
 
-            emailSender.send(message);
+                emailSender.send(message);
 
-        } catch (MessagingException e) {
-            throw new RuntimeException("Something went wrong!");
+            } catch (MessagingException e) {
+                throw new RuntimeException("Something went wrong!");
+            }
         }
     }
 

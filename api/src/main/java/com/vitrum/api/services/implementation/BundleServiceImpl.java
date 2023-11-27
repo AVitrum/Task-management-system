@@ -1,18 +1,20 @@
 package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.dto.response.BundleResponse;
-import com.vitrum.api.models.Bundle;
-import com.vitrum.api.models.Member;
-import com.vitrum.api.models.User;
-import com.vitrum.api.repositories.BundleRepository;
-import com.vitrum.api.repositories.MemberRepository;
-import com.vitrum.api.repositories.TeamRepository;
-import com.vitrum.api.repositories.UserRepository;
-import com.vitrum.api.services.BundleService;
+import com.vitrum.api.data.enums.RoleInTeam;
+import com.vitrum.api.data.models.*;
+import com.vitrum.api.data.response.BundleResponse;
+import com.vitrum.api.data.submodels.Comment;
+import com.vitrum.api.data.submodels.OldTask;
+import com.vitrum.api.repositories.*;
+import com.vitrum.api.services.interfaces.BundleService;
 import com.vitrum.api.util.Converter;
+import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +24,10 @@ public class BundleServiceImpl implements BundleService {
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
     private final MemberRepository memberRepository;
+    private final TaskRepository taskRepository;
+    private final OldTaskRepository oldTaskRepository;
+    private final CommentRepository commentRepository;
+    private final MessageUtil messageUtil;
     private final Converter converter;
 
     @Override
@@ -37,6 +43,7 @@ public class BundleServiceImpl implements BundleService {
         var bundle = Bundle.builder()
                 .creator(creator)
                 .title(title)
+                .team(findTeamByName(teamName))
                 .performer(creator)
                 .build();
         repository.save(bundle);
@@ -44,41 +51,116 @@ public class BundleServiceImpl implements BundleService {
 
     @Override
     public void addPerformer(String teamName, String bundleTitle, String performerName) {
-        var creator = findCreator(teamName);
-        var bundle = findBundleByCreator(bundleTitle, creator);
         var performer = findPerformer(performerName, teamName);
+
+        if (repository.existsByPerformer(performer))
+            throw new IllegalArgumentException(
+                    String.format("This team member already has a task: %s", repository.findByPerformer(performer)
+                            .orElseThrow(() -> new IllegalArgumentException("Bundle not found"))
+                            .getTitle())
+            );
+
+        var creator = findCreator(teamName);
+        var bundle = findBundleByCreator(creator);
 
         bundle.setPerformer(performer);
 
         repository.save(bundle);
+        messageUtil.sendMessage(
+                performer,
+                "TMS Info!", String.format(
+                        "Team: %s\n" +
+                        "New tasks have been added to you by %s", teamName, creator.getUser().getEmail()
+                )
+        );
     }
 
     @Override
-    public BundleResponse findByUser(String teamName, String bundleTitle) {
+    public BundleResponse findByUser(String teamName) {
         var user = User.getAuthUser(userRepository);
         var member = findMemberByUsernameAndTeam(user.getTrueUsername(), teamName);
         Bundle bundle;
 
-        if (repository.existsByCreatorAndTitle(member, bundleTitle)) {
-            bundle = findBundleByCreator(bundleTitle, member);
-        } else if (repository.existsByPerformerAndTitle(member, bundleTitle)) {
-            bundle = findBundleByPerformer(bundleTitle, member);
+        if (repository.existsByCreator(member)) {
+            bundle = findBundleByCreator(member);
+        } else if (repository.existsByPerformer(member)) {
+            bundle = findBundleByPerformer(member);
         } else {
             throw new IllegalArgumentException("Bundle not found");
         }
 
         return converter.mapBundleToBundleResponse(bundle);
+    }
 
+    @Override
+    public BundleResponse findByTitle(String teamName, String bundleTitle) {
+        var member = findMemberByUsernameAndTeam(User.getAuthUser(userRepository).getTrueUsername(), teamName);
+        var team = findTeamByName(teamName);
+        Bundle bundle = repository.findByTeamAndTitle(team, bundleTitle)
+                .orElseThrow(() -> new IllegalArgumentException("Bundle not found"));
+
+        if (!member.equals(bundle.getCreator())
+                && !member.equals(bundle.getPerformer())
+                && member.getRole().equals(RoleInTeam.MEMBER)
+        ) throw new IllegalStateException("You cannot view other users' tasks");
+
+        return converter.mapBundleToBundleResponse(bundle);
+    }
+
+    @Override
+    public void deleteByTitle(String teamName, String bundleTitle) {
+        var member = findMemberByUsernameAndTeam(User.getAuthUser(userRepository).getTrueUsername(), teamName);
+        var team = findTeamByName(teamName);
+        Bundle bundle = repository.findByTeamAndTitle(team, bundleTitle)
+                .orElseThrow(() -> new IllegalArgumentException("Bundle not found"));
+
+        if (!member.equals(bundle.getCreator())
+                && member.getRole().equals(RoleInTeam.MEMBER)
+        ) throw new IllegalStateException("You cannot delete tasks");
+
+        List<Task> tasks = taskRepository.findAllByBundle(bundle);
+        List<List<OldTask>> oldTasks = tasks.stream().map(oldTaskRepository::findAllByTask).toList();
+        List<List<Comment>> comments = tasks.stream().map(commentRepository::findAllByTask).toList();
+
+        comments.forEach(commentRepository::deleteAll);
+        oldTasks.forEach(oldTaskRepository::deleteAll);
+        taskRepository.deleteAll(tasks);
+        repository.delete(bundle);
+    }
+
+    @Override
+    public List<BundleResponse> findAll(String teamName) {
+        var team =  teamRepository.findByName(teamName)
+                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
+        var user = User.getAuthUser(userRepository);
+
+        if (!memberRepository.existsByUserAndTeam(user, team))
+            throw new IllegalArgumentException("You are not a team member");
+
+        var member = memberRepository.findByUserAndTeam(user, team).get();
+
+        if (member.getRole().equals(RoleInTeam.MEMBER))
+            throw new IllegalStateException("You cannot view other users' tasks");
+
+        List<Bundle> bundles = repository.findAllByTeam(team);
+
+        return bundles.stream()
+                .map(converter::mapBundleToBundleResponse)
+                .collect(Collectors.toList());
     }
 
     private Member findMemberByUsernameAndTeam(String username, String teamName) {
-        var team = teamRepository.findByName(teamName)
-                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
+        var team = findTeamByName(teamName);
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return memberRepository.findByUserAndTeam(user, team)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
+    }
+
+    private Team findTeamByName(String teamName) {
+        return teamRepository.findByName(teamName)
+                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
     }
 
     private Member findCreator(String teamName) {
@@ -90,13 +172,13 @@ public class BundleServiceImpl implements BundleService {
         return findMemberByUsernameAndTeam(performer, teamName);
     }
 
-    private Bundle findBundleByCreator(String bundleTitle, Member creator) {
-        return repository.findByCreatorAndTitle(creator, bundleTitle)
+    private Bundle findBundleByCreator(Member creator) {
+        return repository.findByCreator(creator)
                 .orElseThrow(() -> new IllegalArgumentException("Bundle not found"));
     }
 
-    private Bundle findBundleByPerformer(String bundleTitle, Member performer) {
-        return repository.findByPerformerAndTitle(performer, bundleTitle)
+    private Bundle findBundleByPerformer(Member performer) {
+        return repository.findByPerformer(performer)
                 .orElseThrow(() -> new IllegalArgumentException("Bundle not found"));
     }
 }

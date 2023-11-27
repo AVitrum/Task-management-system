@@ -1,8 +1,8 @@
 package com.vitrum.api.controllers;
 
-import com.vitrum.api.dto.request.ChangeUserCredentials;
-import com.vitrum.api.dto.request.RegisterRequest;
-import com.vitrum.api.services.UserService;
+import com.vitrum.api.data.request.ChangeUserCredentials;
+import com.vitrum.api.data.request.RegisterRequest;
+import com.vitrum.api.services.interfaces.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -40,7 +40,7 @@ public class UserController {
         }
     }
 
-    @PatchMapping("/changeCredentials")
+    @PatchMapping("/credentials")
     public ResponseEntity<?> changeCredentials(@RequestBody ChangeUserCredentials request) {
         try {
             service.changeCredentials(request);
@@ -50,10 +50,10 @@ public class UserController {
         }
     }
 
-    @PutMapping("/ban")
-    public ResponseEntity<?> ban(@RequestBody Map<String, String> username) {
+    @PatchMapping("/status")
+    public ResponseEntity<?> changeStatus(@RequestBody Map<String, String> username) {
         try {
-            service.ban(username.get("username"));
+            service.changeStatus(username.get("username"));
             return ResponseEntity.ok("Okay");
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());

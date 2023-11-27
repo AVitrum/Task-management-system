@@ -1,13 +1,13 @@
 package com.vitrum.api.services.implementation;
 
 import com.vitrum.api.config.JwtService;
-import com.vitrum.api.dto.request.ChangeUserCredentials;
-import com.vitrum.api.dto.request.RegisterRequest;
-import com.vitrum.api.dto.response.UserProfileResponse;
-import com.vitrum.api.models.User;
-import com.vitrum.api.models.enums.Role;
+import com.vitrum.api.data.request.ChangeUserCredentials;
+import com.vitrum.api.data.request.RegisterRequest;
+import com.vitrum.api.data.response.UserProfileResponse;
+import com.vitrum.api.data.models.User;
+import com.vitrum.api.data.enums.Role;
 import com.vitrum.api.repositories.UserRepository;
-import com.vitrum.api.services.UserService;
+import com.vitrum.api.services.interfaces.UserService;
 import com.vitrum.api.util.Converter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -73,12 +73,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void ban(String username) {
+    public void changeStatus(String username) {
         User user = repository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        user.setIsBanned(true);
 
+        user.setIsBanned(!user.getIsBanned());
         repository.save(user);
+
+        authenticationServiceImpl.revokeAllUserTokens(user);
     }
 
     private String extractJwtFromRequest(HttpServletRequest request) {

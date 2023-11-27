@@ -1,14 +1,14 @@
 package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.dto.response.HistoryResponse;
-import com.vitrum.api.models.Bundle;
-import com.vitrum.api.models.Member;
-import com.vitrum.api.models.Task;
-import com.vitrum.api.models.enums.Status;
-import com.vitrum.api.models.submodels.OldTask;
+import com.vitrum.api.data.response.HistoryResponse;
+import com.vitrum.api.data.models.Bundle;
+import com.vitrum.api.data.models.Member;
+import com.vitrum.api.data.models.Task;
+import com.vitrum.api.data.enums.Status;
+import com.vitrum.api.data.submodels.OldTask;
 import com.vitrum.api.repositories.*;
-import com.vitrum.api.services.OldTaskService;
-import com.vitrum.api.services.TaskService;
+import com.vitrum.api.services.interfaces.OldTaskService;
+import com.vitrum.api.services.interfaces.TaskService;
 import com.vitrum.api.util.Converter;
 import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
@@ -83,7 +83,7 @@ public class OldTaskServiceImpl implements OldTaskService {
         task.setStatus(Status.RESTORED);
         taskRepository.save(task);
 
-        messageUtil.sendMessage(bundle.getPerformer(), task.toString(), "The task has been restored");
+        messageUtil.sendMessage(bundle.getPerformer(), "The task has been restored", task.toString());
     }
 
     @Override
@@ -98,8 +98,7 @@ public class OldTaskServiceImpl implements OldTaskService {
         taskRepository.delete(taskService.getTask(taskTitle, creatorName, teamName, bundleName));
         messageUtil.sendMessage(
                 bundle.getPerformer(),
-                "The task has been deleted by " + creator.getUser().getEmail(),
-                task.getTitle() + "has been deleted"
+                task.getTitle() + " has been deleted", "The task has been deleted by " + creator.getUser().getEmail()
         );
     }
 
@@ -134,5 +133,6 @@ public class OldTaskServiceImpl implements OldTaskService {
         task.setVersion(oldTask.getVersion());
         task.setDueDate(oldTask.getDueDate());
         task.setStatus(oldTask.getStatus());
+        task.setComments(oldTask.getComments());
     }
 }

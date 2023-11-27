@@ -17,8 +17,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import static com.vitrum.api.models.enums.Role.ADMIN;
-import static com.vitrum.api.models.enums.Role.USER;
+import java.util.Arrays;
+
+import static com.vitrum.api.data.enums.Role.ADMIN;
+import static com.vitrum.api.data.enums.Role.USER;
 
 @Configuration
 @EnableWebSecurity
@@ -69,8 +71,22 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("*"); // change to IP when the development is finished
-        config.addAllowedMethod("*");
+
+        config.setAllowedOrigins(Arrays.asList(
+                "http://localhost:8080",
+                "http://localhost:5173",
+                "http://ec2-16-171-6-194.eu-north-1.compute.amazonaws.com"
+        ));
+
+        config.setAllowedMethods(Arrays.asList(
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE",
+                "OPTIONS"
+        ));
+
         config.addAllowedHeader("*");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

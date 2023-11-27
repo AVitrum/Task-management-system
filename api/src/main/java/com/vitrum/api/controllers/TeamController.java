@@ -1,7 +1,7 @@
 package com.vitrum.api.controllers;
 
-import com.vitrum.api.dto.request.TeamCreationRequest;
-import com.vitrum.api.services.TeamService;
+import com.vitrum.api.data.request.TeamCreationRequest;
+import com.vitrum.api.services.interfaces.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,9 +33,8 @@ public class TeamController {
             @PathVariable String team,
             @RequestBody Map<String, String> request
     ) {
-        String username = request.get("username");
         try {
-            service.addToTeam(username, team);
+            service.addToTeam(team, request);
             return ResponseEntity.ok("Member added successfully");
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());

@@ -1,13 +1,13 @@
 package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.models.Member;
-import com.vitrum.api.models.User;
-import com.vitrum.api.models.enums.RoleInTeam;
+import com.vitrum.api.data.models.Member;
+import com.vitrum.api.data.models.User;
+import com.vitrum.api.data.enums.RoleInTeam;
 import com.vitrum.api.repositories.BundleRepository;
 import com.vitrum.api.repositories.MemberRepository;
 import com.vitrum.api.repositories.TeamRepository;
 import com.vitrum.api.repositories.UserRepository;
-import com.vitrum.api.services.MemberService;
+import com.vitrum.api.services.interfaces.MemberService;
 import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -68,13 +68,34 @@ public class MemberServiceImpl implements MemberService {
             bundleRepository.save(bundle);
             messageUtil.sendMessage(
                     creator,
+                    teamName + " Info!",
                     String.format("The performer of your task (%s) has been removed from the team," +
-                            " you are now the performer", target.getUser().getEmail()),
-                    teamName + " Info!"
+                            " you are now the performer", target.getUser().getEmail())
             );
         }
 
         repository.delete(target);
+    }
+
+    @Override
+    public void changeEmailsMessagingStatus(String teamName) {
+        var team = teamRepository.findByName(teamName)
+                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
+        var member = repository.findByUserAndTeam(User.getAuthUser(userRepository), team)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+
+        member.setEmailsAllowed(!member.isEmailsAllowed());
+        repository.save(member);
+    }
+
+    @Override
+    public boolean getEmailsMessagingStatus(String teamName) {
+        var team = teamRepository.findByName(teamName)
+                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
+        var member = repository.findByUserAndTeam(User.getAuthUser(userRepository), team)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+
+        return member.isEmailsAllowed();
     }
 
     private List<Member> getPerformerAndTarget(Map<String, String> request, String teamName) {

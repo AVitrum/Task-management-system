@@ -1,6 +1,6 @@
 package com.vitrum.api.controllers;
 
-import com.vitrum.api.services.BundleService;
+import com.vitrum.api.services.interfaces.BundleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,14 +43,49 @@ public class BundleController {
         }
     }
 
-    @GetMapping("/{bundle}/findByUser")
+    @GetMapping
+    public ResponseEntity<?> findAll(
+            @PathVariable String team
+    ) {
+        try {
+            return ResponseEntity.ok(service.findAll(team));
+        } catch (IllegalArgumentException | UsernameNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/findByUser")
     public ResponseEntity<?> findByUser(
+            @PathVariable String team
+    ) {
+        try {
+            return ResponseEntity.ok(service.findByUser(team));
+        } catch (IllegalArgumentException | IllegalStateException | UsernameNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{bundle}")
+    public ResponseEntity<?> findByTitle(
             @PathVariable String team,
             @PathVariable String bundle
     ) {
         try {
-            return ResponseEntity.ok(service.findByUser(team, bundle));
-        } catch (IllegalArgumentException | UsernameNotFoundException e) {
+            return ResponseEntity.ok(service.findByTitle(team, bundle));
+        } catch (IllegalArgumentException | IllegalStateException | UsernameNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{bundle}")
+    public ResponseEntity<?> deleteByTitle(
+            @PathVariable String team,
+            @PathVariable String bundle
+    ) {
+        try {
+            service.deleteByTitle(team, bundle);
+            return ResponseEntity.ok("Deleted");
+        } catch (IllegalArgumentException | IllegalStateException | UsernameNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

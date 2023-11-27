@@ -1,12 +1,12 @@
 package com.vitrum.api.services.implementation;
 
-import com.vitrum.api.dto.request.ChangePasswordRequest;
-import com.vitrum.api.dto.request.ResetPasswordRequest;
-import com.vitrum.api.models.User;
-import com.vitrum.api.models.submodels.Recoverycode;
+import com.vitrum.api.data.request.ChangePasswordRequest;
+import com.vitrum.api.data.request.ResetPasswordRequest;
+import com.vitrum.api.data.models.User;
+import com.vitrum.api.data.submodels.Recoverycode;
 import com.vitrum.api.repositories.RecoverycodeRepository;
 import com.vitrum.api.repositories.UserRepository;
-import com.vitrum.api.services.PasswordService;
+import com.vitrum.api.services.interfaces.PasswordService;
 import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

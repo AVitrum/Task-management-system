@@ -1,6 +1,6 @@
 package com.vitrum.api.controllers;
 
-import com.vitrum.api.services.MemberService;
+import com.vitrum.api.services.interfaces.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +28,29 @@ public class MemberController {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/emailsMessagingStatus")
+    public ResponseEntity<?> emailsMessagingStatus(
+            @PathVariable String team
+    ) {
+        try {
+            return ResponseEntity.ok(service.getEmailsMessagingStatus(team));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PatchMapping("/changeEmailsMessagingStatus")
+    public ResponseEntity<?> changeEmailsMessagingStatus(
+            @PathVariable String team
+    ) {
+        try {
+            service.changeEmailsMessagingStatus(team);
+            return ResponseEntity.ok("Changed");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
