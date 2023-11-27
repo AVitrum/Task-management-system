@@ -10,5 +10,5 @@ public interface UserService {
     UserProfileResponse profile(HttpServletRequest request);
     void create(RegisterRequest request);
     void changeCredentials(ChangeUserCredentials request);
-    void ban(String username);
+    void changeStatus(String username);
 }

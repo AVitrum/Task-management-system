@@ -122,8 +122,8 @@ public class Converter {
 
         return BundleResponse.builder()
                 .title(bundle.getTitle())
-                .creatorEmail(bundle.getCreator().getUser().getTrueUsername())
-                .performerEmail(bundle.getPerformer().getUser().getTrueUsername())
+                .creatorEmail(bundle.getCreator().getUser().getEmail())
+                .performerEmail(bundle.getPerformer().getUser().getEmail())
                 .tasks(tasks.stream().map(this::mapTaskToTaskResponse).collect(Collectors.toList()))
                 .build();
     }

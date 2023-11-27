@@ -111,5 +111,4 @@ public class TeamServiceImpl implements TeamService {
         var team = repository.findByName(name).orElseThrow(() -> new IllegalArgumentException("Team not found"));
         return converter.mapTeamToTeamResponse(team);
     }
-
 }

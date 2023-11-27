@@ -73,11 +73,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void ban(String username) {
+    public void changeStatus(String username) {
         User user = repository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        user.setIsBanned(true);
+        user.setIsBanned(!user.getIsBanned());
         repository.save(user);
 
         authenticationServiceImpl.revokeAllUserTokens(user);

@@ -43,8 +43,7 @@ public class TaskServiceImpl implements TaskService {
         if (repository.existsByTitleAndBundle(request.getTitle(), bundle))
             throw new IllegalArgumentException("A task with that name already exists in this team");
 
-        var task = createTask(request, bundle);
-        repository.save(task);
+        repository.save(createTask(request, bundle));
     }
 
     @Override
@@ -63,7 +62,11 @@ public class TaskServiceImpl implements TaskService {
         updateTaskFields(request, task);
         repository.save(task);
 
-        messageUtil.sendMessage(bundle.getPerformer(), "The task has been changed", task.toString());
+        messageUtil.sendMessage(
+                bundle.getPerformer(),
+                String.format("The task has been changed by %s", creator.getUser().getEmail()),
+                task.toString()
+        );
     }
 
     @Override
@@ -82,7 +85,11 @@ public class TaskServiceImpl implements TaskService {
         var oldTask = converter.mapTaskToOldTask(task);
         oldTaskRepository.save(oldTask);
 
-        messageUtil.sendMessage(task.getBundle().getPerformer(), "The task has been deleted", task.toString());
+        messageUtil.sendMessage(
+                task.getBundle().getPerformer(),
+                String.format("The task has been deleted by %s", creator.getUser().getEmail()),
+                task.toString()
+        );
     }
 
     @Override
@@ -118,11 +125,6 @@ public class TaskServiceImpl implements TaskService {
         var user = User.getAuthUser(userRepository);
         return findMemberByUsernameAndTeam(user.getTrueUsername(), teamName);
     }
-
-//    private Member findPerformer(String performer, String teamName) {
-//        return findMemberByUsernameAndTeam(performer, teamName);
-//    }
-
 
     private Task createTask(TaskRequest request, Bundle bundle) {
         return Task.builder()
