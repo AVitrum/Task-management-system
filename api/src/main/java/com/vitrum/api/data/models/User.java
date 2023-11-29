@@ -42,6 +42,10 @@ public class User implements UserDetails {
 
     private List<Recoverycode> recoverycode;
 
+    public static String getUsername(UserRepository userRepository) {
+        return User.getAuthUser(userRepository).getTrueUsername();
+    }
+
     public static User getAuthUser(UserRepository repository) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {

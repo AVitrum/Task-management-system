@@ -9,7 +9,6 @@ import com.vitrum.api.services.interfaces.TaskService;
 import com.vitrum.api.util.Converter;
 import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,7 +21,6 @@ public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository repository;
     private final OldTaskRepository oldTaskRepository;
-    private final MemberRepository memberRepository;
     private final TeamRepository teamRepository;
     private final BundleRepository bundleRepository;
     private final UserRepository userRepository;
@@ -32,34 +30,39 @@ public class TaskServiceImpl implements TaskService {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
-    public void create(TaskRequest request, String teamName, String bundleName) {
-        var creator = findCreator(teamName);
+    public void create(TaskRequest request, String teamName, String bundleTitle) {
+        var team = Team.findTeamByName(teamName, teamRepository);
+        var creator = Member.findCreator(team, userRepository);
 
         if (creator.checkPermissionToCreate())
             throw new IllegalArgumentException("You do not have permission to perform this action");
 
-        var bundle = findBundle(bundleName, creator.getTeam());
+        var bundle = Bundle.findBundleByTeam(team, bundleTitle);
 
         if (repository.existsByTitleAndBundle(request.getTitle(), bundle))
             throw new IllegalArgumentException("A task with that name already exists in this team");
 
-        repository.save(createTask(request, bundle));
+        Task task = createTask(request, bundle);
+        repository.save(task);
+
+        bundle.getTasks().add(task);
+        bundleRepository.save(bundle);
     }
 
     @Override
-    public void change(TaskRequest request, String taskTitle, String teamName,String bundleName) {
-        var creator = findCreator(teamName);
-        var bundle = findBundle(bundleName, creator.getTeam());
-        var task = findTaskByTitleAndBundle(taskTitle, bundle);
+    public void change(TaskRequest request, String taskTitle, String teamName,String bundleTitle) {
+        var team = Team.findTeamByName(teamName, teamRepository);
+        var creator = Member.findCreator(team, userRepository);
+        var bundle = Bundle.findBundleByTeam(team, bundleTitle);
+        var task = Task.findTaskByTitleAndBundle(bundle, taskTitle);
 
-        if (task.getStatus() == Status.DELETED) {
+        if (task.getStatus() == Status.DELETED)
             throw new IllegalArgumentException("The task is not available for modification as it has been deleted");
-        }
 
         OldTask oldTask = converter.mapTaskToOldTask(task);
         oldTaskRepository.save(oldTask);
 
-        updateTaskFields(request, task);
+        updateTaskFields(request, task, oldTask);
         repository.save(task);
 
         messageUtil.sendMessage(
@@ -70,60 +73,29 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void delete(String taskTitle, String teamName, String bundleName) {
-        var creator = findCreator(teamName);
-        var bundle = findBundle(bundleName, creator.getTeam());
-        var task = findTaskByTitleAndBundle(taskTitle, bundle);
+    public void delete(String taskTitle, String teamName, String bundleTitle) {
+        var team = Team.findTeamByName(teamName, teamRepository);
+        var creator = Member.findCreator(team, userRepository);
+        var bundle = Bundle.findBundleByCreator(creator, bundleTitle);
+        var task = Task.findTaskByTitleAndBundle(bundle, taskTitle);
 
         if (task.getStatus() == Status.DELETED)
             throw new IllegalArgumentException("The task has already been deleted and cannot be deleted again");
 
         task.setStatus(Status.DELETED);
         task.setVersion(task.getVersion());
-        repository.save(task);
 
         var oldTask = converter.mapTaskToOldTask(task);
         oldTaskRepository.save(oldTask);
+
+        task.getOldTasks().add(oldTask);
+        repository.save(task);
 
         messageUtil.sendMessage(
                 task.getBundle().getPerformer(),
                 String.format("The task has been deleted by %s", creator.getUser().getEmail()),
                 task.toString()
         );
-    }
-
-    @Override
-    public Task getTask(String taskTitle, String creatorName, String teamName, String bundleName) {
-        var team = teamRepository.findByName(teamName)
-                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
-        var user = userRepository.findByUsername(creatorName)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        var creator = memberRepository.findByUserAndTeam(user, team)
-                .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
-        var bundle = findBundle(bundleName, creator.getTeam());
-
-        return repository.findByTitleAndBundle(taskTitle, bundle)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
-    }
-
-    private Bundle findBundle(String bundleName, Team team) {
-        return bundleRepository.findByTeamAndTitle(team, bundleName)
-                .orElseThrow(() -> new IllegalArgumentException("Bundle not found"));
-    }
-
-    private Member findMemberByUsernameAndTeam(String username, String teamName) {
-        var team = teamRepository.findByName(teamName)
-                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
-        var user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        return memberRepository.findByUserAndTeam(user, team)
-                .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
-    }
-
-    private Member findCreator(String teamName) {
-        var user = User.getAuthUser(userRepository);
-        return findMemberByUsernameAndTeam(user.getTrueUsername(), teamName);
     }
 
     private Task createTask(TaskRequest request, Bundle bundle) {
@@ -136,15 +108,12 @@ public class TaskServiceImpl implements TaskService {
                 .status(Status.PENDING)
                 .dueDate(LocalDateTime.parse(request.getDueDate(), formatter))
                 .bundle(bundle)
+                .oldTasks(new ArrayList<>())
+                .comments(new ArrayList<>())
                 .build();
     }
 
-    private Task findTaskByTitleAndBundle(String taskTitle, Bundle bundle) {
-        return repository.findByTitleAndBundle(taskTitle, bundle)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
-    }
-
-    private void updateTaskFields(TaskRequest request, Task task) {
+    private void updateTaskFields(TaskRequest request, Task task, OldTask oldTask) {
         if (request.getDescription() != null)
             task.setDescription(request.getDescription());
 
@@ -158,6 +127,7 @@ public class TaskServiceImpl implements TaskService {
             task.setStatus(Status.valueOf(request.getStatus().toUpperCase()));
 
         task.setVersion(task.getVersion() + 1);
+        task.getOldTasks().add(oldTask);
         task.setComments(new ArrayList<>());
     }
 }

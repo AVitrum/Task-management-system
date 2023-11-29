@@ -4,9 +4,6 @@ import com.vitrum.api.data.models.*;
 import com.vitrum.api.data.response.*;
 import com.vitrum.api.data.submodels.Comment;
 import com.vitrum.api.data.submodels.OldTask;
-import com.vitrum.api.repositories.CommentRepository;
-import com.vitrum.api.repositories.MemberRepository;
-import com.vitrum.api.repositories.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,10 +14,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class Converter {
-
-    private final MemberRepository memberRepository;
-    private final TaskRepository taskRepository;
-    private final CommentRepository commentRepository;
 
     public TeamResponse mapTeamToTeamResponse(Team team) {
         return TeamResponse.builder()
@@ -40,10 +33,7 @@ public class Converter {
     }
 
     public List<MemberResponse> getMemberResponse(Team team) {
-
-        List<Member> members = memberRepository.findAllByTeam(team);
-
-        return members.stream()
+        return team.getMembers().stream()
                 .map(this::mapMemberToMemberResponse)
                 .collect(Collectors.toList());
     }
@@ -82,7 +72,7 @@ public class Converter {
                 .dueDate(task.getDueDate())
                 .changeTime(LocalDateTime.now())
                 .status(task.getStatus())
-                .comments(commentRepository.findAllByTask(task))
+                .comments(task.getComments())
                 .task(task)
                 .build();
     }
@@ -117,14 +107,11 @@ public class Converter {
     }
 
     public BundleResponse mapBundleToBundleResponse(Bundle bundle) {
-
-        List<Task> tasks = taskRepository.findAllByBundle(bundle);
-
         return BundleResponse.builder()
                 .title(bundle.getTitle())
                 .creatorEmail(bundle.getCreator().getUser().getEmail())
                 .performerEmail(bundle.getPerformer().getUser().getEmail())
-                .tasks(tasks.stream().map(this::mapTaskToTaskResponse).collect(Collectors.toList()))
+                .tasks(bundle.getTasks().stream().map(this::mapTaskToTaskResponse).collect(Collectors.toList()))
                 .build();
     }
 }

@@ -1,5 +1,6 @@
 package com.vitrum.api.services.implementation;
 
+import com.vitrum.api.data.enums.Status;
 import com.vitrum.api.data.models.*;
 import com.vitrum.api.data.submodels.Comment;
 import com.vitrum.api.repositories.*;
@@ -18,20 +19,24 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository repository;
     private final UserRepository userRepository;
     private final TeamRepository teamRepository;
-    private final MemberRepository memberRepository;
-    private final BundleRepository bundleRepository;
     private final TaskRepository taskRepository;
     private final MessageUtil messageUtil;
 
     @Override
     public void create(String teamName, String bundleTitle, String taskTitle, Map<String, String> request) {
-        var team = findTeamByName(teamName);
-        var author = findAuthor(team);
-        var bundle = findBundleByTeamAndTitle(team, bundleTitle);
-        var task = findTaskByTitleAndBundle(taskTitle, bundle);
+        var team = Team.findTeamByName(teamName, teamRepository);
+        var author = Member.findMemberByKey(User.getUsername(userRepository), team.getMembers());
+        var bundle = Bundle.findBundleByTeam(team, bundleTitle);
+        var task = Task.findTaskByTitleAndBundle(bundle, taskTitle);
+
+        if (task.getStatus().equals(Status.DELETED))
+            throw new IllegalArgumentException("Task has been deleted");
 
         Comment comment = createComment(task, author, request);
         repository.save(comment);
+
+        task.getComments().add(comment);
+        taskRepository.save(task);
 
         messageUtil.sendMessage(
                 bundle.getCreator(),
@@ -48,27 +53,4 @@ public class CommentServiceImpl implements CommentService {
                 .task(task)
                 .build();
     }
-
-    private Task findTaskByTitleAndBundle(String taskTitle, Bundle bundle) {
-        return taskRepository.findByTitleAndBundle(taskTitle, bundle)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
-    }
-
-    private Bundle findBundleByTeamAndTitle(Team team, String bundleTitle) {
-        return bundleRepository.findByTeamAndTitle(team, bundleTitle)
-                .orElseThrow(() -> new IllegalArgumentException("Bundle not found"));
-    }
-
-    private Team findTeamByName(String teamName) {
-        return teamRepository.findByName(teamName)
-                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
-    }
-
-    public Member findAuthor(Team team) {
-        return memberRepository.findByUserAndTeam(
-                User.getAuthUser(userRepository),
-                team
-        ).orElseThrow(() -> new IllegalArgumentException("Member not found"));
-    }
-
 }

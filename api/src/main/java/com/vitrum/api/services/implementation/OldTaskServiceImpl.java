@@ -1,18 +1,17 @@
 package com.vitrum.api.services.implementation;
 
+import com.vitrum.api.data.models.Team;
+import com.vitrum.api.data.models.User;
 import com.vitrum.api.data.response.HistoryResponse;
 import com.vitrum.api.data.models.Bundle;
-import com.vitrum.api.data.models.Member;
 import com.vitrum.api.data.models.Task;
 import com.vitrum.api.data.enums.Status;
 import com.vitrum.api.data.submodels.OldTask;
 import com.vitrum.api.repositories.*;
 import com.vitrum.api.services.interfaces.OldTaskService;
-import com.vitrum.api.services.interfaces.TaskService;
 import com.vitrum.api.util.Converter;
 import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,23 +23,26 @@ public class OldTaskServiceImpl implements OldTaskService {
 
     private final OldTaskRepository repository;
     private final TaskRepository taskRepository;
-    private final MemberRepository memberRepository;
     private final UserRepository userRepository;
     private final TeamRepository teamRepository;
     private final BundleRepository bundleRepository;
-    private final TaskService taskService;
+    private final CommentRepository commentRepository;
     private final MessageUtil messageUtil;
     private final Converter converter;
 
     @Override
-    public List<HistoryResponse> findAllByTitle(String taskTitle, String creatorName, String teamName, String bundleName) {
-        var creator = findCreator(creatorName, teamName);
-        var bundle = findBundle(bundleName, creator);
-        var task = findTaskByTitleAndBundle(taskTitle, bundle);
+    public List<HistoryResponse> findAllByTitle(
+            String taskTitle,
+            String teamName,
+            String bundleTitle
+    ) {
+        var team = Team.findTeamByName(teamName, teamRepository);
+        var task = Task.findTaskByTitleAndBundle(
+                Bundle.findBundleByTeam(team, bundleTitle),
+                taskTitle
+        );
 
-        List<OldTask> oldTasks = getOldTasks(task);
-
-        return oldTasks.stream()
+        return task.getOldTasks().stream()
                 .map(converter::mapOldTaskToHistoryResponse)
                 .collect(Collectors.toList());
     }
@@ -48,82 +50,72 @@ public class OldTaskServiceImpl implements OldTaskService {
     @Override
     public OldTask getByVersion(
             String taskTitle,
-            String creatorName,
             String teamName,
-            String bundleName,
+            String bundleTitle,
             Long version
     ) {
-        var creator = findCreator(creatorName, teamName);
-        var bundle = findBundle(bundleName, creator);
-        var task = findTaskByTitleAndBundle(taskTitle, bundle);
+        var task = Task.findTaskByTitleAndBundle(
+                Bundle.findBundleByTeam(Team.findTeamByName(
+                        teamName,
+                        teamRepository
+                ), bundleTitle),
+                taskTitle
+        );
 
-        return repository.findByTaskAndVersion(task, version)
-                .orElseThrow(() -> new IllegalArgumentException("Task version not found"));
+        return OldTask.findByTaskAndVersion(task, version);
     }
 
     @Override
     public void restore(
             String taskTitle,
-            String creatorName,
             String teamName,
-            String bundleName,
+            String bundleTitle,
             Long version
     ) {
-        OldTask oldTask = getByVersion(taskTitle, creatorName, teamName, bundleName, version);
+        OldTask oldTask = getByVersion(taskTitle, teamName, bundleTitle, version);
+        var bundle = Bundle.findBundleByTeam(
+                Team.findTeamByName(
+                        teamName,
+                teamRepository
+        ), bundleTitle);
+        var task = Task.findTaskByTitleAndBundle(bundle, taskTitle);
 
-        var creator = findCreator(creatorName, teamName);
-        var bundle = findBundle(bundleName, creator);
-        var task = findTaskByTitleAndBundle(taskTitle, bundle);
+        List<OldTask> oldTasks = task.getOldTasks().subList(version.intValue(), task.getOldTasks().size());
 
-        List<OldTask> oldTasks = getOldTasks(task);
-        repository.deleteAll(oldTasks.subList(version.intValue(), oldTasks.size()));
+        oldTasks.stream().map(OldTask::getComments).forEach(commentRepository::deleteAll);
+
+        repository.deleteAll(oldTasks);
 
         updateTaskFields(oldTask, task);
-
-        task.setStatus(Status.RESTORED);
+        task.setOldTasks(task.getOldTasks().subList(0, version.intValue()));
         taskRepository.save(task);
 
         messageUtil.sendMessage(bundle.getPerformer(), "The task has been restored", task.toString());
     }
 
     @Override
-    public void delete(String taskTitle, String creatorName, String teamName, String bundleName) {
-        var creator = findCreator(creatorName, teamName);
-        var bundle = findBundle(bundleName, creator);
-        var task = findTaskByTitleAndBundle(taskTitle, bundle);
+    public void delete(String taskTitle, String teamName, String bundleTitle) {
+        var bundle = Bundle.findBundleByTeam(
+                Team.findTeamByName(
+                        teamName,
+                        teamRepository
+                ), bundleTitle);
+        var task = Task.findTaskByTitleAndBundle(bundle, taskTitle);
 
-        List<OldTask> oldTasks = getOldTasks(task);
+        List<OldTask> oldTasks = task.getOldTasks();
         repository.deleteAll(oldTasks);
 
-        taskRepository.delete(taskService.getTask(taskTitle, creatorName, teamName, bundleName));
+        commentRepository.deleteAll(task.getComments());
+
+        bundle.getTasks().remove(task);
+        taskRepository.delete(task);
+
+        bundleRepository.save(bundle);
+
         messageUtil.sendMessage(
                 bundle.getPerformer(),
-                task.getTitle() + " has been deleted", "The task has been deleted by " + creator.getUser().getEmail()
+                task.getTitle() + " has been deleted", "The task has been deleted by " + User.getUsername(userRepository)
         );
-    }
-
-    private Task findTaskByTitleAndBundle(String taskTitle, Bundle bundle) {
-        return taskRepository.findByTitleAndBundle(taskTitle, bundle)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
-    }
-
-    private List<OldTask> getOldTasks(Task task) {
-        return repository.findAllByTask(task);
-    }
-
-    private Bundle findBundle(String bundleName, Member creator) {
-        return bundleRepository.findByCreatorAndTitle(creator, bundleName)
-                .orElseThrow(() -> new IllegalArgumentException("Bundle not found"));
-    }
-
-    private Member findCreator(String creatorName, String teamName) {
-        var team = teamRepository.findByName(teamName)
-                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
-        var user = userRepository.findByUsername(creatorName)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        return memberRepository.findByUserAndTeam(user, team)
-                .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
     }
 
     private void updateTaskFields(OldTask oldTask, Task task) {
@@ -132,7 +124,7 @@ public class OldTaskServiceImpl implements OldTaskService {
         task.setDescription(oldTask.getDescription());
         task.setVersion(oldTask.getVersion());
         task.setDueDate(oldTask.getDueDate());
-        task.setStatus(oldTask.getStatus());
+        task.setStatus(Status.RESTORED);
         task.setComments(oldTask.getComments());
     }
 }
