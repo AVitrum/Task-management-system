@@ -1,5 +1,6 @@
 package com.vitrum.api.data.models;
 
+import com.vitrum.api.repositories.TeamRepository;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,4 +28,9 @@ public class Team {
 
     @DBRef
     private List<Member> members;
+
+    public static Team findTeamByName(String teamName, TeamRepository teamRepository) {
+        return teamRepository.findByName(teamName)
+                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
+    }
 }

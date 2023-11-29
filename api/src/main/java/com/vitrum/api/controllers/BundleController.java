@@ -54,17 +54,6 @@ public class BundleController {
         }
     }
 
-    @GetMapping("/findByUser")
-    public ResponseEntity<?> findByUser(
-            @PathVariable String team
-    ) {
-        try {
-            return ResponseEntity.ok(service.findByUser(team));
-        } catch (IllegalArgumentException | IllegalStateException | UsernameNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
     @GetMapping("/{bundle}")
     public ResponseEntity<?> findByTitle(
             @PathVariable String team,

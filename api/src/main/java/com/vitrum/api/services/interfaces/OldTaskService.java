@@ -7,20 +7,18 @@ import java.util.List;
 
 public interface OldTaskService {
 
-    List<HistoryResponse> findAllByTitle(String taskTitle, String creatorName, String teamName, String bundleName);
+    List<HistoryResponse> findAllByTitle(String taskTitle, String teamName, String bundleName);
     OldTask getByVersion(
             String taskTitle,
-            String creatorName,
             String teamName,
             String bundleName,
             Long version
     );
     void restore(
             String taskTitle,
-            String creatorName,
             String teamName,
             String bundleName,
             Long version
     );
-    void delete(String taskTitle, String creatorName, String teamName, String bundleName);
+    void delete(String taskTitle, String teamName, String bundleName);
 }

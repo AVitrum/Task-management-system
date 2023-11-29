@@ -38,4 +38,11 @@ public class OldTask {
 
     @DBRef
     private Task task;
+
+    public static OldTask findByTaskAndVersion(Task task, Long version) {
+        for (var oldTask : task.getOldTasks())
+            if (oldTask != null && oldTask.getVersion().equals(version))
+                return oldTask;
+        throw new IllegalArgumentException("Version not found");
+    }
 }

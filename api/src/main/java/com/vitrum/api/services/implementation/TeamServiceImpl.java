@@ -43,6 +43,7 @@ public class TeamServiceImpl implements TeamService {
             var team = Team.builder()
                     .name(request.getName())
                     .members(new ArrayList<>())
+                    .bundles(new ArrayList<>())
                     .build();
             repository.save(team);
 
@@ -51,8 +52,13 @@ public class TeamServiceImpl implements TeamService {
                     .role(RoleInTeam.LEADER)
                     .isEmailsAllowed(true)
                     .team(team)
+                    .creatorBundles(new ArrayList<>())
+                    .performerBundles(new ArrayList<>())
                     .build();
             memberRepository.save(member);
+
+            team.getMembers().add(member);
+            repository.save(team);
 
             return TeamCreationResponse.builder()
                     .id(team.getId())
@@ -79,8 +85,13 @@ public class TeamServiceImpl implements TeamService {
                 .user(user)
                 .role(RoleInTeam.MEMBER)
                 .team(team)
+                .creatorBundles(new ArrayList<>())
+                .performerBundles(new ArrayList<>())
                 .build();
         memberRepository.save(member);
+
+        team.getMembers().add(member);
+        repository.save(team);
 
         messageUtil.sendMessage(
                 member,

@@ -33,4 +33,25 @@ public class Bundle {
 
     @DBRef
     private List<Task> tasks;
+
+    public static Bundle findBundleByCreator(Member creator, String title) {
+        for (var bundle : creator.getCreatorBundles())
+            if (bundle != null && bundle.getTitle().equals(title))
+                return bundle;
+        throw new IllegalArgumentException("Bundle not found");
+    }
+
+    public static Bundle findBundleByTeam(Team team, String title) {
+        for (var bundle : team.getBundles())
+            if (bundle != null && bundle.getTitle().equals(title))
+                return bundle;
+        throw new IllegalArgumentException("Bundle not found");
+    }
+
+    public static Bundle findBundleByPerformer(Member performer, String title) {
+        for (var bundle : performer.getPerformerBundles())
+            if (bundle != null && bundle.getTitle().equals(title))
+                return bundle;
+        throw new IllegalArgumentException("Bundle not found");
+    }
 }

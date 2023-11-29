@@ -1,6 +1,7 @@
 package com.vitrum.api.data.models;
 
 import com.vitrum.api.data.enums.RoleInTeam;
+import com.vitrum.api.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -39,5 +40,20 @@ public class Member {
 
     public boolean checkPermissionToCreate() {
         return this.getRole().equals(RoleInTeam.MEMBER);
+    }
+
+    public static Member findMemberByKey(String key, List<Member> members) {
+        for (var member : members)
+            if (member != null && member.getUser().getTrueUsername().equals(key))
+                return member;
+        throw new IllegalArgumentException("Member not found");
+    }
+
+    public static Member findCreator(Team team, UserRepository userRepository) {
+        return findMemberByKey(User.getUsername(userRepository), team.getMembers());
+    }
+
+    public static Member findPerformer(String performer, Team team) {
+        return findMemberByKey(performer, team.getMembers());
     }
 }

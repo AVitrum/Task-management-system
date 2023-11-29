@@ -24,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -46,11 +47,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
+                .tokens(new ArrayList<>())
                 .isBanned(false)
                 .build();
 
-        var savedUser = repository.save(user);
         var jwtToken = jwtService.generateToken(user);
+        var savedUser = repository.save(user);
         saveUserToken(savedUser, jwtToken);
     }
 
@@ -126,7 +128,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     public void revokeAllUserTokens(User user) {
-        var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
+        var validUserTokens = user.getTokens();
 
         if (validUserTokens.isEmpty())
             return;
@@ -148,6 +150,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .revoked(false)
                 .build();
         tokenRepository.save(token);
+        user.getTokens().add(token);
+        repository.save(user);
     }
 }
 

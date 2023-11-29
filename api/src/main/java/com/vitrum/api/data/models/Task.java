@@ -43,6 +43,13 @@ public class Task {
     @DBRef
     private List<Comment> comments;
 
+    public static Task findTaskByTitleAndBundle(Bundle bundle, String title) {
+        for (var task : bundle.getTasks())
+            if (task != null && task.getTitle().equals(title))
+                return task;
+        throw new IllegalArgumentException("Task not found");
+    }
+
     @Override
     public String toString() {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
