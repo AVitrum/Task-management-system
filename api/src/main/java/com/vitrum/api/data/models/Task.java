@@ -1,21 +1,19 @@
 package com.vitrum.api.data.models;
 
 import com.vitrum.api.data.enums.Status;
-import com.vitrum.api.data.submodels.Comment;
 import com.vitrum.api.data.submodels.OldTask;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-@Document(collection = "tasks")
+@Entity
+@Table(name = "task")
 @Data
 @Builder
 @NoArgsConstructor
@@ -23,8 +21,10 @@ import java.util.List;
 public class Task {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
+    @Column(nullable = false, unique = true)
     private String title;
     private String description;
     private LocalDateTime creationTime;
@@ -32,23 +32,15 @@ public class Task {
     private Long priority;
     private Long version;
 
+    @Enumerated(EnumType.STRING)
     private Status status;
 
-    @DBRef
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bundle_id")
     private Bundle bundle;
 
-    @DBRef
+    @OneToMany(mappedBy = "task")
     private List<OldTask> oldTasks;
-
-    @DBRef
-    private List<Comment> comments;
-
-    public static Task findTaskByTitleAndBundle(Bundle bundle, String title) {
-        for (var task : bundle.getTasks())
-            if (task != null && task.getTitle().equals(title))
-                return task;
-        throw new IllegalArgumentException("Task not found");
-    }
 
     @Override
     public String toString() {

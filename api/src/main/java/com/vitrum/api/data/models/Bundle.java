@@ -1,16 +1,15 @@
 package com.vitrum.api.data.models;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
-@Document(collection = "bundles")
+@Entity
+@Table(name = "bundle")
 @Data
 @Builder
 @NoArgsConstructor
@@ -18,40 +17,24 @@ import java.util.List;
 public class Bundle {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String title;
 
-    @DBRef
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id")
     private Team team;
 
-    @DBRef
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id")
     private Member creator;
 
-    @DBRef
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "performer_id")
     private Member performer;
 
-    @DBRef
+    @OneToMany(mappedBy = "bundle")
     private List<Task> tasks;
-
-    public static Bundle findBundleByCreator(Member creator, String title) {
-        for (var bundle : creator.getCreatorBundles())
-            if (bundle != null && bundle.getTitle().equals(title))
-                return bundle;
-        throw new IllegalArgumentException("Bundle not found");
-    }
-
-    public static Bundle findBundleByTeam(Team team, String title) {
-        for (var bundle : team.getBundles())
-            if (bundle != null && bundle.getTitle().equals(title))
-                return bundle;
-        throw new IllegalArgumentException("Bundle not found");
-    }
-
-    public static Bundle findBundleByPerformer(Member performer, String title) {
-        for (var bundle : performer.getPerformerBundles())
-            if (bundle != null && bundle.getTitle().equals(title))
-                return bundle;
-        throw new IllegalArgumentException("Bundle not found");
-    }
 }
+

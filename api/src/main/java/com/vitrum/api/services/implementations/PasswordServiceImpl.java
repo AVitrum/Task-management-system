@@ -1,11 +1,11 @@
-package com.vitrum.api.services.implementation;
+package com.vitrum.api.services.implementations;
 
+import com.vitrum.api.data.models.User;
+import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.data.request.ChangePasswordRequest;
 import com.vitrum.api.data.request.ResetPasswordRequest;
-import com.vitrum.api.data.models.User;
 import com.vitrum.api.data.submodels.Recoverycode;
 import com.vitrum.api.repositories.RecoverycodeRepository;
-import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.services.interfaces.PasswordService;
 import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
@@ -28,17 +28,17 @@ public class PasswordServiceImpl implements PasswordService {
 
     @Override
     public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
-        var user = User.getAuthUser(repository);
+        var user = User.getUserFromPrincipal(connectedUser);
 
-        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword()))
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             throw new IllegalStateException("Wrong password!");
-
-        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword()))
+        }
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
             throw new IllegalStateException("Password is the same as the current one!");
-
-        if (!request.getNewPassword().equals(request.getConfirmationPassword()))
+        }
+        if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
             throw new IllegalStateException("Passwords do not match!");
-
+        }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         repository.save(user);
@@ -48,22 +48,21 @@ public class PasswordServiceImpl implements PasswordService {
     public void resetPassword(ResetPasswordRequest request) {
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Wrong email!"));
-        var recoverycode = recoverycodeRepository.findByUser(user)
-                .orElseThrow(() -> new IllegalArgumentException("Code not found"));
+        var recoverycode = user.getRecoverycode().get(0);
 
         if (recoverycode.isExpired()) {
             recoverycodeRepository.delete(recoverycode);
             throw new IllegalStateException("Code is expired");
         }
-        if (!recoverycode.getCode().equals(request.getCode()))
+        if (!recoverycode.getCode().equals(request.getCode())) {
             throw new IllegalStateException("The codes do not match");
-
-        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword()))
+        }
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
             throw new IllegalStateException("Password is the same as the current one!");
-
-        if (!request.getNewPassword().equals(request.getConfirmationPassword()))
+        }
+        if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
             throw new IllegalStateException("Passwords do not match!");
-
+        }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         repository.save(user);
@@ -80,9 +79,8 @@ public class PasswordServiceImpl implements PasswordService {
     }
 
     private Recoverycode generateRecoverycode(User user) {
-        if (recoverycodeRepository.findByUser(user).isPresent()) {
-            Recoverycode recoverycode = recoverycodeRepository.findByUser(user)
-                    .orElseThrow(() -> new IllegalArgumentException("Code not found"));
+        if (!user.getRecoverycode().isEmpty()) {
+            Recoverycode recoverycode = user.getRecoverycode().get(0);
             recoverycodeRepository.delete(recoverycode);
         }
 

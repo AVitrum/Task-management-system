@@ -77,7 +77,6 @@ public class SecurityConfiguration {
                 "http://localhost:5173",
                 "http://ec2-16-171-6-194.eu-north-1.compute.amazonaws.com"
         ));
-
         config.setAllowedMethods(Arrays.asList(
                 "GET",
                 "POST",
@@ -86,7 +85,6 @@ public class SecurityConfiguration {
                 "DELETE",
                 "OPTIONS"
         ));
-
         config.addAllowedHeader("*");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

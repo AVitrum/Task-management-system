@@ -1,19 +1,27 @@
 package com.vitrum.api.repositories;
 
 import com.vitrum.api.data.submodels.Token;
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface TokenRepository extends MongoRepository<Token, String> {
+public interface TokenRepository extends JpaRepository<Token, Long> {
 
-    @Query("{$and: [{'user._id': ?0}, {$or: [{'expired': false}, {'revoked': false}]}]}")
-    List<Token> findAllValidTokenByUser(String userId);
+    @Query(value = """
+      select t from Token t inner join User u\s
+      on t.user.id = u.id\s
+      where u.id = :id and (t.expired = false or t.revoked = false)\s
+      """)
+    List<Token> findAllValidTokenByUser(Long id);
 
-    @Query("{$and: [{'user._id': ?0}, {$or: [{'expired': true}, {'revoked': true}]}]}")
-    List<Token> findAllExpiredTokenByUser(String userId);
+    @Query(value = """
+      select t from Token t inner join User u\s
+      on t.user.id = u.id\s
+      where u.id = :id and (t.expired = true or t.revoked = true )\s
+      """)
+    List<Token> findAllExpiredTokenByUser(Long id);
 
     Optional<Token> findByToken(String token);
 }

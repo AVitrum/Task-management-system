@@ -6,23 +6,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class HistoryResponse {
-    private String taskId;
-    private String id;
+    private Long taskId;
+    private Long id;
     private Long version;
     private String title;
-    private String status;
     private String description;
     private LocalDateTime creationTime;
     private LocalDateTime dueDate;
     private LocalDateTime changeTime;
     private Long priority;
-    private List<CommentResponse> comments;
+    private String status;
     private MemberResponse creator;
 }

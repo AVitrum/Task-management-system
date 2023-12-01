@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Map;
 
 @RestController
@@ -19,10 +20,11 @@ public class TeamController {
 
     @PostMapping("/create")
     public ResponseEntity<?> create(
-            @RequestBody TeamCreationRequest request
+            @RequestBody TeamCreationRequest request,
+            Principal connectedUser
     ) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request));
+            return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request, connectedUser));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -56,9 +58,10 @@ public class TeamController {
 
     @GetMapping("/findByUser")
     public ResponseEntity<?> showIfInTeam(
+            Principal connectedUser
     ) {
         try {
-            return ResponseEntity.ok(service.findIfInTeam());
+            return ResponseEntity.ok(service.findIfInTeam(connectedUser));
         } catch (IllegalArgumentException | UsernameNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

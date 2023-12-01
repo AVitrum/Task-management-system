@@ -1,8 +1,8 @@
 package com.vitrum.api.controllers;
 
+import com.vitrum.api.services.interfaces.UserService;
 import com.vitrum.api.data.request.ChangeUserCredentials;
 import com.vitrum.api.data.request.RegisterRequest;
-import com.vitrum.api.services.interfaces.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -40,7 +40,7 @@ public class UserController {
         }
     }
 
-    @PatchMapping("/credentials")
+    @PatchMapping("/changeCredentials")
     public ResponseEntity<?> changeCredentials(@RequestBody ChangeUserCredentials request) {
         try {
             service.changeCredentials(request);
@@ -50,8 +50,8 @@ public class UserController {
         }
     }
 
-    @PatchMapping("/status")
-    public ResponseEntity<?> changeStatus(@RequestBody Map<String, String> username) {
+    @PutMapping("/ban")
+    public ResponseEntity<?> ban(@RequestBody Map<String, String> username) {
         try {
             service.changeStatus(username.get("username"));
             return ResponseEntity.ok("Okay");

@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/api/teams/{team}/bundles/{bundle}/tasks")
 @RequiredArgsConstructor
@@ -19,10 +21,11 @@ public class TaskController {
     public ResponseEntity<?> create(
             @RequestBody TaskRequest request,
             @PathVariable String team,
-            @PathVariable String bundle
+            @PathVariable String bundle,
+            Principal connectedUser
     ) {
         try {
-            service.create(request, team, bundle);
+            service.create(request, connectedUser, team, bundle);
             return ResponseEntity.status(HttpStatus.CREATED).body("Task created successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -36,10 +39,11 @@ public class TaskController {
             @RequestBody TaskRequest request,
             @PathVariable String team,
             @PathVariable String task,
-            @PathVariable String bundle
+            @PathVariable String bundle,
+            Principal connectedUser
     ) {
         try {
-            service.change(request, task, team, bundle);
+            service.change(request, task, connectedUser, team, bundle);
             return ResponseEntity.ok("Task changed successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -52,10 +56,11 @@ public class TaskController {
     public ResponseEntity<?> delete(
             @PathVariable String team,
             @PathVariable String task,
-            @PathVariable String bundle
+            @PathVariable String bundle,
+            Principal connectedUser
     ) {
         try {
-            service.delete(task, team, bundle);
+            service.delete(task, connectedUser, team, bundle);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

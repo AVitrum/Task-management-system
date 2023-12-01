@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Map;
 
 @RestController
@@ -18,11 +19,12 @@ public class MemberController {
 
     @PatchMapping("/changeRole")
     public ResponseEntity<?> changeRole(
+            Principal connectedUser,
             @RequestBody Map<String, String> request,
             @PathVariable String team
     ) {
         try {
-            service.changeRole(request, team);
+            service.changeRole(connectedUser, request, team);
             return ResponseEntity.ok("Role changed successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -33,10 +35,11 @@ public class MemberController {
 
     @GetMapping("/emailsMessagingStatus")
     public ResponseEntity<?> emailsMessagingStatus(
-            @PathVariable String team
+            @PathVariable String team,
+            Principal connectedUser
     ) {
         try {
-            return ResponseEntity.ok(service.getEmailsMessagingStatus(team));
+            return ResponseEntity.ok(service.getEmailsMessagingStatus(team, connectedUser));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -44,10 +47,11 @@ public class MemberController {
 
     @PatchMapping("/changeEmailsMessagingStatus")
     public ResponseEntity<?> changeEmailsMessagingStatus(
-            @PathVariable String team
+            @PathVariable String team,
+            Principal connectedUser
     ) {
         try {
-            service.changeEmailsMessagingStatus(team);
+            service.changeEmailsMessagingStatus(team, connectedUser);
             return ResponseEntity.ok("Changed");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -56,11 +60,12 @@ public class MemberController {
 
     @DeleteMapping("/kick")
     public ResponseEntity<?> kick(
+            Principal connectedUser,
             @RequestBody Map<String, String> request,
             @PathVariable String team
     ) {
         try {
-            service.kick(request, team);
+            service.kick(connectedUser, request, team);
             return ResponseEntity.ok("Kicked successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

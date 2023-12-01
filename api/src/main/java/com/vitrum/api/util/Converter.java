@@ -1,10 +1,12 @@
 package com.vitrum.api.util;
 
-import com.vitrum.api.data.models.*;
+import com.vitrum.api.data.models.User;
 import com.vitrum.api.data.response.*;
-import com.vitrum.api.data.submodels.Comment;
+import com.vitrum.api.data.models.Bundle;
+import com.vitrum.api.data.models.Member;
 import com.vitrum.api.data.submodels.OldTask;
-import lombok.RequiredArgsConstructor;
+import com.vitrum.api.data.models.Task;
+import com.vitrum.api.data.models.Team;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -12,7 +14,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class Converter {
 
     public TeamResponse mapTeamToTeamResponse(Team team) {
@@ -33,32 +34,17 @@ public class Converter {
     }
 
     public List<MemberResponse> getMemberResponse(Team team) {
-        return team.getMembers().stream()
+        List<Member> members = team.getMembers();
+        return members.stream()
                 .map(this::mapMemberToMemberResponse)
                 .collect(Collectors.toList());
     }
 
-    public List<CommentResponse> getCommentResponse(OldTask oldTask) {
-
-        List<Comment> comments = oldTask.getComments();
-
-        return comments.stream()
-                .map(this::mapCommentToCommentResponse)
-                .collect(Collectors.toList());
-    }
-
-    private CommentResponse mapCommentToCommentResponse(Comment comment) {
-        return CommentResponse.builder()
-                .author(comment.getAuthor().getUser().getTrueUsername())
-                .text(comment.getText())
-                .build();
-    }
-
-    public MemberResponse mapMemberToMemberResponse(Member member) {
+    public MemberResponse mapMemberToMemberResponse(Member membership) {
         return MemberResponse.builder()
-                .id(member.getId())
-                .name(member.getUser().getTrueUsername())
-                .role(member.getRole())
+                .id(membership.getId())
+                .name(membership.getUser().getTrueUsername())
+                .role(membership.getRole())
                 .build();
     }
 
@@ -72,7 +58,6 @@ public class Converter {
                 .dueDate(task.getDueDate())
                 .changeTime(LocalDateTime.now())
                 .status(task.getStatus())
-                .comments(task.getComments())
                 .task(task)
                 .build();
     }
@@ -90,7 +75,6 @@ public class Converter {
                 .creationTime(oldTask.getCreationTime())
                 .dueDate(oldTask.getDueDate())
                 .creator(mapMemberToMemberResponse(oldTask.getTask().getBundle().getCreator()))
-                .comments(getCommentResponse(oldTask))
                 .build();
     }
 
@@ -109,8 +93,8 @@ public class Converter {
     public BundleResponse mapBundleToBundleResponse(Bundle bundle) {
         return BundleResponse.builder()
                 .title(bundle.getTitle())
-                .creatorEmail(bundle.getCreator().getUser().getEmail())
-                .performerEmail(bundle.getPerformer().getUser().getEmail())
+                .creatorEmail(bundle.getCreator().getUser().getTrueUsername())
+                .performerEmail(bundle.getPerformer().getUser().getTrueUsername())
                 .tasks(bundle.getTasks().stream().map(this::mapTaskToTaskResponse).collect(Collectors.toList()))
                 .build();
     }

@@ -3,17 +3,13 @@ package com.vitrum.api.repositories;
 import com.vitrum.api.data.models.Member;
 import com.vitrum.api.data.models.User;
 import com.vitrum.api.data.models.Team;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface MemberRepository extends MongoRepository<Member, String> {
-
+public interface MemberRepository extends JpaRepository<Member, Long> {
+    Optional<Member> findByUser(User user);
     Optional<Member> findByUserAndTeam(User user, Team team);
-
-    List<Member> findAllByUser(User user);
-    List<Member> findAllByTeam(Team team);
-
-    Boolean existsByUserAndTeam(User user, Team team);
+    Optional<List<Member>> findAllByUser(User user);
 }

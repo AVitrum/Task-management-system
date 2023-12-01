@@ -1,17 +1,16 @@
 package com.vitrum.api.data.submodels;
 
 import com.vitrum.api.data.models.User;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalTime;
 
-@Document(collection = "recoverycodes")
+@Entity
+@Table(name = "recoverycode")
 @Data
 @Builder
 @NoArgsConstructor
@@ -19,13 +18,15 @@ import java.time.LocalTime;
 public class Recoverycode {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private Long code;
     private LocalTime creationTime;
 
-    @DBRef
-    private User user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    public User user;
 
     public boolean isExpired() {
         LocalTime creationTime = this.getCreationTime();

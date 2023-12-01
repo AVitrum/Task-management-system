@@ -20,6 +20,6 @@ public class ApplicationAuditAware implements AuditorAware<Long> {
             return Optional.empty();
         }
         User userPrincipal = (User) authentication.getPrincipal();
-        return Optional.of(Long.parseLong(userPrincipal.getId()));
+        return Optional.ofNullable(userPrincipal.getId());
     }
 }

@@ -1,22 +1,22 @@
-package com.vitrum.api.services.implementation;
+package com.vitrum.api.services.implementations;
 
-import com.vitrum.api.data.request.TeamCreationRequest;
-import com.vitrum.api.data.response.TeamCreationResponse;
-import com.vitrum.api.data.response.TeamResponse;
-import com.vitrum.api.data.models.Member;
 import com.vitrum.api.data.models.Team;
-import com.vitrum.api.data.models.User;
-import com.vitrum.api.data.enums.RoleInTeam;
-import com.vitrum.api.repositories.MemberRepository;
 import com.vitrum.api.repositories.TeamRepository;
 import com.vitrum.api.repositories.UserRepository;
+import com.vitrum.api.data.response.*;
+import com.vitrum.api.data.models.Member;
+import com.vitrum.api.repositories.MemberRepository;
+import com.vitrum.api.data.request.TeamCreationRequest;
+import com.vitrum.api.data.models.User;
+import com.vitrum.api.data.enums.RoleInTeam;
 import com.vitrum.api.services.interfaces.TeamService;
 import com.vitrum.api.util.Converter;
-import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,34 +30,23 @@ public class TeamServiceImpl implements TeamService {
     private final MemberRepository memberRepository;
     private final UserRepository userRepository;
     private final Converter converter;
-    private final MessageUtil messageUtil;
 
     @Override
-    public TeamCreationResponse create(TeamCreationRequest request) {
+    public TeamCreationResponse create(TeamCreationRequest request, Principal connectedUser) {
         try {
-            var user = User.getAuthUser(userRepository);
-
-            if (repository.existsByName(request.getName()))
-                throw new IllegalArgumentException("Team with the same name already exists");
-
+            var user = User.getUserFromPrincipal(connectedUser);
             var team = Team.builder()
                     .name(request.getName())
                     .members(new ArrayList<>())
-                    .bundles(new ArrayList<>())
                     .build();
             repository.save(team);
-
             var member = Member.builder()
                     .user(user)
                     .role(RoleInTeam.LEADER)
-                    .isEmailsAllowed(true)
                     .team(team)
-                    .creatorBundles(new ArrayList<>())
-                    .performerBundles(new ArrayList<>())
+                    .isEmailsAllowed(true)
                     .build();
             memberRepository.save(member);
-
-            team.getMembers().add(member);
             repository.save(team);
 
             return TeamCreationResponse.builder()
@@ -68,6 +57,8 @@ public class TeamServiceImpl implements TeamService {
 
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException("Can't create");
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("Team with the same name already exists");
         }
     }
 
@@ -78,39 +69,29 @@ public class TeamServiceImpl implements TeamService {
         var user = userRepository.findByUsername(request.get("username"))
                 .orElseThrow(() -> new UsernameNotFoundException("Can't find user"));
 
-        if (memberRepository.existsByUserAndTeam(user, team))
+        if (inTeam(user, team))
             throw new IllegalArgumentException("The user is already in the team");
 
         var member = Member.builder()
                 .user(user)
                 .role(RoleInTeam.MEMBER)
                 .team(team)
-                .creatorBundles(new ArrayList<>())
-                .performerBundles(new ArrayList<>())
+                .isEmailsAllowed(true)
                 .build();
         memberRepository.save(member);
-
-        team.getMembers().add(member);
         repository.save(team);
-
-        messageUtil.sendMessage(
-                member,
-                String.format("You have been added to the team: %s.", teamName),
-                "TMS Info"
-        );
     }
 
     public List<TeamResponse> getAll() {
-        return repository.findAll()
-                .stream()
-                .map(converter::mapTeamToTeamResponse)
-                .collect(Collectors.toList());
+        var teams = repository.findAll();
+        return teams.stream().map(converter::mapTeamToTeamResponse).collect(Collectors.toList());
     }
 
     @Override
-    public List<TeamResponse> findIfInTeam() {
-        var user = User.getAuthUser(userRepository);
-        List<Member> members = memberRepository.findAllByUser(user);
+    public List<TeamResponse> findIfInTeam(Principal connectedUser) {
+        var user = User.getUserFromPrincipal(connectedUser);
+        List<Member> members = memberRepository.findAllByUser(user)
+                .orElseThrow(() -> new IllegalArgumentException("Can't find"));
 
         return members.stream()
                 .map(member -> converter.mapTeamToTeamResponse(member.getTeam()))
@@ -122,4 +103,10 @@ public class TeamServiceImpl implements TeamService {
         var team = repository.findByName(name).orElseThrow(() -> new IllegalArgumentException("Team not found"));
         return converter.mapTeamToTeamResponse(team);
     }
+
+    private Boolean inTeam(User user, Team team) {
+        return team.getMembers().contains(memberRepository.findByUser(user)
+                .orElse(null));
+    }
+
 }

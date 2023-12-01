@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Map;
 
 @RestController
@@ -19,10 +20,11 @@ public class BundleController {
     @PostMapping("/create")
     public ResponseEntity<?> create(
            @RequestBody Map<String, String> request,
-           @PathVariable String team
+           @PathVariable String team,
+           Principal connectedUser
     ) {
         try {
-            service.create(team, request.get("title"));
+            service.create(team, connectedUser, request.get("title"));
             return ResponseEntity.status(HttpStatus.CREATED).body("Created");
         } catch (IllegalArgumentException | UsernameNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -33,48 +35,26 @@ public class BundleController {
     public ResponseEntity<?> addPerformer(
             @RequestBody Map<String, String> request,
             @PathVariable String team,
-            @PathVariable String bundle
+            @PathVariable String bundle,
+            Principal connectedUser
     ) {
         try {
-            service.addPerformer(team, bundle, request.get("performer"));
+            service.addPerformer(team, bundle, connectedUser, request.get("performer"));
             return ResponseEntity.ok("Added");
         } catch (IllegalArgumentException | UsernameNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @GetMapping
-    public ResponseEntity<?> findAll(
-            @PathVariable String team
+    @GetMapping("/{bundle}/findByUser")
+    public ResponseEntity<?> findByUser(
+            @PathVariable String team,
+            @PathVariable String bundle,
+            Principal connectedUser
     ) {
         try {
-            return ResponseEntity.ok(service.findAll(team));
+            return ResponseEntity.ok(service.findByUser(team, bundle, connectedUser));
         } catch (IllegalArgumentException | UsernameNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @GetMapping("/{bundle}")
-    public ResponseEntity<?> findByTitle(
-            @PathVariable String team,
-            @PathVariable String bundle
-    ) {
-        try {
-            return ResponseEntity.ok(service.findByTitle(team, bundle));
-        } catch (IllegalArgumentException | IllegalStateException | UsernameNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/{bundle}")
-    public ResponseEntity<?> deleteByTitle(
-            @PathVariable String team,
-            @PathVariable String bundle
-    ) {
-        try {
-            service.deleteByTitle(team, bundle);
-            return ResponseEntity.ok("Deleted");
-        } catch (IllegalArgumentException | IllegalStateException | UsernameNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

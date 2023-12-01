@@ -1,12 +1,12 @@
-package com.vitrum.api.services.implementation;
+package com.vitrum.api.services.implementations;
 
+import com.vitrum.api.data.enums.Role;
+import com.vitrum.api.data.models.User;
+import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.config.JwtService;
 import com.vitrum.api.data.request.ChangeUserCredentials;
 import com.vitrum.api.data.request.RegisterRequest;
 import com.vitrum.api.data.response.UserProfileResponse;
-import com.vitrum.api.data.models.User;
-import com.vitrum.api.data.enums.Role;
-import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.services.interfaces.UserService;
 import com.vitrum.api.util.Converter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +28,6 @@ public class UserServiceImpl implements UserService {
     public UserProfileResponse profile(HttpServletRequest request) {
         String jwt = extractJwtFromRequest(request);
         String userEmail = jwtService.extractEmail(jwt);
-
         User user = repository.findByEmail(userEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
@@ -40,6 +39,7 @@ public class UserServiceImpl implements UserService {
         authenticationServiceImpl.register(request);
         User user = repository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
         try {
             user.setRole(Role.valueOf(request.getRole()));
             repository.save(user);
@@ -52,16 +52,17 @@ public class UserServiceImpl implements UserService {
     public void changeCredentials(ChangeUserCredentials request) {
         User user = repository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
         try {
-            if (request.getRole() != null)
+            if (request.getRole() != null) {
                 user.setRole(Role.valueOf(request.getRole()));
-
-            if (request.getEmail() != null)
+            }
+            if (request.getEmail() != null) {
                 user.setEmail(request.getEmail());
-
-            if (request.getNewUsername() != null)
+            }
+            if (request.getNewUsername() != null) {
                 user.setUsername(request.getNewUsername());
-
+            }
             repository.save(user);
         } catch (IllegalArgumentException e) {
             user.setRole(Role.USER);
@@ -85,10 +86,9 @@ public class UserServiceImpl implements UserService {
 
     private String extractJwtFromRequest(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
-
-        if (authHeader != null && authHeader.startsWith("Bearer "))
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);
-
+        }
         throw new IllegalArgumentException("Invalid authorization header!");
     }
 }

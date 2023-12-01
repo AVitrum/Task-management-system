@@ -1,16 +1,15 @@
 package com.vitrum.api.repositories;
 
 import com.vitrum.api.data.models.User;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface UserRepository extends MongoRepository<User, String> {
+public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
     Optional<User> findByUsername(String username);
 
-    Boolean existsByEmail(String email);
     Boolean existsByUsername(String username);
-    Boolean existsByEmailOrUsername(String email, String username);
+    Boolean existsByEmail(String email);
 }

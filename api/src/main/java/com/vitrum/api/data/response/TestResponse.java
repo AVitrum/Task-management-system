@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class TestResponse {
 
     private String name;
-    private String id;
+    private Long id;
     private String role;
 }

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TeamCreationResponse {
 
-    private String id;
+    private Long id;
     private String name;
     private UserProfileResponse creator;
 }

@@ -1,4 +1,4 @@
-package com.vitrum.api.services.implementation;
+package com.vitrum.api.services.implementations;
 
 import com.vitrum.api.repositories.TokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,20 +23,16 @@ public class LogoutServiceImpl implements LogoutHandler {
     ) {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-
         if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
             return;
         }
-
         jwt = authHeader.substring(7);
         var storedToken = tokenRepository.findByToken(jwt)
                 .orElse(null);
-
         if (storedToken != null) {
             storedToken.setExpired(true);
             storedToken.setRevoked(true);
             tokenRepository.save(storedToken);
-
             SecurityContextHolder.clearContext();
         }
     }
