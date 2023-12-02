@@ -52,7 +52,8 @@ public class SecurityConfiguration {
                         ).hasRole(ADMIN.name())
                         .requestMatchers(
                                 "/api/users/**",
-                                "/api/teams/**"
+                                "/api/teams/**",
+                                "/api/files/**"
                         ).hasAnyRole(USER.name(), ADMIN.name())
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
