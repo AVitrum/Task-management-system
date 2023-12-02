@@ -3,22 +3,23 @@ package com.vitrum.api.services.interfaces;
 import com.vitrum.api.data.response.HistoryResponse;
 import com.vitrum.api.data.submodels.OldTask;
 
+import java.security.Principal;
 import java.util.List;
 
 public interface OldTaskService {
 
-    List<HistoryResponse> findAllByTitle(String taskTitle, String teamName, String bundleTitle);
+    List<HistoryResponse> findAllByTitle(String task, String team, String bundle, Principal connectedUser);
     OldTask getByVersion(
-            String taskTitle,
-            String teamName,
-            String bundleTitle,
-            Long version
-    );
+            String task,
+            String team,
+            String bundle,
+            Long version,
+            Principal connectedUser);
     void restore(
-            String taskTitle,
-            String teamName,
-            String bundleTitle,
-            Long version
-    );
-    void delete(String taskTitle, String teamName, String bundleTitle);
+            String task,
+            String team,
+            String bundle,
+            Long version,
+            Principal connectedUser);
+    void delete(String task, String team, String bundle, Principal connectedUser);
 }

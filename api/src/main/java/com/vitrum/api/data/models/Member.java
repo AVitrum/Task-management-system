@@ -1,12 +1,14 @@
 package com.vitrum.api.data.models;
 
 import com.vitrum.api.data.enums.RoleInTeam;
+import com.vitrum.api.repositories.MemberRepository;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.security.Principal;
 import java.util.List;
 
 @Entity
@@ -40,7 +42,14 @@ public class Member {
     @OneToMany(mappedBy = "performer")
     private List<Bundle> performerBundles;
 
-    public boolean checkPermissionToCreate() {
+    public boolean checkPermission() {
         return this.getRole().equals(RoleInTeam.MEMBER);
+    }
+
+    public static Member getActionPerformer(MemberRepository memberRepository, Principal connectedUser, Team team) {
+        return memberRepository.findByUserAndTeam(
+                User.getUserFromPrincipal(connectedUser),
+                team
+        ).orElseThrow(() -> new IllegalArgumentException("Member not found"));
     }
 }

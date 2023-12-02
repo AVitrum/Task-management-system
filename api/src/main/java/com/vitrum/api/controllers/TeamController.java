@@ -25,8 +25,10 @@ public class TeamController {
     ) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request, connectedUser));
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
@@ -38,10 +40,10 @@ public class TeamController {
         try {
             service.addToTeam(team, request);
             return ResponseEntity.ok("Member added successfully");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
@@ -51,8 +53,10 @@ public class TeamController {
     ) {
         try {
             return ResponseEntity.ok(service.findByName(name));
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
@@ -61,9 +65,11 @@ public class TeamController {
             Principal connectedUser
     ) {
         try {
-            return ResponseEntity.ok(service.findIfInTeam(connectedUser));
-        } catch (IllegalArgumentException | UsernameNotFoundException e) {
+            return ResponseEntity.ok(service.findByUser(connectedUser));
+        } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 

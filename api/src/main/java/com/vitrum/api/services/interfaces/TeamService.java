@@ -13,6 +13,6 @@ public interface TeamService {
     TeamCreationResponse create(TeamCreationRequest request, Principal connectedUser);
     void addToTeam(String teamName, Map<String, String> request);
     List<TeamResponse> getAll();
-    List<TeamResponse> findIfInTeam(Principal connectedUser);
+    List<TeamResponse> findByUser(Principal connectedUser);
     TeamResponse findByName(String name);
 }

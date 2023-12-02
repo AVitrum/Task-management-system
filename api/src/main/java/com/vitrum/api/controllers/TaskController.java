@@ -17,7 +17,7 @@ public class TaskController {
 
     private final TaskService service;
 
-    @PostMapping("/create")
+    @PostMapping("/add")
     public ResponseEntity<?> create(
             @RequestBody TaskRequest request,
             @PathVariable String team,
@@ -25,9 +25,9 @@ public class TaskController {
             Principal connectedUser
     ) {
         try {
-            service.create(request, connectedUser, team, bundle);
+            service.add(request, connectedUser, team, bundle);
             return ResponseEntity.status(HttpStatus.CREATED).body("Task created successfully");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
@@ -45,12 +45,29 @@ public class TaskController {
         try {
             service.change(request, task, connectedUser, team, bundle);
             return ResponseEntity.ok("Task changed successfully");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
+
+    @GetMapping("/{task}")
+    public ResponseEntity<?> getTask(
+            @PathVariable String team,
+            @PathVariable String bundle,
+            @PathVariable String task,
+            Principal connectedUser
+    ) {
+        try {
+            return ResponseEntity.ok(service.getTask(task, connectedUser, team, bundle));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
+
 
     @DeleteMapping("/delete/{task}")
     public ResponseEntity<?> delete(
@@ -62,7 +79,7 @@ public class TaskController {
         try {
             service.delete(task, connectedUser, team, bundle);
             return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());

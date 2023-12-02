@@ -1,5 +1,6 @@
 package com.vitrum.api.data.models;
 
+import com.vitrum.api.repositories.TeamRepository;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,4 +29,9 @@ public class Team {
 
     @OneToMany(mappedBy = "team")
     private List<Bundle> bundles;
+
+    public static Team findTeamByName(TeamRepository teamRepository, String name) {
+        return teamRepository.findByName(name)
+                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
+    }
 }
