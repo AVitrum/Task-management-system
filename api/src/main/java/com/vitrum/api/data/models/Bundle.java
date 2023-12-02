@@ -1,5 +1,6 @@
 package com.vitrum.api.data.models;
 
+import com.vitrum.api.repositories.BundleRepository;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,5 +37,10 @@ public class Bundle {
 
     @OneToMany(mappedBy = "bundle")
     private List<Task> tasks;
+
+    public static Bundle findBundle(BundleRepository bundleRepository, Team team, String title) {
+        return bundleRepository.findByTeamAndTitle(team, title)
+                .orElseThrow(() -> new IllegalArgumentException("Bundle not found"));
+    }
 }
 

@@ -1,6 +1,7 @@
 package com.vitrum.api.services.implementations;
 
 import com.vitrum.api.data.models.Bundle;
+import com.vitrum.api.data.models.Team;
 import com.vitrum.api.data.models.User;
 import com.vitrum.api.repositories.BundleRepository;
 import com.vitrum.api.repositories.UserRepository;
@@ -9,6 +10,7 @@ import com.vitrum.api.data.models.Member;
 import com.vitrum.api.repositories.MemberRepository;
 import com.vitrum.api.repositories.TeamRepository;
 import com.vitrum.api.services.interfaces.BundleService;
+import com.vitrum.api.services.interfaces.OldTaskService;
 import com.vitrum.api.util.Converter;
 import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ public class BundleServiceImpl implements BundleService {
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
     private final MemberRepository memberRepository;
+    private final OldTaskService oldTaskService;
     private final MessageUtil messageUtil;
     private final Converter converter;
 
@@ -32,7 +36,7 @@ public class BundleServiceImpl implements BundleService {
     public void create(String teamName, Principal connectedUser, String title) {
         var creator = findCreator(connectedUser, teamName);
 
-        if (creator.checkPermissionToCreate())
+        if (creator.checkPermission())
             throw new IllegalArgumentException("You do not have permission to perform this action");
 
         var bundle = Bundle.builder()
@@ -46,7 +50,7 @@ public class BundleServiceImpl implements BundleService {
 
     @Override
     public void addPerformer(String teamName, String bundleTitle, Principal connectedUser, String performerName) {
-        var performer = findPerformer(performerName, teamName);
+        var performer = findMemberByUsernameAndTeam(performerName, teamName);
 
         if (repository.existsByPerformer(performer))
             throw new IllegalArgumentException(
@@ -55,8 +59,16 @@ public class BundleServiceImpl implements BundleService {
                             .getTitle())
             );
 
-        var creator = findCreator(connectedUser, teamName);
-        var bundle = findBundleByCreator(bundleTitle, creator);
+        var bundle = Bundle.findBundle(
+                repository,
+                Team.findTeamByName(teamRepository, teamName),
+                bundleTitle
+        );
+        var actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
+
+        if (!actionPerformer.equals(bundle.getCreator())
+                && actionPerformer.checkPermission()
+        ) throw new IllegalStateException("You do not have permission for this action");
 
         bundle.setPerformer(performer);
         repository.save(bundle);
@@ -65,27 +77,45 @@ public class BundleServiceImpl implements BundleService {
                 performer,
                 "TMS Info!", String.format(
                         "Team: %s\n" +
-                                "New tasks have been added to you by %s", teamName, creator.getUser().getEmail()
+                                "New tasks have been added to you by %s", teamName, actionPerformer.getUser().getEmail()
                 )
         );
     }
 
     @Override
-    public BundleResponse findByUser(String teamName, String bundleTitle, Principal connectedUser) {
-        var user = User.getUserFromPrincipal(connectedUser);
-        var member = findMemberByUsernameAndTeam(user.getTrueUsername(), teamName);
+    public List<BundleResponse> findAll(String team, Principal connectedUser) {
+        return repository.findAllByTeam(Team.findTeamByName(teamRepository, team))
+                .stream()
+                .map(converter::mapBundleToBundleResponse)
+                .toList();
+    }
 
-        Bundle bundle;
-        if (repository.existsByCreatorAndTitle(member, bundleTitle)) {
-            bundle = findBundleByCreator(bundleTitle, member);
-        } else if (repository.existsByPerformerAndTitle(member, bundleTitle)) {
-            bundle = findBundleByPerformer(bundleTitle, member);
-        } else {
-            throw new IllegalArgumentException("Bundle not found");
-        }
+    @Override
+    public Bundle findByTitle(String teamName, String bundleTitle, Principal connectedUser) {
+        Bundle bundle = Bundle.findBundle(
+                repository,
+                Team.findTeamByName(teamRepository, teamName),
+                bundleTitle);
+        Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
 
-        return converter.mapBundleToBundleResponse(bundle);
+        if (!actionPerformer.equals(bundle.getCreator())
+                && !actionPerformer.equals(bundle.getPerformer())
+                && actionPerformer.checkPermission()
+        ) throw new IllegalStateException("You cannot view other users' tasks");
 
+        return bundle;
+    }
+
+    @Override
+    public void deleteByTitle(String teamName, String bundleTitle, Principal connectedUser) {
+        Bundle bundle = findByTitle(teamName, bundleTitle, connectedUser);
+
+        bundle.getTasks().forEach(
+                task -> oldTaskService.delete(
+                        task.getTitle(), bundle.getTeam().getName(), bundle.getTitle(), connectedUser)
+        );
+
+        repository.delete(bundle);
     }
 
     private Member findMemberByUsernameAndTeam(String username, String teamName) {
@@ -103,17 +133,4 @@ public class BundleServiceImpl implements BundleService {
         return findMemberByUsernameAndTeam(user.getTrueUsername(), teamName);
     }
 
-    private Member findPerformer(String performer, String teamName) {
-        return findMemberByUsernameAndTeam(performer, teamName);
-    }
-
-    private Bundle findBundleByCreator(String bundleTitle, Member creator) {
-        return repository.findByCreatorAndTitle(creator, bundleTitle)
-                .orElseThrow(() -> new IllegalArgumentException("Bundle not found"));
-    }
-
-    private Bundle findBundleByPerformer(String bundleTitle, Member performer) {
-        return repository.findByPerformerAndTitle(performer, bundleTitle)
-                .orElseThrow(() -> new IllegalArgumentException("Bundle not found"));
-    }
 }

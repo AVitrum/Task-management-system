@@ -1,6 +1,7 @@
 package com.vitrum.api.controllers;
 
 import com.vitrum.api.services.interfaces.BundleService;
+import com.vitrum.api.util.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,18 +17,21 @@ import java.util.Map;
 public class BundleController {
 
     private final BundleService service;
+    private final Converter converter;
 
     @PostMapping("/create")
     public ResponseEntity<?> create(
-           @RequestBody Map<String, String> request,
-           @PathVariable String team,
-           Principal connectedUser
+            @RequestBody Map<String, String> request,
+            @PathVariable String team,
+            Principal connectedUser
     ) {
         try {
             service.create(team, connectedUser, request.get("title"));
             return ResponseEntity.status(HttpStatus.CREATED).body("Created");
-        } catch (IllegalArgumentException | UsernameNotFoundException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
@@ -41,21 +45,57 @@ public class BundleController {
         try {
             service.addPerformer(team, bundle, connectedUser, request.get("performer"));
             return ResponseEntity.ok("Added");
-        } catch (IllegalArgumentException | UsernameNotFoundException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
-    @GetMapping("/{bundle}/findByUser")
-    public ResponseEntity<?> findByUser(
+    @GetMapping
+    public ResponseEntity<?> findAll(
+            @PathVariable String team,
+            Principal connectedUser
+    ) {
+        try {
+            return ResponseEntity.ok(service.findAll(team, connectedUser));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{bundle}")
+    public ResponseEntity<?> findByTitle(
             @PathVariable String team,
             @PathVariable String bundle,
             Principal connectedUser
     ) {
         try {
-            return ResponseEntity.ok(service.findByUser(team, bundle, connectedUser));
-        } catch (IllegalArgumentException | UsernameNotFoundException e) {
+            return ResponseEntity.ok(converter.mapBundleToBundleResponse(
+                    service.findByTitle(team, bundle, connectedUser))
+            );
+        } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{bundle}")
+    public ResponseEntity<?> deleteByTitle(
+            @PathVariable String team,
+            @PathVariable String bundle,
+            Principal connectedUser
+    ) {
+        try {
+            service.deleteByTitle(team, bundle, connectedUser);
+            return ResponseEntity.ok("Deleted");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 }

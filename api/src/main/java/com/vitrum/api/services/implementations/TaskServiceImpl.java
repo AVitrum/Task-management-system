@@ -10,7 +10,6 @@ import com.vitrum.api.services.interfaces.TaskService;
 import com.vitrum.api.util.Converter;
 import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -26,20 +25,18 @@ public class TaskServiceImpl implements TaskService {
     private final MemberRepository memberRepository;
     private final TeamRepository teamRepository;
     private final BundleRepository bundleRepository;
-    private final UserRepository userRepository;
     private final Converter converter;
     private final MessageUtil messageUtil;
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
-    public void create(TaskRequest request, Principal connectedUser, String teamName, String bundleName) {
-        var creator = findCreator(connectedUser, teamName);
+    public void add(TaskRequest request, Principal connectedUser, String team, String bundleTitle) {
+        var bundle = findBundle(Team.findTeamByName(teamRepository, team), bundleTitle);
+        var actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
 
-        if (creator.checkPermissionToCreate())
+        if (actionPerformer.checkPermission())
             throw new IllegalArgumentException("You do not have permission to perform this action");
-
-        var bundle = findBundle(bundleName, creator);
 
         if (repository.existsByTitleAndBundle(request.getTitle(), bundle))
             throw new IllegalArgumentException("A task with that name already exists in this team");
@@ -48,10 +45,19 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void change(TaskRequest request, String taskTitle, Principal connectedUser, String teamName,String bundleName) {
-        var creator = findCreator(connectedUser, teamName);
-        var bundle = findBundle(bundleName, creator);
+    public void change(
+            TaskRequest request,
+            String taskTitle,
+            Principal connectedUser,
+            String team,
+            String bundleTitle
+    ) {
+        var bundle = findBundle(Team.findTeamByName(teamRepository, team), bundleTitle);
         var task = findTaskByTitleAndBundle(taskTitle, bundle);
+        var actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
+
+        if (actionPerformer.checkPermission())
+            throw new IllegalArgumentException("You do not have permission to perform this action");
 
         if (task.getStatus() == Status.DELETED)
             throw new IllegalArgumentException("The task is not available for modification as it has been deleted");
@@ -64,16 +70,32 @@ public class TaskServiceImpl implements TaskService {
 
         messageUtil.sendMessage(
                 bundle.getPerformer(),
-                String.format("The task has been changed by %s", creator.getUser().getEmail()),
+                String.format("The task has been changed by %s", actionPerformer.getUser().getEmail()),
                 task.toString()
         );
     }
 
     @Override
-    public void delete(String taskTitle, Principal connectedUser, String teamName, String bundleName) {
-        var creator = findCreator(connectedUser, teamName);
-        var bundle = findBundle(bundleName, creator);
+    public Task getTask(String taskTitle, Principal connectedUser, String team, String bundleTitle) {
+        var bundle = findBundle(Team.findTeamByName(teamRepository, team), bundleTitle);
+        var actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
+
+        if (!actionPerformer.equals(bundle.getCreator())
+                && !actionPerformer.equals(bundle.getPerformer())
+                && actionPerformer.checkPermission()
+        ) throw new IllegalStateException("You cannot view other users' task");
+
+        return findTaskByTitleAndBundle(taskTitle, bundle);
+    }
+
+    @Override
+    public void delete(String taskTitle, Principal connectedUser, String team, String bundleTitle) {
+        var bundle = findBundle(Team.findTeamByName(teamRepository, team), bundleTitle);
         var task = findTaskByTitleAndBundle(taskTitle, bundle);
+        var actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
+
+        if (actionPerformer.checkPermission())
+            throw new IllegalArgumentException("You do not have permission to perform this action");
 
         if (task.getStatus() == Status.DELETED)
             throw new IllegalArgumentException("The task has already been deleted and cannot be deleted again");
@@ -87,35 +109,15 @@ public class TaskServiceImpl implements TaskService {
 
         messageUtil.sendMessage(
                 task.getBundle().getPerformer(),
-                String.format("The task has been deleted by %s", creator.getUser().getEmail()),
+                String.format("The task has been deleted by %s", actionPerformer.getUser().getEmail()),
                 task.toString()
         );
     }
 
-    private Bundle findBundle(String bundleName, Member creator) {
-        return bundleRepository.findByCreatorAndTitle(creator, bundleName)
+    private Bundle findBundle(Team team, String title) {
+        return bundleRepository.findByTeamAndTitle(team, title)
                 .orElseThrow(() -> new IllegalArgumentException("Bundle not found"));
     }
-
-    private Member findMemberByUsernameAndTeam(String username, String teamName) {
-        var team = teamRepository.findByName(teamName)
-                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
-        var user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        return memberRepository.findByUserAndTeam(user, team)
-                .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
-    }
-
-    private Member findCreator(Principal connectedUser, String teamName) {
-        var user = User.getUserFromPrincipal(connectedUser);
-        return findMemberByUsernameAndTeam(user.getTrueUsername(), teamName);
-    }
-
-    private Member findPerformer(String performer, String teamName) {
-        return findMemberByUsernameAndTeam(performer, teamName);
-    }
-
 
     private Task createTask(TaskRequest request, Bundle bundle) {
         return Task.builder()
@@ -136,18 +138,14 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private void updateTaskFields(TaskRequest request, Task task) {
-        if (request.getDescription() != null) {
+        if (request.getDescription() != null)
             task.setDescription(request.getDescription());
-        }
-        if (request.getPriority() != null) {
+        if (request.getPriority() != null)
             task.setPriority(request.getPriority());
-        }
-        if (request.getDueDate() != null) {
+        if (request.getDueDate() != null)
             task.setDueDate(LocalDateTime.parse(request.getDueDate(), formatter));
-        }
-        if (request.getStatus() != null) {
+        if (request.getStatus() != null)
             task.setStatus(Status.valueOf(request.getStatus().toUpperCase()));
-        }
         task.setVersion(task.getVersion() + 1);
     }
 }

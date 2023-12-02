@@ -54,7 +54,6 @@ public class TeamServiceImpl implements TeamService {
                     .name(team.getName())
                     .creator(converter.mapUserToUserProfileResponse(user))
                     .build();
-
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException("Can't create");
         } catch (DataIntegrityViolationException e) {
@@ -69,7 +68,7 @@ public class TeamServiceImpl implements TeamService {
         var user = userRepository.findByUsername(request.get("username"))
                 .orElseThrow(() -> new UsernameNotFoundException("Can't find user"));
 
-        if (inTeam(user, team))
+        if (memberRepository.existsByUserAndTeam(user, team))
             throw new IllegalArgumentException("The user is already in the team");
 
         var member = Member.builder()
@@ -79,16 +78,18 @@ public class TeamServiceImpl implements TeamService {
                 .isEmailsAllowed(true)
                 .build();
         memberRepository.save(member);
-        repository.save(team);
-    }
-
-    public List<TeamResponse> getAll() {
-        var teams = repository.findAll();
-        return teams.stream().map(converter::mapTeamToTeamResponse).collect(Collectors.toList());
     }
 
     @Override
-    public List<TeamResponse> findIfInTeam(Principal connectedUser) {
+    public List<TeamResponse> getAll() {
+        var teams = repository.findAll();
+        return teams.stream()
+                .map(converter::mapTeamToTeamResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TeamResponse> findByUser(Principal connectedUser) {
         var user = User.getUserFromPrincipal(connectedUser);
         List<Member> members = memberRepository.findAllByUser(user)
                 .orElseThrow(() -> new IllegalArgumentException("Can't find"));
@@ -102,11 +103,6 @@ public class TeamServiceImpl implements TeamService {
     public TeamResponse findByName(String name) {
         var team = repository.findByName(name).orElseThrow(() -> new IllegalArgumentException("Team not found"));
         return converter.mapTeamToTeamResponse(team);
-    }
-
-    private Boolean inTeam(User user, Team team) {
-        return team.getMembers().contains(memberRepository.findByUser(user)
-                .orElse(null));
     }
 
 }

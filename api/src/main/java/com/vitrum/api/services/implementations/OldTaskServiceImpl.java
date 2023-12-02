@@ -1,21 +1,20 @@
 package com.vitrum.api.services.implementations;
 
+import com.vitrum.api.data.models.Member;
 import com.vitrum.api.data.models.Team;
 import com.vitrum.api.data.submodels.OldTask;
-import com.vitrum.api.repositories.OldTaskRepository;
+import com.vitrum.api.repositories.*;
 import com.vitrum.api.data.response.HistoryResponse;
 import com.vitrum.api.data.models.Bundle;
-import com.vitrum.api.repositories.BundleRepository;
 import com.vitrum.api.data.enums.Status;
 import com.vitrum.api.data.models.Task;
-import com.vitrum.api.repositories.TaskRepository;
-import com.vitrum.api.repositories.TeamRepository;
 import com.vitrum.api.services.interfaces.OldTaskService;
 import com.vitrum.api.util.Converter;
 import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,13 +26,20 @@ public class OldTaskServiceImpl implements OldTaskService {
     private final TaskRepository taskRepository;
     private final TeamRepository teamRepository;
     private final BundleRepository bundleRepository;
+    private final MemberRepository memberRepository;
     private final MessageUtil messageUtil;
     private final Converter converter;
 
     @Override
-    public List<HistoryResponse> findAllByTitle(String taskTitle, String teamName, String bundleName) {
-        var bundle = findBundle(findTeam(teamName), bundleName);
-        var task = findTaskByTitleAndBundle(taskTitle, bundle);
+    public List<HistoryResponse> findAllByTitle(
+            String taskTitle,
+            String teamName,
+            String bundleTitle,
+            Principal connectedUser
+    ) {
+        Bundle bundle = findBundleByTitleAndTeam(teamName, bundleTitle);
+        Task task = findTaskByTitleAndBundle(taskTitle, bundle);
+        checkUserPermission(connectedUser, bundle);
 
         List<OldTask> oldTasks = getOldTasks(task);
 
@@ -47,10 +53,12 @@ public class OldTaskServiceImpl implements OldTaskService {
             String taskTitle,
             String teamName,
             String bundleTitle,
-            Long version
+            Long version,
+            Principal connectedUser
     ) {
-        var bundle = findBundle(findTeam(teamName), bundleTitle);
-        var task = findTaskByTitleAndBundle(taskTitle, bundle);
+        Bundle bundle = findBundleByTitleAndTeam(teamName, bundleTitle);
+        Task task = findTaskByTitleAndBundle(taskTitle, bundle);
+        checkUserPermission(connectedUser, bundle);
 
         return repository.findByTaskAndVersion(task, version)
                 .orElseThrow(() -> new IllegalArgumentException("Task version not found"));
@@ -61,12 +69,13 @@ public class OldTaskServiceImpl implements OldTaskService {
             String taskTitle,
             String teamName,
             String bundleTitle,
-            Long version
+            Long version,
+            Principal connectedUser
     ) {
-        OldTask oldTask = getByVersion(taskTitle, teamName, bundleTitle, version);
-
-        var bundle = findBundle(findTeam(teamName), bundleTitle);
-        var task = findTaskByTitleAndBundle(taskTitle, bundle);
+        OldTask oldTask = getByVersion(taskTitle, teamName, bundleTitle, version, connectedUser);
+        Bundle bundle = findBundleByTitleAndTeam(teamName, bundleTitle);
+        Task task = findTaskByTitleAndBundle(taskTitle, bundle);
+        checkRestorePermission(connectedUser, bundle);
 
         List<OldTask> oldTasks = getOldTasks(task);
         repository.deleteAll(oldTasks.subList(version.intValue(), oldTasks.size()));
@@ -80,9 +89,10 @@ public class OldTaskServiceImpl implements OldTaskService {
     }
 
     @Override
-    public void delete(String taskTitle, String teamName, String bundleTitle) {
-        var bundle = findBundle(findTeam(teamName), bundleTitle);
-        var task = findTaskByTitleAndBundle(taskTitle, bundle);
+    public void delete(String taskTitle, String teamName, String bundleTitle, Principal connectedUser) {
+        Bundle bundle = findBundleByTitleAndTeam(teamName, bundleTitle);
+        Task task = findTaskByTitleAndBundle(taskTitle, bundle);
+        checkDeletePermission(connectedUser, bundle);
 
         List<OldTask> oldTasks = getOldTasks(task);
         repository.deleteAll(oldTasks);
@@ -95,9 +105,34 @@ public class OldTaskServiceImpl implements OldTaskService {
         );
     }
 
-    private Team findTeam(String teamName) {
-        return teamRepository.findByName(teamName)
-                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
+    private Bundle findBundleByTitleAndTeam(String teamName, String bundleTitle) {
+        Team team = Team.findTeamByName(teamRepository, teamName);
+        return Bundle.findBundle(bundleRepository, team, bundleTitle);
+    }
+
+    private void checkUserPermission(Principal connectedUser, Bundle bundle) {
+        Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
+
+        if (!actionPerformer.equals(bundle.getCreator())
+                && !actionPerformer.equals(bundle.getPerformer())
+                && actionPerformer.checkPermission()
+        ) throw new IllegalStateException("You cannot view other users' tasks");
+    }
+
+    private void checkRestorePermission(Principal connectedUser, Bundle bundle) {
+        Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
+
+        if (!actionPerformer.equals(bundle.getCreator())
+                && actionPerformer.checkPermission()
+        ) throw new IllegalStateException("You cannot view other users' tasks");
+    }
+
+    private void checkDeletePermission(Principal connectedUser, Bundle bundle) {
+        Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
+
+        if (!actionPerformer.equals(bundle.getCreator())
+                && actionPerformer.checkPermission()
+        ) throw new IllegalStateException("You cannot view other users' tasks");
     }
 
     private Task findTaskByTitleAndBundle(String taskTitle, Bundle bundle) {
@@ -108,10 +143,6 @@ public class OldTaskServiceImpl implements OldTaskService {
     private List<OldTask> getOldTasks(Task task) {
         return repository.findAllByTask(task)
                 .orElseThrow(() -> new IllegalArgumentException("Wrong task title"));
-    }
-    private Bundle findBundle(Team team, String title) {
-        return bundleRepository.findByTeamAndTitle(team, title)
-                .orElseThrow(() -> new IllegalArgumentException("Bundle not found"));
     }
 
     private void updateTaskFields(OldTask oldTask, Task task) {
