@@ -53,7 +53,7 @@ public class TaskServiceImpl implements TaskService {
             String bundleTitle
     ) {
         var bundle = findBundle(Team.findTeamByName(teamRepository, team), bundleTitle);
-        var task = findTaskByTitleAndBundle(taskTitle, bundle);
+        var task = Task.findTaskByTitleAndBundle(repository, taskTitle, bundle);
         var actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
 
         if (actionPerformer.checkPermission())
@@ -85,13 +85,13 @@ public class TaskServiceImpl implements TaskService {
                 && actionPerformer.checkPermission()
         ) throw new IllegalStateException("You cannot view other users' task");
 
-        return findTaskByTitleAndBundle(taskTitle, bundle);
+        return Task.findTaskByTitleAndBundle(repository, taskTitle, bundle);
     }
 
     @Override
     public void delete(String taskTitle, Principal connectedUser, String team, String bundleTitle) {
         var bundle = findBundle(Team.findTeamByName(teamRepository, team), bundleTitle);
-        var task = findTaskByTitleAndBundle(taskTitle, bundle);
+        var task = Task.findTaskByTitleAndBundle(repository, taskTitle, bundle);
         var actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
 
         if (actionPerformer.checkPermission())
@@ -130,11 +130,6 @@ public class TaskServiceImpl implements TaskService {
                 .dueDate(LocalDateTime.parse(request.getDueDate(), formatter))
                 .bundle(bundle)
                 .build();
-    }
-
-    private Task findTaskByTitleAndBundle(String taskTitle, Bundle bundle) {
-        return repository.findByTitleAndBundle(taskTitle, bundle)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
     }
 
     private void updateTaskFields(TaskRequest request, Task task) {
