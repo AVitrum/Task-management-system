@@ -30,6 +30,7 @@ public class Converter {
                 .email(user.getEmail())
                 .username(user.getTrueUsername())
                 .role(user.getRole())
+                .imagePath(user.getImagePath())
                 .build();
     }
 

@@ -121,7 +121,7 @@ public class TaskServiceImpl implements TaskService {
 
     private Task createTask(TaskRequest request, Bundle bundle) {
         return Task.builder()
-                .title(request.getTitle())
+                .title(request.getTitle().replaceAll("\\s", "_"))
                 .description(request.getDescription())
                 .priority(request.getPriority())
                 .version(0L)

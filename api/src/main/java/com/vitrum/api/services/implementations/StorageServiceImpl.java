@@ -29,12 +29,11 @@ public class StorageServiceImpl implements StorageService {
 
     @Value("${bucketName}")
     private String bucketName;
-
     @Value("${server-address}")
     private String serverAddress;
 
     private final AmazonS3 s3Client;
-    private final FileRepository fileRepository;
+    private final FileRepository repository;
     private final TeamRepository teamRepository;
     private final BundleRepository bundleRepository;
     private final TaskRepository taskRepository;
@@ -60,6 +59,7 @@ public class StorageServiceImpl implements StorageService {
                 Objects.requireNonNull(originalFilename).replaceAll("\\s", "_"));
 
         s3Client.putObject(new PutObjectRequest(bucketName, modifiedFilename, fileObj));
+        fileObj.delete();
 
         String[] fileNameSplit = originalFilename.split("\\.");
         String fileExtension = fileNameSplit[fileNameSplit.length - 1];
@@ -70,7 +70,7 @@ public class StorageServiceImpl implements StorageService {
                 .type(fileExtension)
                 .task(task)
                 .build();
-        fileRepository.save(file);
+        repository.save(file);
     }
 
     @Override
@@ -99,10 +99,12 @@ public class StorageServiceImpl implements StorageService {
                 fileName
         );
 
+        repository.delete(repository.findByName(modifiedFilename)
+                .orElseThrow(() -> new IllegalArgumentException("File not found")));
         s3Client.deleteObject(bucketName, modifiedFilename);
     }
 
-    private File convertMultiPartFileToFile(MultipartFile file) {
+    public static File convertMultiPartFileToFile(MultipartFile file) {
         File convertedFile = new File(Objects.requireNonNull(file.getOriginalFilename()));
         try (FileOutputStream fos = new FileOutputStream(convertedFile)) {
             fos.write(file.getBytes());

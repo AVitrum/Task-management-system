@@ -51,9 +51,7 @@ public class StorageController {
                     .headers(headers)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .body(resource);
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (AmazonS3Exception e) {
+        } catch (AmazonS3Exception | IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("File not found");
         }
     }
@@ -65,7 +63,11 @@ public class StorageController {
             @PathVariable String task,
             @PathVariable String fileName
     ) {
-        service.deleteFile(team, bundle, task, fileName);
-        return ResponseEntity.ok("File deleted successfully");
+        try {
+            service.deleteFile(team, bundle, task, fileName);
+            return ResponseEntity.ok("File deleted successfully");
+        } catch (AmazonS3Exception | IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("File not found");
+        }
     }
 }
