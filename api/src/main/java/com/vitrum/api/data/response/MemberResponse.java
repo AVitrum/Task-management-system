@@ -15,4 +15,5 @@ public class MemberResponse {
     private Long id;
     private String name;
     private RoleInTeam role;
+    private UserProfileResponse user;
 }

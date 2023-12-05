@@ -41,7 +41,7 @@ public class BundleServiceImpl implements BundleService {
 
         var bundle = Bundle.builder()
                 .creator(creator)
-                .title(title)
+                .title(title.replaceAll("\\s", "_"))
                 .performer(creator)
                 .team(creator.getTeam())
                 .build();

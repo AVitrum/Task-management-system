@@ -1,7 +1,14 @@
 package com.vitrum.api.services.implementations;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.util.IOUtils;
 import com.vitrum.api.data.enums.Role;
+import com.vitrum.api.data.models.File;
 import com.vitrum.api.data.models.User;
+import com.vitrum.api.repositories.FileRepository;
 import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.config.JwtService;
 import com.vitrum.api.data.request.ChangeUserCredentials;
@@ -11,18 +18,31 @@ import com.vitrum.api.services.interfaces.UserService;
 import com.vitrum.api.util.Converter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.security.Principal;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    @Value("${bucketName}")
+    private String bucketName;
+    @Value("${server-address}")
+    private String serverAddress;
+
     private final UserRepository repository;
+    private final FileRepository fileRepository;
     private final AuthenticationServiceImpl authenticationServiceImpl;
     private final Converter converter;
     private final JwtService jwtService;
+    private final AmazonS3 s3Client;
 
     @Override
     public UserProfileResponse profile(HttpServletRequest request) {
@@ -82,6 +102,48 @@ public class UserServiceImpl implements UserService {
         repository.save(user);
 
         authenticationServiceImpl.revokeAllUserTokens(user);
+    }
+
+    @Override
+    public void addImage(Principal connectedUser, MultipartFile multipartFile) {
+        var user = User.getUserFromPrincipal(connectedUser);
+
+        var fileObj = StorageServiceImpl.convertMultiPartFileToFile(multipartFile);
+        String originalFilename = multipartFile.getOriginalFilename();
+        String modifiedFilename = String.format("img_%s_%s",
+                user.getTrueUsername(),
+                Objects.requireNonNull(originalFilename).replaceAll("\\s", "_"));
+
+        if (fileRepository.existsByName(modifiedFilename))
+            throw new IllegalArgumentException("A file with this name already exists." +
+                    " Delete it before adding this one");
+
+        s3Client.putObject(new PutObjectRequest(bucketName, modifiedFilename, fileObj));
+        fileObj.delete();
+
+        String[] fileNameSplit = originalFilename.split("\\.");
+        String fileExtension = fileNameSplit[fileNameSplit.length - 1];
+
+        var file = File.builder()
+                .name(modifiedFilename)
+                .path(String.format("%s/api/users/image/%s", serverAddress, modifiedFilename))
+                .type(fileExtension)
+                .task(null)
+                .build();
+        fileRepository.save(file);
+
+        user.setImagePath(file.getPath());
+        repository.save(user);
+    }
+
+    @Override
+    public byte[] getImage(Principal connectedUser, String fileName) {
+        S3Object s3Object = s3Client.getObject(bucketName, fileName);
+        try (S3ObjectInputStream inputStream = s3Object.getObjectContent()) {
+            return IOUtils.toByteArray(inputStream);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to download the file", e);
+        }
     }
 
     private String extractJwtFromRequest(HttpServletRequest request) {

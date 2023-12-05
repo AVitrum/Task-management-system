@@ -40,11 +40,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public void register(RegisterRequest request) {
         try {
             var user = User.builder()
-                    .username(request.getUsername())
+                    .username(request.getUsername().replaceAll("\\s", "_"))
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
                     .role(Role.USER)
                     .isBanned(false)
+                    .imagePath(null)
                     .build();
 
             var savedUser = repository.save(user);
@@ -83,7 +84,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             var jwtToken = jwtService.generateToken(user);
             var refreshToken = jwtService.generateRefreshToken(user);
 
-//            revokeAllUserTokens(user);
+            revokeAllUserTokens(user);
             saveUserToken(user, jwtToken);
 
             return AuthenticationResponse.builder()

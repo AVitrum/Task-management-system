@@ -1,12 +1,8 @@
 package com.vitrum.api.util;
 
-import com.vitrum.api.data.models.User;
+import com.vitrum.api.data.models.*;
 import com.vitrum.api.data.response.*;
-import com.vitrum.api.data.models.Bundle;
-import com.vitrum.api.data.models.Member;
 import com.vitrum.api.data.submodels.OldTask;
-import com.vitrum.api.data.models.Task;
-import com.vitrum.api.data.models.Team;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,6 +17,9 @@ public class Converter {
                 .id(team.getId())
                 .name(team.getName())
                 .members(getMemberResponse(team))
+                .bundles(team.getBundles().stream()
+                        .map(this::mapBundleToBundleResponse)
+                        .collect(Collectors.toList()))
                 .build();
     }
 
@@ -30,6 +29,7 @@ public class Converter {
                 .email(user.getEmail())
                 .username(user.getTrueUsername())
                 .role(user.getRole())
+                .imagePath(user.getImagePath())
                 .build();
     }
 
@@ -40,11 +40,12 @@ public class Converter {
                 .collect(Collectors.toList());
     }
 
-    public MemberResponse mapMemberToMemberResponse(Member membership) {
+    public MemberResponse mapMemberToMemberResponse(Member member) {
         return MemberResponse.builder()
-                .id(membership.getId())
-                .name(membership.getUser().getTrueUsername())
-                .role(membership.getRole())
+                .id(member.getId())
+                .name(member.getUser().getTrueUsername())
+                .role(member.getRole())
+                .user(mapUserToUserProfileResponse(member.getUser()))
                 .build();
     }
 
@@ -87,6 +88,7 @@ public class Converter {
                 .dueDate(task.getDueDate())
                 .status(task.getStatus().name())
                 .priority(task.getPriority())
+                .files(task.getFiles().stream().map(File::getPath).collect(Collectors.toList()))
                 .build();
     }
 

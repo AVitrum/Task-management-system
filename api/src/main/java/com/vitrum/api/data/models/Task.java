@@ -2,6 +2,7 @@ package com.vitrum.api.data.models;
 
 import com.vitrum.api.data.enums.Status;
 import com.vitrum.api.data.submodels.OldTask;
+import com.vitrum.api.repositories.TaskRepository;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,6 +42,14 @@ public class Task {
 
     @OneToMany(mappedBy = "task")
     private List<OldTask> oldTasks;
+
+    @OneToMany(mappedBy = "task")
+    private List<File> files;
+
+    public static Task findTaskByTitleAndBundle(TaskRepository repository, String taskTitle, Bundle bundle) {
+        return repository.findByTitleAndBundle(taskTitle, bundle)
+                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+    }
 
     @Override
     public String toString() {

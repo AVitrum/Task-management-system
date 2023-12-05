@@ -36,7 +36,7 @@ public class TeamServiceImpl implements TeamService {
         try {
             var user = User.getUserFromPrincipal(connectedUser);
             var team = Team.builder()
-                    .name(request.getName())
+                    .name(request.getName().replaceAll("\\s", "_"))
                     .members(new ArrayList<>())
                     .build();
             repository.save(team);

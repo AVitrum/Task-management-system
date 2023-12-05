@@ -37,6 +37,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    private String imagePath;
+
     @Column(name = "is_banned")
     private Boolean isBanned;
 
