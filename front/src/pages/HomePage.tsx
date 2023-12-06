@@ -1,34 +1,37 @@
-import { useState, useEffect, useContext } from "react";
-import axios from "axios";
+import { useContext } from "react";
 import { UserContext } from "../components/UserContext";
 
 export default function HomePage() {
-const { token, setUserInfo, userInfo, setToken } = useContext(UserContext);  
-  const [imageData, setImageData] = useState(null);
 
-  useEffect(() => {
-    axios.get(userInfo.imagePath,
-     { responseType: 'arraybuffer', headers: {
-        Authorization: `Bearer ${token}`,
-    }, })
-      .then(response => {
-        const arrayBufferView = new Uint8Array(response.data);
-        const blob = new Blob([arrayBufferView], { type: 'image/jpeg' });
-        const urlCreator = window.URL || window.webkitURL;
-        const imageUrl = urlCreator.createObjectURL(blob);
+    const {userInfo} = useContext(UserContext);
 
-        setImageData(imageUrl);
-      })
-      .catch(error => {
-        console.error('Помилка отримання зображення:', error);
-      });
-  }, []);
-
-  return (
-    <div>
-      {imageData && (
-        <img src={imageData} alt="Зображення" />
-      )}
-    </div>
-  );
+    return(
+        <div className="text-white" >
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+          <br/>
+          Here will be something interesting but later
+          <br/>
+          <>
+          {userInfo.id}
+          </>
+          <br/>
+  
+      
+          <>
+          {userInfo.email}
+          </>
+          <br/>
+          <>
+          {userInfo.username}
+          </>
+          <br/>
+          <>
+          {userInfo.role}
+          
+          </>
+        </div>
+    );
 }
