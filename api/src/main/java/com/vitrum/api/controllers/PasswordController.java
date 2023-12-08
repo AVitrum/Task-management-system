@@ -11,13 +11,13 @@ import javax.validation.Valid;
 import java.security.Principal;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/users/password")
 @RequiredArgsConstructor
 public class PasswordController {
 
     private final PasswordService service;
 
-    @GetMapping("/password/recoverycode/{email}")
+    @GetMapping("/recoverycode/{email}")
     public ResponseEntity<?> getRecoverycode(
             @PathVariable String email
     ) {
@@ -29,7 +29,7 @@ public class PasswordController {
         }
     }
 
-    @PatchMapping("/password")
+    @PatchMapping
     public ResponseEntity<?> change(
             @Valid @RequestBody ChangePasswordRequest request,
             Principal connectedUser
@@ -42,7 +42,7 @@ public class PasswordController {
         }
     }
 
-    @PatchMapping("/password/reset")
+    @PatchMapping("/reset")
     public ResponseEntity<?> reset(
             @RequestBody ResetPasswordRequest request
     ) {

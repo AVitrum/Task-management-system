@@ -8,8 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "old_task")
 @Data
@@ -25,9 +23,6 @@ public class OldTask {
     @Column(nullable = false)
     private String title;
     private String description;
-    private LocalDateTime creationTime;
-    private LocalDateTime dueDate;
-    private LocalDateTime changeTime;
     private Long priority;
     private Long version;
 

@@ -3,12 +3,10 @@ package com.vitrum.api.services.implementations;
 import com.vitrum.api.data.models.Bundle;
 import com.vitrum.api.data.models.Team;
 import com.vitrum.api.data.models.User;
-import com.vitrum.api.repositories.BundleRepository;
-import com.vitrum.api.repositories.UserRepository;
+import com.vitrum.api.data.request.BundleRequest;
+import com.vitrum.api.repositories.*;
 import com.vitrum.api.data.response.BundleResponse;
 import com.vitrum.api.data.models.Member;
-import com.vitrum.api.repositories.MemberRepository;
-import com.vitrum.api.repositories.TeamRepository;
 import com.vitrum.api.services.interfaces.BundleService;
 import com.vitrum.api.services.interfaces.OldTaskService;
 import com.vitrum.api.util.Converter;
@@ -18,6 +16,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -32,18 +32,26 @@ public class BundleServiceImpl implements BundleService {
     private final MessageUtil messageUtil;
     private final Converter converter;
 
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     @Override
-    public void create(String teamName, Principal connectedUser, String title) {
+    public void create(String teamName, Principal connectedUser, BundleRequest request) {
         var creator = findCreator(connectedUser, teamName);
 
         if (creator.checkPermission())
             throw new IllegalArgumentException("You do not have permission to perform this action");
 
+        if (repository.existsByTitleAndTeam(request.getTitle(), creator.getTeam()))
+            throw new IllegalArgumentException("Bundle with the same name already exists");
+
         var bundle = Bundle.builder()
                 .creator(creator)
-                .title(title.replaceAll("\\s", "_"))
+                .title(request.getTitle().replaceAll("\\s", "_"))
                 .performer(creator)
                 .team(creator.getTeam())
+                .assignmentTime(LocalDateTime.now())
+                .changeTime(LocalDateTime.now())
+                .dueDate(LocalDateTime.parse(request.getDueDate(), formatter))
                 .build();
         repository.save(bundle);
     }
@@ -71,6 +79,7 @@ public class BundleServiceImpl implements BundleService {
         ) throw new IllegalStateException("You do not have permission for this action");
 
         bundle.setPerformer(performer);
+        bundle.setAssignmentTime(LocalDateTime.now());
         repository.save(bundle);
 
         messageUtil.sendMessage(

@@ -15,6 +15,7 @@ public interface BundleRepository extends JpaRepository<Bundle, Long> {
 
     List<Bundle> findAllByTeam(Team team);
 
+    Boolean existsByTitleAndTeam(String title, Team team);
     Boolean existsByPerformer(Member performer);
 
 }

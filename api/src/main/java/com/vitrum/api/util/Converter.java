@@ -5,7 +5,6 @@ import com.vitrum.api.data.response.*;
 import com.vitrum.api.data.submodels.OldTask;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,9 +16,6 @@ public class Converter {
                 .id(team.getId())
                 .name(team.getName())
                 .members(getMemberResponse(team))
-                .bundles(team.getBundles().stream()
-                        .map(this::mapBundleToBundleResponse)
-                        .collect(Collectors.toList()))
                 .build();
     }
 
@@ -55,9 +51,6 @@ public class Converter {
                 .description(task.getDescription())
                 .priority(task.getPriority())
                 .version(task.getVersion())
-                .creationTime(task.getCreationTime())
-                .dueDate(task.getDueDate())
-                .changeTime(LocalDateTime.now())
                 .status(task.getStatus())
                 .task(task)
                 .build();
@@ -72,9 +65,6 @@ public class Converter {
                 .description(oldTask.getDescription())
                 .priority(oldTask.getPriority())
                 .status(oldTask.getStatus().name())
-                .changeTime(oldTask.getChangeTime())
-                .creationTime(oldTask.getCreationTime())
-                .dueDate(oldTask.getDueDate())
                 .creator(mapMemberToMemberResponse(oldTask.getTask().getBundle().getCreator()))
                 .build();
     }
@@ -84,8 +74,6 @@ public class Converter {
                 .title(task.getTitle())
                 .description(task.getDescription())
                 .version(task.getVersion())
-                .creationTime(task.getCreationTime())
-                .dueDate(task.getDueDate())
                 .status(task.getStatus().name())
                 .priority(task.getPriority())
                 .files(task.getFiles().stream().map(File::getPath).collect(Collectors.toList()))
@@ -97,6 +85,9 @@ public class Converter {
                 .title(bundle.getTitle())
                 .creatorEmail(bundle.getCreator().getUser().getTrueUsername())
                 .performerEmail(bundle.getPerformer().getUser().getTrueUsername())
+                .assignmentTime(bundle.getAssignmentTime())
+                .changeTime(bundle.getChangeTime())
+                .dueDate(bundle.getDueDate())
                 .tasks(bundle.getTasks().stream().map(this::mapTaskToTaskResponse).collect(Collectors.toList()))
                 .build();
     }

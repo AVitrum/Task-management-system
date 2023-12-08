@@ -40,14 +40,8 @@ public class TeamServiceImpl implements TeamService {
                     .members(new ArrayList<>())
                     .build();
             repository.save(team);
-            var member = Member.builder()
-                    .user(user)
-                    .role(RoleInTeam.LEADER)
-                    .team(team)
-                    .isEmailsAllowed(true)
-                    .build();
-            memberRepository.save(member);
-            repository.save(team);
+
+            createMember(user, team, "Leader");
 
             return TeamCreationResponse.builder()
                     .id(team.getId())
@@ -63,21 +57,14 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public void addToTeam(String teamName, Map<String, String> request) {
-        var team = repository.findByName(teamName)
-                .orElseThrow(() -> new IllegalArgumentException("Can't find team by this name"));
+        var team = Team.findTeamByName(repository, teamName);
         var user = userRepository.findByUsername(request.get("username"))
                 .orElseThrow(() -> new UsernameNotFoundException("Can't find user"));
 
         if (memberRepository.existsByUserAndTeam(user, team))
             throw new IllegalArgumentException("The user is already in the team");
 
-        var member = Member.builder()
-                .user(user)
-                .role(RoleInTeam.MEMBER)
-                .team(team)
-                .isEmailsAllowed(true)
-                .build();
-        memberRepository.save(member);
+        createMember(user, team, "Member");
     }
 
     @Override
@@ -101,8 +88,18 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public TeamResponse findByName(String name) {
-        var team = repository.findByName(name).orElseThrow(() -> new IllegalArgumentException("Team not found"));
+        var team = Team.findTeamByName(repository, name);
         return converter.mapTeamToTeamResponse(team);
     }
 
+    private void createMember(User user, Team team, String role) {
+        memberRepository.save(
+                Member.builder()
+                        .user(user)
+                        .role(RoleInTeam.valueOf(role.toUpperCase()))
+                        .team(team)
+                        .isEmailsAllowed(true)
+                        .build()
+        );
+    }
 }

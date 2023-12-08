@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -22,6 +23,9 @@ public class Bundle {
     private Long id;
 
     private String title;
+    private LocalDateTime assignmentTime;
+    private LocalDateTime dueDate;
+    private LocalDateTime changeTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
@@ -41,6 +45,11 @@ public class Bundle {
     public static Bundle findBundle(BundleRepository bundleRepository, Team team, String title) {
         return bundleRepository.findByTeamAndTitle(team, title)
                 .orElseThrow(() -> new IllegalArgumentException("Bundle not found"));
+    }
+
+    public static void saveChangeDate(BundleRepository repository, Bundle bundle) {
+        bundle.setAssignmentTime(LocalDateTime.now());
+        repository.save(bundle);
     }
 }
 
