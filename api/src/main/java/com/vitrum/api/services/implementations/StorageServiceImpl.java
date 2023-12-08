@@ -66,7 +66,13 @@ public class StorageServiceImpl implements StorageService {
 
         var file = com.vitrum.api.data.models.File.builder()
                 .name(modifiedFilename)
-                .path(String.format("%s/api/files/download/%s", serverAddress, modifiedFilename))
+                .path(String.format("%s/api/teams/%s/bundles/%s/tasks/%s/files/%s",
+                        serverAddress,
+                        teamName,
+                        bundleTitle,
+                        taskTitle,
+                        originalFilename)
+                )
                 .type(fileExtension)
                 .task(task)
                 .build();

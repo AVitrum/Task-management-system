@@ -13,8 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -28,8 +26,6 @@ public class TaskServiceImpl implements TaskService {
     private final Converter converter;
     private final MessageUtil messageUtil;
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
     @Override
     public void add(TaskRequest request, Principal connectedUser, String team, String bundleTitle) {
         var bundle = findBundle(Team.findTeamByName(teamRepository, team), bundleTitle);
@@ -42,6 +38,8 @@ public class TaskServiceImpl implements TaskService {
             throw new IllegalArgumentException("A task with that name already exists in this team");
 
         repository.save(createTask(request, bundle));
+
+        Bundle.saveChangeDate(bundleRepository, bundle);
     }
 
     @Override
@@ -67,6 +65,8 @@ public class TaskServiceImpl implements TaskService {
 
         updateTaskFields(request, task);
         repository.save(task);
+        
+        Bundle.saveChangeDate(bundleRepository, bundle);
 
         messageUtil.sendMessage(
                 bundle.getPerformer(),
@@ -107,6 +107,8 @@ public class TaskServiceImpl implements TaskService {
         var oldTask = converter.mapTaskToOldTask(task);
         oldTaskRepository.save(oldTask);
 
+        Bundle.saveChangeDate(bundleRepository, bundle);
+
         messageUtil.sendMessage(
                 task.getBundle().getPerformer(),
                 String.format("The task has been deleted by %s", actionPerformer.getUser().getEmail()),
@@ -125,9 +127,7 @@ public class TaskServiceImpl implements TaskService {
                 .description(request.getDescription())
                 .priority(request.getPriority())
                 .version(0L)
-                .creationTime(LocalDateTime.now())
                 .status(Status.PENDING)
-                .dueDate(LocalDateTime.parse(request.getDueDate(), formatter))
                 .bundle(bundle)
                 .build();
     }
@@ -137,8 +137,6 @@ public class TaskServiceImpl implements TaskService {
             task.setDescription(request.getDescription());
         if (request.getPriority() != null)
             task.setPriority(request.getPriority());
-        if (request.getDueDate() != null)
-            task.setDueDate(LocalDateTime.parse(request.getDueDate(), formatter));
         if (request.getStatus() != null)
             task.setStatus(Status.valueOf(request.getStatus().toUpperCase()));
         task.setVersion(task.getVersion() + 1);

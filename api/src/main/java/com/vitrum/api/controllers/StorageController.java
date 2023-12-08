@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Slf4j
-@RequestMapping("/api/teams/{team}/bundles/{bundle}/tasks/{task}")
+@RequestMapping("/api/teams/{team}/bundles/{bundle}/tasks/{task}/files")
 @RequiredArgsConstructor
 @Validated
 public class StorageController {

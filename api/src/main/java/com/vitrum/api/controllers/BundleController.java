@@ -1,5 +1,6 @@
 package com.vitrum.api.controllers;
 
+import com.vitrum.api.data.request.BundleRequest;
 import com.vitrum.api.services.interfaces.BundleService;
 import com.vitrum.api.util.Converter;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +22,12 @@ public class BundleController {
 
     @PostMapping("/create")
     public ResponseEntity<?> create(
-            @RequestBody Map<String, String> request,
+            @RequestBody BundleRequest request,
             @PathVariable String team,
             Principal connectedUser
     ) {
         try {
-            service.create(team, connectedUser, request.get("title"));
+            service.create(team, connectedUser, request);
             return ResponseEntity.status(HttpStatus.CREATED).body("Created");
         } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

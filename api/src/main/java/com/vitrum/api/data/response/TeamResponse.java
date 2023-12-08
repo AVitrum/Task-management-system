@@ -16,5 +16,4 @@ public class TeamResponse {
     private Long id;
     private String name;
     private List<MemberResponse> members;
-    private List<BundleResponse> bundles;
 }

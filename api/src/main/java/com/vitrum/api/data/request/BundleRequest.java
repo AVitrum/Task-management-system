@@ -9,10 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TaskRequest {
+public class BundleRequest {
 
     private String title;
-    private String description;
-    private Long priority;
-    private String status;
+    private String dueDate;
 }

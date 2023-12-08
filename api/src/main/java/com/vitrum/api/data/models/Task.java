@@ -9,7 +9,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -28,8 +27,6 @@ public class Task {
     @Column(nullable = false, unique = true)
     private String title;
     private String description;
-    private LocalDateTime creationTime;
-    private LocalDateTime dueDate;
     private Long priority;
     private Long version;
 
@@ -55,12 +52,12 @@ public class Task {
     public String toString() {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        String formattedCreationTime = creationTime.format(dateFormatter);
-        String formattedDueDate = dueDate.format(dateFormatter);
+        String formattedCreationTime = bundle.getAssignmentTime().format(dateFormatter);
+        String formattedDueDate = bundle.getDueDate().format(dateFormatter);
 
         return "Task: " + title + '\n' +
                 "description: " + description + '\n' +
-                "creationTime: " + formattedCreationTime + '\n' +
+                "assignmentTime: " + formattedCreationTime + '\n' +
                 "dueDate: " + formattedDueDate + '\n' +
                 "priority: " + priority + '\n' +
                 "version: " + version + '\n' +

@@ -85,6 +85,8 @@ public class OldTaskServiceImpl implements OldTaskService {
         task.setStatus(Status.RESTORED);
         taskRepository.save(task);
 
+        Bundle.saveChangeDate(bundleRepository, bundle);
+
         messageUtil.sendMessage(bundle.getPerformer(), "The task has been restored", task.toString());
     }
 
@@ -98,6 +100,9 @@ public class OldTaskServiceImpl implements OldTaskService {
         repository.deleteAll(oldTasks);
 
         taskRepository.delete(task);
+
+        Bundle.saveChangeDate(bundleRepository, bundle);
+
         messageUtil.sendMessage(
                 bundle.getPerformer(),
                 task.getTitle() + " has been deleted", "The task has been deleted by "
@@ -150,7 +155,6 @@ public class OldTaskServiceImpl implements OldTaskService {
         task.setPriority(oldTask.getPriority());
         task.setDescription(oldTask.getDescription());
         task.setVersion(oldTask.getVersion());
-        task.setDueDate(oldTask.getDueDate());
         task.setStatus(oldTask.getStatus());
     }
 }
