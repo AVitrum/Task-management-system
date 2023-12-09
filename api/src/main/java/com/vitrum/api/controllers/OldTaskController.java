@@ -26,7 +26,7 @@ public class OldTaskController {
     ) {
         try {
             return ResponseEntity.ok(service.findAllByTitle(taskTitle, team, bundle, connectedUser));
-        } catch (UsernameNotFoundException | IllegalArgumentException e) {
+        } catch (UsernameNotFoundException | IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -43,7 +43,7 @@ public class OldTaskController {
             return ResponseEntity.ok(converter.mapOldTaskToHistoryResponse(
                     service.getByVersion(taskTitle, team, bundle, version, connectedUser))
             );
-        } catch (UsernameNotFoundException | IllegalArgumentException e) {
+        } catch (UsernameNotFoundException | IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -60,7 +60,7 @@ public class OldTaskController {
         try {
             service.restore(taskTitle, team, bundle, version, connectedUser);
             return ResponseEntity.ok("Restored");
-        } catch (UsernameNotFoundException | IllegalArgumentException e) {
+        } catch (UsernameNotFoundException | IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -75,7 +75,7 @@ public class OldTaskController {
         try {
             service.delete(taskTitle, team, bundle, connectedUser);
             return ResponseEntity.ok("Deleted");
-        } catch (UsernameNotFoundException | IllegalArgumentException e) {
+        } catch (UsernameNotFoundException | IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

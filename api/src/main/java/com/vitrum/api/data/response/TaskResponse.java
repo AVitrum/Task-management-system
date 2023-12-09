@@ -18,5 +18,6 @@ public class TaskResponse {
     private Long priority;
     private Long version;
     private String status;
+    private List<CommentResponse> comments;
     private List<String> files;
 }

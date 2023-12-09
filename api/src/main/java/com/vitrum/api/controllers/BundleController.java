@@ -53,6 +53,23 @@ public class BundleController {
         }
     }
 
+    @PatchMapping("/{bundle}/update")
+    public ResponseEntity<?> update (
+            @RequestBody Map<String, String> request,
+            @PathVariable String team,
+            @PathVariable String bundle,
+            Principal connectedUser
+    ) {
+        try {
+            service.update(team, bundle, connectedUser, request.get("dueDate"));
+            return ResponseEntity.ok("Updated");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
+
     @GetMapping
     public ResponseEntity<?> findAll(
             @PathVariable String team,

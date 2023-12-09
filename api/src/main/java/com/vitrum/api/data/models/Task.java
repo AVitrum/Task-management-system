@@ -43,6 +43,9 @@ public class Task {
     @OneToMany(mappedBy = "task")
     private List<File> files;
 
+    @OneToMany(mappedBy = "task")
+    private List<Comment> comments;
+
     public static Task findTaskByTitleAndBundle(TaskRepository repository, String taskTitle, Bundle bundle) {
         return repository.findByTitleAndBundle(taskTitle, bundle)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
@@ -52,7 +55,7 @@ public class Task {
     public String toString() {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        String formattedCreationTime = bundle.getAssignmentTime().format(dateFormatter);
+        String formattedCreationTime = bundle.getAssignmentDate().format(dateFormatter);
         String formattedDueDate = bundle.getDueDate().format(dateFormatter);
 
         return "Task: " + title + '\n' +
