@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -23,12 +24,13 @@ public class TaskServiceImpl implements TaskService {
     private final MemberRepository memberRepository;
     private final TeamRepository teamRepository;
     private final BundleRepository bundleRepository;
+    private final CommentRepository commentRepository;
     private final Converter converter;
     private final MessageUtil messageUtil;
 
     @Override
-    public void add(TaskRequest request, Principal connectedUser, String team, String bundleTitle) {
-        var bundle = findBundle(Team.findTeamByName(teamRepository, team), bundleTitle);
+    public void add(TaskRequest request, Principal connectedUser, String teamName, String bundleTitle) {
+        var bundle = Bundle.getBundleWithDateCheck(bundleRepository, teamRepository, repository, teamName, bundleTitle);
         var actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
 
         if (actionPerformer.checkPermission())
@@ -39,18 +41,18 @@ public class TaskServiceImpl implements TaskService {
 
         repository.save(createTask(request, bundle));
 
-        Bundle.saveChangeDate(bundleRepository, bundle);
+        bundle.saveChangeDate(bundleRepository);
     }
 
     @Override
     public void change(
             TaskRequest request,
             String taskTitle,
-            Principal connectedUser,
-            String team,
-            String bundleTitle
+            String teamName,
+            String bundleTitle,
+            Principal connectedUser
     ) {
-        var bundle = findBundle(Team.findTeamByName(teamRepository, team), bundleTitle);
+        var bundle = Bundle.getBundleWithDateCheck(bundleRepository, teamRepository, repository, teamName, bundleTitle);
         var task = Task.findTaskByTitleAndBundle(repository, taskTitle, bundle);
         var actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
 
@@ -62,11 +64,11 @@ public class TaskServiceImpl implements TaskService {
 
         OldTask oldTask = converter.mapTaskToOldTask(task);
         oldTaskRepository.save(oldTask);
+        commentRepository.saveAll(oldTask.getComments());
 
         updateTaskFields(request, task);
-        repository.save(task);
-        
-        Bundle.saveChangeDate(bundleRepository, bundle);
+
+        bundle.saveChangeDate(bundleRepository);
 
         messageUtil.sendMessage(
                 bundle.getPerformer(),
@@ -76,21 +78,21 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task getTask(String taskTitle, Principal connectedUser, String team, String bundleTitle) {
-        var bundle = findBundle(Team.findTeamByName(teamRepository, team), bundleTitle);
+    public Task getTask(String taskTitle, Principal connectedUser, String teamName, String bundleTitle) {
+        var bundle = Bundle.findBundle(bundleRepository, Team.findTeamByName(teamRepository, teamName), bundleTitle);
         var actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
 
         if (!actionPerformer.equals(bundle.getCreator())
                 && !actionPerformer.equals(bundle.getPerformer())
                 && actionPerformer.checkPermission()
-        ) throw new IllegalStateException("You cannot view other users' task");
+        ) throw new IllegalStateException("You do not have permission to view this task");
 
         return Task.findTaskByTitleAndBundle(repository, taskTitle, bundle);
     }
 
     @Override
-    public void delete(String taskTitle, Principal connectedUser, String team, String bundleTitle) {
-        var bundle = findBundle(Team.findTeamByName(teamRepository, team), bundleTitle);
+    public void delete(String taskTitle, Principal connectedUser, String teamName, String bundleTitle) {
+        var bundle = Bundle.getBundleWithDateCheck(bundleRepository, teamRepository, repository, teamName, bundleTitle);
         var task = Task.findTaskByTitleAndBundle(repository, taskTitle, bundle);
         var actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
 
@@ -106,19 +108,15 @@ public class TaskServiceImpl implements TaskService {
 
         var oldTask = converter.mapTaskToOldTask(task);
         oldTaskRepository.save(oldTask);
+        commentRepository.saveAll(oldTask.getComments());
 
-        Bundle.saveChangeDate(bundleRepository, bundle);
+        bundle.saveChangeDate(bundleRepository);
 
         messageUtil.sendMessage(
                 task.getBundle().getPerformer(),
                 String.format("The task has been deleted by %s", actionPerformer.getUser().getEmail()),
                 task.toString()
         );
-    }
-
-    private Bundle findBundle(Team team, String title) {
-        return bundleRepository.findByTeamAndTitle(team, title)
-                .orElseThrow(() -> new IllegalArgumentException("Bundle not found"));
     }
 
     private Task createTask(TaskRequest request, Bundle bundle) {
@@ -140,5 +138,7 @@ public class TaskServiceImpl implements TaskService {
         if (request.getStatus() != null)
             task.setStatus(Status.valueOf(request.getStatus().toUpperCase()));
         task.setVersion(task.getVersion() + 1);
+        task.setComments(new ArrayList<>());
+        repository.save(task);
     }
 }

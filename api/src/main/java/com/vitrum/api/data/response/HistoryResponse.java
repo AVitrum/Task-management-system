@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -18,4 +20,5 @@ public class HistoryResponse {
     private Long priority;
     private String status;
     private MemberResponse creator;
+    private List<CommentResponse> comments;
 }

@@ -54,5 +54,4 @@ public class AuthController {
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         logoutServiceImpl.logout(request, response, SecurityContextHolder.getContext().getAuthentication());
     }
-
 }

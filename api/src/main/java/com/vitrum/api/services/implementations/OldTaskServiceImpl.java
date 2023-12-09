@@ -1,13 +1,10 @@
 package com.vitrum.api.services.implementations;
 
-import com.vitrum.api.data.models.Member;
-import com.vitrum.api.data.models.Team;
+import com.vitrum.api.data.models.*;
 import com.vitrum.api.data.submodels.OldTask;
 import com.vitrum.api.repositories.*;
 import com.vitrum.api.data.response.HistoryResponse;
-import com.vitrum.api.data.models.Bundle;
 import com.vitrum.api.data.enums.Status;
-import com.vitrum.api.data.models.Task;
 import com.vitrum.api.services.interfaces.OldTaskService;
 import com.vitrum.api.util.Converter;
 import com.vitrum.api.util.MessageUtil;
@@ -15,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +25,7 @@ public class OldTaskServiceImpl implements OldTaskService {
     private final TeamRepository teamRepository;
     private final BundleRepository bundleRepository;
     private final MemberRepository memberRepository;
+    private final CommentRepository commentRepository;
     private final MessageUtil messageUtil;
     private final Converter converter;
 
@@ -37,7 +36,7 @@ public class OldTaskServiceImpl implements OldTaskService {
             String bundleTitle,
             Principal connectedUser
     ) {
-        Bundle bundle = findBundleByTitleAndTeam(teamName, bundleTitle);
+        Bundle bundle = Bundle.findBundle(bundleRepository, Team.findTeamByName(teamRepository, teamName), bundleTitle);
         Task task = findTaskByTitleAndBundle(taskTitle, bundle);
         checkUserPermission(connectedUser, bundle);
 
@@ -56,7 +55,7 @@ public class OldTaskServiceImpl implements OldTaskService {
             Long version,
             Principal connectedUser
     ) {
-        Bundle bundle = findBundleByTitleAndTeam(teamName, bundleTitle);
+        Bundle bundle = Bundle.findBundle(bundleRepository, Team.findTeamByName(teamRepository, teamName), bundleTitle);
         Task task = findTaskByTitleAndBundle(taskTitle, bundle);
         checkUserPermission(connectedUser, bundle);
 
@@ -73,46 +72,45 @@ public class OldTaskServiceImpl implements OldTaskService {
             Principal connectedUser
     ) {
         OldTask oldTask = getByVersion(taskTitle, teamName, bundleTitle, version, connectedUser);
-        Bundle bundle = findBundleByTitleAndTeam(teamName, bundleTitle);
+        Bundle bundle = Bundle.getBundleWithDateCheck(bundleRepository, teamRepository, taskRepository, teamName, bundleTitle);
         Task task = findTaskByTitleAndBundle(taskTitle, bundle);
         checkRestorePermission(connectedUser, bundle);
 
         List<OldTask> oldTasks = getOldTasks(task);
-        repository.deleteAll(oldTasks.subList(version.intValue(), oldTasks.size()));
+        List <OldTask> oldTaskSubList = oldTasks.subList(version.intValue(), oldTasks.size());
+        oldTaskSubList.stream().map(item -> oldTask.getComments()).forEach(commentRepository::deleteAll);
+        repository.deleteAll(oldTaskSubList);
 
         updateTaskFields(oldTask, task);
 
         task.setStatus(Status.RESTORED);
         taskRepository.save(task);
 
-        Bundle.saveChangeDate(bundleRepository, bundle);
+        bundle.saveChangeDate(bundleRepository);
 
         messageUtil.sendMessage(bundle.getPerformer(), "The task has been restored", task.toString());
     }
 
     @Override
     public void delete(String taskTitle, String teamName, String bundleTitle, Principal connectedUser) {
-        Bundle bundle = findBundleByTitleAndTeam(teamName, bundleTitle);
+        Bundle bundle = Bundle.getBundleWithDateCheck(bundleRepository, teamRepository, taskRepository, teamName, bundleTitle);
         Task task = findTaskByTitleAndBundle(taskTitle, bundle);
         checkDeletePermission(connectedUser, bundle);
 
         List<OldTask> oldTasks = getOldTasks(task);
+        oldTasks.stream().map(OldTask::getComments).forEach(commentRepository::deleteAll);
         repository.deleteAll(oldTasks);
 
+        commentRepository.deleteAll(task.getComments());
         taskRepository.delete(task);
 
-        Bundle.saveChangeDate(bundleRepository, bundle);
+        bundle.saveChangeDate(bundleRepository);
 
         messageUtil.sendMessage(
                 bundle.getPerformer(),
                 task.getTitle() + " has been deleted", "The task has been deleted by "
                         + bundle.getCreator().getUser().getEmail()
         );
-    }
-
-    private Bundle findBundleByTitleAndTeam(String teamName, String bundleTitle) {
-        Team team = Team.findTeamByName(teamRepository, teamName);
-        return Bundle.findBundle(bundleRepository, team, bundleTitle);
     }
 
     private void checkUserPermission(Principal connectedUser, Bundle bundle) {
@@ -156,5 +154,19 @@ public class OldTaskServiceImpl implements OldTaskService {
         task.setDescription(oldTask.getDescription());
         task.setVersion(oldTask.getVersion());
         task.setStatus(oldTask.getStatus());
+
+        List<Comment> comments = new ArrayList<>();
+        oldTask.getComments().forEach(comment -> {
+            Comment newComment = Comment.builder()
+                    .text(comment.getText())
+                    .creationTime(comment.getCreationTime())
+                    .author(comment.getAuthor())
+                    .task(task)
+                    .build();
+            comments.add(newComment);
+        });
+        task.setComments(comments);
+        commentRepository.saveAll(task.getComments());
+        commentRepository.deleteAll(oldTask.getComments());
     }
 }

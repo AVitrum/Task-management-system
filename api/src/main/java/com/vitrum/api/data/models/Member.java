@@ -36,6 +36,9 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private RoleInTeam role;
 
+    @OneToMany(mappedBy = "author")
+    private List<Comment> comments;
+
     @OneToMany(mappedBy = "creator")
     private List<Bundle> creatorBundles;
 

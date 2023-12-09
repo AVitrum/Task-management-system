@@ -11,8 +11,8 @@ public interface BundleService {
 
     void create(String teamName, Principal connectedUser, BundleRequest request);
     void addPerformer(String teamName, String bundleTitle, Principal connectedUser, String performerName);
+    void update(String teamName, String bundleTitle, Principal connectedUser, String dueDate);
     void deleteByTitle(String team, String bundle, Principal connectedUser);
     Bundle findByTitle(String teamName, String bundleTitle, Principal connectedUser);
     List<BundleResponse> findAll(String team, Principal connectedUser);
-
 }

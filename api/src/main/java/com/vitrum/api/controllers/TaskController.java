@@ -18,7 +18,7 @@ public class TaskController {
     private final TaskService service;
 
     @PostMapping("/add")
-    public ResponseEntity<?> create(
+    public ResponseEntity<?> add(
             @RequestBody TaskRequest request,
             @PathVariable String team,
             @PathVariable String bundle,
@@ -43,7 +43,7 @@ public class TaskController {
             Principal connectedUser
     ) {
         try {
-            service.change(request, task, connectedUser, team, bundle);
+            service.change(request, task, team, bundle, connectedUser);
             return ResponseEntity.ok("Task changed successfully");
         } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

@@ -19,6 +19,7 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +30,7 @@ public class BundleServiceImpl implements BundleService {
     private final UserRepository userRepository;
     private final MemberRepository memberRepository;
     private final OldTaskService oldTaskService;
+    private final TaskRepository taskRepository;
     private final MessageUtil messageUtil;
     private final Converter converter;
 
@@ -49,7 +51,7 @@ public class BundleServiceImpl implements BundleService {
                 .title(request.getTitle().replaceAll("\\s", "_"))
                 .performer(creator)
                 .team(creator.getTeam())
-                .assignmentTime(LocalDateTime.now())
+                .assignmentDate(LocalDateTime.now())
                 .changeTime(LocalDateTime.now())
                 .dueDate(LocalDateTime.parse(request.getDueDate(), formatter))
                 .build();
@@ -79,7 +81,7 @@ public class BundleServiceImpl implements BundleService {
         ) throw new IllegalStateException("You do not have permission for this action");
 
         bundle.setPerformer(performer);
-        bundle.setAssignmentTime(LocalDateTime.now());
+        bundle.setAssignmentDate(LocalDateTime.now());
         repository.save(bundle);
 
         messageUtil.sendMessage(
@@ -92,11 +94,28 @@ public class BundleServiceImpl implements BundleService {
     }
 
     @Override
+    public void update(String teamName, String bundleTitle, Principal connectedUser, String dueDate) {
+        var bundle = Bundle.findBundle(
+                repository,
+                Team.findTeamByName(teamRepository, teamName),
+                bundleTitle
+        );
+        var actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
+
+        if (!actionPerformer.equals(bundle.getCreator())
+                && actionPerformer.checkPermission()
+        ) throw new IllegalStateException("You do not have permission for this action");
+
+        bundle.setDueDate(LocalDateTime.parse(dueDate, formatter));
+        bundle.saveChangeDate(repository);
+    }
+
+    @Override
     public List<BundleResponse> findAll(String team, Principal connectedUser) {
-        return repository.findAllByTeam(Team.findTeamByName(teamRepository, team))
-                .stream()
-                .map(converter::mapBundleToBundleResponse)
-                .toList();
+        List<Bundle> bundles = repository.findAllByTeam(Team.findTeamByName(teamRepository, team));
+
+        bundles.forEach(bundle -> bundle.checkDate(taskRepository));
+        return bundles.stream().map(converter::mapBundleToBundleResponse).collect(Collectors.toList());
     }
 
     @Override
@@ -105,6 +124,9 @@ public class BundleServiceImpl implements BundleService {
                 repository,
                 Team.findTeamByName(teamRepository, teamName),
                 bundleTitle);
+
+        bundle.checkDate(taskRepository);
+
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
 
         if (!actionPerformer.equals(bundle.getCreator())

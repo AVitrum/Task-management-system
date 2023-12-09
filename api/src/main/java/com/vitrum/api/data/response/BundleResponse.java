@@ -17,7 +17,7 @@ public class BundleResponse {
     private String title;
     private String creatorEmail;
     private String performerEmail;
-    private LocalDateTime assignmentTime;
+    private LocalDateTime assignmentDate;
     private LocalDateTime dueDate;
     private LocalDateTime changeTime;
     private List<TaskResponse> tasks;

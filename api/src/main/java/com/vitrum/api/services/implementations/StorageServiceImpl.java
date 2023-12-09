@@ -5,7 +5,6 @@ import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
 import com.vitrum.api.data.models.Bundle;
 import com.vitrum.api.data.models.Task;
-import com.vitrum.api.data.models.Team;
 import com.vitrum.api.repositories.BundleRepository;
 import com.vitrum.api.repositories.FileRepository;
 import com.vitrum.api.repositories.TaskRepository;
@@ -43,9 +42,11 @@ public class StorageServiceImpl implements StorageService {
         var task = Task.findTaskByTitleAndBundle(
                 taskRepository,
                 taskTitle,
-                Bundle.findBundle(
+                Bundle.getBundleWithDateCheck(
                         bundleRepository,
-                        Team.findTeamByName(teamRepository, teamName),
+                        teamRepository,
+                        taskRepository,
+                        teamName,
                         bundleTitle
                 )
         );
@@ -103,6 +104,14 @@ public class StorageServiceImpl implements StorageService {
                 bundleTitle,
                 taskTitle,
                 fileName
+        );
+
+        Bundle.getBundleWithDateCheck(
+                bundleRepository,
+                teamRepository,
+                taskRepository,
+                teamName,
+                bundleTitle
         );
 
         repository.delete(repository.findByName(modifiedFilename)
