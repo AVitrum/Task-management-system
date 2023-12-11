@@ -1,5 +1,6 @@
 package com.vitrum.api.services.implementations;
 
+import com.vitrum.api.data.enums.RoleInTeam;
 import com.vitrum.api.data.models.Bundle;
 import com.vitrum.api.data.models.Team;
 import com.vitrum.api.data.models.User;
@@ -69,9 +70,11 @@ public class BundleServiceImpl implements BundleService {
                             .getTitle())
             );
 
-        var bundle = Bundle.findBundle(
+        var bundle = Bundle.getBundleWithDateCheck(
                 repository,
-                Team.findTeamByName(teamRepository, teamName),
+                teamRepository,
+                taskRepository,
+                teamName,
                 bundleTitle
         );
         var actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
@@ -111,8 +114,19 @@ public class BundleServiceImpl implements BundleService {
     }
 
     @Override
-    public List<BundleResponse> findAll(String team, Principal connectedUser) {
-        List<Bundle> bundles = repository.findAllByTeam(Team.findTeamByName(teamRepository, team));
+    public List<BundleResponse> findAll(String teamName, Principal connectedUser) {
+        var actionPerformer = Member.getActionPerformer(
+                memberRepository,
+                connectedUser,
+                Team.findTeamByName(teamRepository, teamName)
+        );
+
+        List<Bundle> bundles;
+
+        if (!actionPerformer.getRole().equals(RoleInTeam.MEMBER))
+            bundles = repository.findAllByTeam(Team.findTeamByName(teamRepository, teamName));
+        else
+            bundles = actionPerformer.getPerformerBundles();
 
         bundles.forEach(bundle -> bundle.checkDate(taskRepository));
         return bundles.stream().map(converter::mapBundleToBundleResponse).collect(Collectors.toList());

@@ -11,5 +11,12 @@ public interface TaskService {
     void change(TaskRequest request, String taskTitle, String team, String bundle, Principal connectedUser);
     void delete(String task, Principal connectedUser, String team, String bundle);
 
+    void markAsCompleted(
+            String taskTitle,
+            String teamName,
+            String bundleTitle,
+            Principal connectedUser
+    );
+
     Task getTask(String task, Principal connectedUser, String team, String bundle);
 }

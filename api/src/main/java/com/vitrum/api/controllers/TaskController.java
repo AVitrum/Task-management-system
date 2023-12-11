@@ -34,6 +34,23 @@ public class TaskController {
         }
     }
 
+    @PatchMapping("/submit/{task}")
+    public ResponseEntity<?> markAsCompleted(
+            @PathVariable String team,
+            @PathVariable String task,
+            @PathVariable String bundle,
+            Principal connectedUser
+    ) {
+        try {
+            service.markAsCompleted(task, team, bundle, connectedUser);
+            return ResponseEntity.ok("Completed");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
+
     @PatchMapping("/change/{task}")
     public ResponseEntity<?> change(
             @RequestBody TaskRequest request,

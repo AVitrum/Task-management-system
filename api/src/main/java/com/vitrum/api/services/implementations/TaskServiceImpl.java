@@ -62,6 +62,9 @@ public class TaskServiceImpl implements TaskService {
         if (task.getStatus() == Status.DELETED)
             throw new IllegalArgumentException("The task is not available for modification as it has been deleted");
 
+        if (task.getStatus() == Status.COMPLETED)
+            throw new IllegalArgumentException("The task is marked as completed");
+
         OldTask oldTask = converter.mapTaskToOldTask(task);
         oldTaskRepository.save(oldTask);
         commentRepository.saveAll(oldTask.getComments());
@@ -75,6 +78,23 @@ public class TaskServiceImpl implements TaskService {
                 String.format("The task has been changed by %s", actionPerformer.getUser().getEmail()),
                 task.toString()
         );
+    }
+
+    @Override
+    public void markAsCompleted(
+            String taskTitle,
+            String teamName,
+            String bundleTitle,
+            Principal connectedUser
+    ) {
+        var bundle = Bundle.getBundleWithDateCheck(bundleRepository, teamRepository, repository, teamName, bundleTitle);
+        var task = Task.findTaskByTitleAndBundle(repository, taskTitle, bundle);
+        var actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
+
+        if (!actionPerformer.equals(bundle.getPerformer()))
+            throw new IllegalArgumentException("You are not performing this task");
+
+        task.setStatus(Status.COMPLETED);
     }
 
     @Override
