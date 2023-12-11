@@ -1,5 +1,6 @@
 package com.vitrum.api.data.request;
 
+import com.vitrum.api.data.enums.RegistrationSource;
 import com.vitrum.api.validation.PasswordConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,5 +18,6 @@ public class RegisterRequest {
     @PasswordConstraint
     private String password;
     private String role;
-
+    private RegistrationSource source;
+    private String imagePath;
 }

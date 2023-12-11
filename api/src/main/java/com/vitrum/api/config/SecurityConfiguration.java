@@ -31,6 +31,7 @@ public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
+    private final GoogleService oAuth2LoginSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -38,12 +39,13 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(httpSecurityCorsConfigurer ->
                         httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))
+                .oauth2Login(oath2 -> oath2.successHandler(oAuth2LoginSuccessHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/users/password/recoverycode/**",
-                                "/api/users/password/reset")
-                            .permitAll()
+                                "/api/users/password/reset"
+                        ).permitAll()
                         .requestMatchers(
                                 "/api/users/changeCredentials",
                                 "/api/users/ban",
@@ -54,8 +56,7 @@ public class SecurityConfiguration {
                                 "/api/users/**",
                                 "/api/teams/**"
                         ).hasAnyRole(USER.name(), ADMIN.name())
-                )
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                ).sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout ->

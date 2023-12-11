@@ -1,6 +1,7 @@
 package com.vitrum.api.services.implementations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vitrum.api.data.enums.RegistrationSource;
 import com.vitrum.api.data.request.AuthenticationRequest;
 import com.vitrum.api.data.response.AuthenticationResponse;
 import com.vitrum.api.data.request.RegisterRequest;
@@ -37,20 +38,25 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     @Override
-    public void register(RegisterRequest request) {
+    public String register(RegisterRequest request) {
         try {
+            if (!request.getSource().equals(RegistrationSource.GOOGLE))
+                request.setSource(RegistrationSource.JWT);
+
             var user = User.builder()
                     .username(request.getUsername().replaceAll("\\s", "_"))
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
                     .role(Role.USER)
+                    .source(request.getSource())
                     .isBanned(false)
-                    .imagePath(null)
+                    .imagePath(request.getImagePath())
                     .build();
 
             var savedUser = repository.save(user);
             var jwtToken = jwtService.generateToken(user);
             saveUserToken(savedUser, jwtToken);
+            return jwtToken;
         } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("User with the same email/username already exists.");
         }
@@ -70,6 +76,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         if (!user.isAccountNonLocked())
             throw new IllegalStateException("The account is blocked");
+
+        if (user.getSource().equals(RegistrationSource.GOOGLE))
+            throw new IllegalStateException("Only google auth");
 
         try {
             authenticationManager.authenticate(
@@ -91,6 +100,35 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .accessToken(jwtToken)
                     .refreshToken(refreshToken)
                     .build();
+    }
+
+    @Override
+    public String googleAuthenticate(User user) {
+
+        if (!user.isAccountNonLocked())
+            throw new IllegalStateException("The account is blocked");
+
+        if (user.getSource().equals(RegistrationSource.JWT)) {
+            user.setSource(RegistrationSource.GOOGLE);
+            user.setPassword(passwordEncoder.encode("GooglePassword"));
+            repository.save(user);
+        }
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            user.getEmail(),
+                            "GooglePassword"
+                    )
+            );
+        } catch (BadCredentialsException e) {
+            throw new IllegalArgumentException("Wrong password");
+        }
+        var jwtToken = jwtService.generateToken(user);
+
+        revokeAllUserTokens(user);
+        saveUserToken(user, jwtToken);
+        return jwtToken;
     }
 
     @Override

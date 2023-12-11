@@ -1,5 +1,6 @@
 package com.vitrum.api.services.interfaces;
 
+import com.vitrum.api.data.models.User;
 import com.vitrum.api.data.request.AuthenticationRequest;
 import com.vitrum.api.data.request.RegisterRequest;
 import com.vitrum.api.data.response.AuthenticationResponse;
@@ -10,7 +11,10 @@ import java.io.IOException;
 
 public interface AuthenticationService {
 
-    void register(RegisterRequest request);
+    String register(RegisterRequest request);
     AuthenticationResponse authenticate(AuthenticationRequest request);
+
+    String googleAuthenticate(User user);
+
     void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException;
 }

@@ -1,5 +1,6 @@
 package com.vitrum.api.data.models;
 
+import com.vitrum.api.data.enums.RegistrationSource;
 import com.vitrum.api.data.enums.Role;
 import com.vitrum.api.data.submodels.Recoverycode;
 import com.vitrum.api.data.submodels.Token;
@@ -34,7 +35,6 @@ public class User implements UserDetails {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
     private String password;
 
     private String imagePath;
@@ -44,6 +44,10 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Column(name = "source")
+    @Enumerated(EnumType.STRING)
+    private RegistrationSource source;
 
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;

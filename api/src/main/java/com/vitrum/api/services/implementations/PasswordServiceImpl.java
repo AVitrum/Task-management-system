@@ -1,5 +1,6 @@
 package com.vitrum.api.services.implementations;
 
+import com.vitrum.api.data.enums.RegistrationSource;
 import com.vitrum.api.data.models.User;
 import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.data.request.ChangePasswordRequest;
@@ -30,15 +31,18 @@ public class PasswordServiceImpl implements PasswordService {
     public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
         var user = User.getUserFromPrincipal(connectedUser);
 
-        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+        if (user.getSource().equals(RegistrationSource.GOOGLE))
+            throw new IllegalArgumentException("This account is linked to Google," +
+                    " you need to log in only through this platform");
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword()))
             throw new IllegalStateException("Wrong password!");
-        }
-        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword()))
             throw new IllegalStateException("Password is the same as the current one!");
-        }
-        if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
+
+        if (!request.getNewPassword().equals(request.getConfirmationPassword()))
             throw new IllegalStateException("Passwords do not match!");
-        }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         repository.save(user);
@@ -73,6 +77,11 @@ public class PasswordServiceImpl implements PasswordService {
     public void getRecoverycode(String email) {
         var user = repository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Wrong email!"));
+
+        if (user.getSource().equals(RegistrationSource.GOOGLE))
+            throw new IllegalArgumentException("This account is linked to Google," +
+                    " you need to log in only through this platform");
+
         var recoverycode = generateRecoverycode(user);
 
         messageUtil.sendRecoverycodeByEmail(user, recoverycode);
