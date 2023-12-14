@@ -48,7 +48,13 @@ public class PasswordServiceImpl implements PasswordService {
     public void resetPassword(ResetPasswordRequest request) {
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Wrong email!"));
-        var recoverycode = user.getRecoverycode().get(0);
+        Recoverycode recoverycode;
+        try {
+            recoverycode = user.getRecoverycode().get(0);
+        } catch (IndexOutOfBoundsException e) {
+            throw new IllegalStateException("Recovery code not found");
+        }
+
 
         if (recoverycode.isExpired()) {
             recoverycodeRepository.delete(recoverycode);

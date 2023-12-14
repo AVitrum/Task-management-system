@@ -3,9 +3,10 @@ package com.vitrum.api.services.implementations;
 import com.vitrum.api.data.enums.Status;
 import com.vitrum.api.data.models.Comment;
 import com.vitrum.api.data.models.Member;
+import com.vitrum.api.data.models.Task;
+import com.vitrum.api.data.models.Team;
 import com.vitrum.api.repositories.*;
 import com.vitrum.api.services.interfaces.CommentService;
-import com.vitrum.api.services.interfaces.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +20,12 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository repository;
     private final MemberRepository memberRepository;
-    private final TaskService taskService;
+    private final TaskRepository taskRepository;
+    private final TeamRepository teamRepository;
 
     @Override
-    public void add(Map<String, String> request, Principal connectedUser, String teamName, String bundleTitle, String taskTitle) {
-        var task = taskService.getTask(taskTitle, connectedUser, teamName, bundleTitle);
+    public void add(Map<String, String> request, Principal connectedUser, String teamName, String taskTitle) {
+        var task = Task.findTask(taskRepository, Team.findTeamByName(teamRepository, teamName), taskTitle);
 
 
         if (task.getStatus().equals(Status.DELETED))
@@ -31,7 +33,7 @@ public class CommentServiceImpl implements CommentService {
 
         repository.save(
                 Comment.builder()
-                        .author(Member.getActionPerformer(memberRepository, connectedUser, task.getBundle().getTeam()))
+                        .author(Member.getActionPerformer(memberRepository, connectedUser, task.getTeam()))
                         .text(request.get("text"))
                         .creationTime(LocalDateTime.now())
                         .task(task)

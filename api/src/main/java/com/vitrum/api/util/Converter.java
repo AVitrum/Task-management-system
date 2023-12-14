@@ -3,7 +3,6 @@ package com.vitrum.api.util;
 import com.vitrum.api.data.models.*;
 import com.vitrum.api.data.response.*;
 import com.vitrum.api.data.submodels.OldTask;
-import com.vitrum.api.repositories.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +14,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class Converter {
 
-    private final CommentRepository commentRepository;
-
     public TeamResponse mapTeamToTeamResponse(Team team) {
         return TeamResponse.builder()
                 .id(team.getId())
                 .name(team.getName())
                 .members(getMemberResponse(team))
+                .stage(team.getCurrentStage().getType().toString())
+                .stageDueDate(team.getCurrentStage().getDueDate())
                 .build();
     }
 
@@ -51,11 +50,34 @@ public class Converter {
                 .build();
     }
 
+
+    public CommentResponse mapCommentToCommentResponse(Comment comment) {
+        return CommentResponse.builder()
+                .author(comment.getAuthor().getUser().getTrueUsername())
+                .text(comment.getText())
+                .creationTime(comment.getCreationTime())
+                .build();
+    }
+
+    public TaskResponse mapTaskToTaskResponse(Task task) {
+        List<String> categories = task.getCategories().stream().map(Enum::name).toList();
+
+        return TaskResponse.builder()
+                .id(task.getId())
+                .title(task.getTitle())
+                .description(task.getDescription())
+                .assignmentDate(task.getAssignmentDate())
+                .changeTime(task.getChangeTime())
+                .creator(mapMemberToMemberResponse(task.getCreator()))
+                .performer(mapMemberToMemberResponse(task.getPerformer()))
+                .categories(categories)
+                .build();
+    }
+
     public OldTask mapTaskToOldTask(Task task) {
         OldTask oldTask = OldTask.builder()
                 .title(task.getTitle())
                 .description(task.getDescription())
-                .priority(task.getPriority())
                 .version(task.getVersion())
                 .status(task.getStatus())
                 .task(task)
@@ -72,7 +94,6 @@ public class Converter {
             comments.add(newComment);
         });
 
-        commentRepository.deleteAll(task.getComments());
         oldTask.setComments(comments);
         return oldTask;
     }
@@ -85,49 +106,9 @@ public class Converter {
                 .version(oldTask.getVersion())
                 .title(oldTask.getTitle())
                 .description(oldTask.getDescription())
-                .priority(oldTask.getPriority())
                 .status(oldTask.getStatus().name())
                 .comments(oldTask.getComments().stream()
                         .map(this::mapCommentToCommentResponse)
-                        .collect(Collectors.toList()))
-                .creator(mapMemberToMemberResponse(oldTask.getTask().getBundle().getCreator()))
-                .build();
-    }
-
-    public CommentResponse mapCommentToCommentResponse(Comment comment) {
-        return CommentResponse.builder()
-                .author(comment.getAuthor().getUser().getTrueUsername())
-                .text(comment.getText())
-                .creationTime(comment.getCreationTime())
-                .build();
-    }
-
-    public TaskResponse mapTaskToTaskResponse(Task task) {
-        return TaskResponse.builder()
-                .title(task.getTitle())
-                .description(task.getDescription())
-                .version(task.getVersion())
-                .status(task.getStatus().name())
-                .priority(task.getPriority())
-                .comments(task.getComments().stream()
-                        .map(this::mapCommentToCommentResponse)
-                        .collect(Collectors.toList()))
-                .files(task.getFiles().stream()
-                        .map(File::getPath)
-                        .collect(Collectors.toList()))
-                .build();
-    }
-
-    public BundleResponse mapBundleToBundleResponse(Bundle bundle) {
-        return BundleResponse.builder()
-                .title(bundle.getTitle())
-                .creatorEmail(bundle.getCreator().getUser().getTrueUsername())
-                .performerEmail(bundle.getPerformer().getUser().getTrueUsername())
-                .assignmentDate(bundle.getAssignmentDate())
-                .changeTime(bundle.getChangeTime())
-                .dueDate(bundle.getDueDate())
-                .tasks(bundle.getTasks().stream()
-                        .map(this::mapTaskToTaskResponse)
                         .collect(Collectors.toList()))
                 .build();
     }

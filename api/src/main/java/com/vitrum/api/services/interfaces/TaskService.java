@@ -2,14 +2,21 @@ package com.vitrum.api.services.interfaces;
 
 import com.vitrum.api.data.models.Task;
 import com.vitrum.api.data.request.TaskRequest;
+import com.vitrum.api.data.response.TaskResponse;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 public interface TaskService {
 
-    void add(TaskRequest request, Principal connectedUser, String team, String bundle);
-    void change(TaskRequest request, String taskTitle, String team, String bundle, Principal connectedUser);
-    void delete(String task, Principal connectedUser, String team, String bundle);
+    void create(String teamName, Principal connectedUser, TaskRequest request);
+    void addPerformer(String teamName, String taskTitle, Principal connectedUser, String performerName);
+    String update(Map<String, String> request, String teamName, String taskTitle, Principal connectedUser);
+    void deleteByTitle(String teamName, String taskTitle, Principal connectedUser);
+    Task findByTitle(String teamName, String taskTitle, Principal connectedUser);
+    List<TaskResponse> findAll(String team, Principal connectedUser);
 
-    Task getTask(String task, Principal connectedUser, String team, String bundle);
+    LocalDateTime getDeadlineForTasks(String teamName);
 }

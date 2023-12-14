@@ -17,8 +17,6 @@ public class HistoryResponse {
     private Long version;
     private String title;
     private String description;
-    private Long priority;
     private String status;
-    private MemberResponse creator;
     private List<CommentResponse> comments;
 }

@@ -1,8 +1,8 @@
 package com.vitrum.api.data.submodels;
 
 import com.vitrum.api.data.models.Comment;
-import com.vitrum.api.data.models.Task;
 import com.vitrum.api.data.enums.Status;
+import com.vitrum.api.data.models.Task;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,14 +1,17 @@
 package com.vitrum.api.repositories;
 
-import com.vitrum.api.data.models.Bundle;
 import com.vitrum.api.data.models.Task;
+import com.vitrum.api.data.models.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    Optional<Task> findByTitleAndBundle(String title, Bundle bundle);
+    Optional<Task> findByTeamAndTitle(Team team, String title);
 
-    Boolean existsByTitleAndBundle(String title, Bundle bundle);
+    List<Task> findAllByTeam(Team team);
+
+    Boolean existsByTitleAndTeam(String title, Team team);
 }
