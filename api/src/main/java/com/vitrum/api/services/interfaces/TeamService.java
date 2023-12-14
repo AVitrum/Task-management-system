@@ -10,7 +10,6 @@ import java.util.Map;
 
 public interface TeamService {
 
-    void addToTeam(String teamName, Map<String, String> request);
     void changeStage(String team, Map<String, String> request, Principal connectedUser);
     TeamCreationResponse create(TeamCreationRequest request, Principal connectedUser);
     List<TeamResponse> getAll();

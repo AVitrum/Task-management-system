@@ -22,12 +22,6 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request, connectedUser));
     }
 
-    @PostMapping("/{team}/addMember")
-    public ResponseEntity<?> addMember(@PathVariable String team, @RequestBody Map<String, String> request) {
-        service.addToTeam(team, request);
-        return ResponseEntity.ok("Member added successfully");
-    }
-
     @PutMapping("/{team}/changeStage")
     public ResponseEntity<?> changeStage(
             @PathVariable String team,

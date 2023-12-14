@@ -5,18 +5,15 @@ import com.vitrum.api.data.models.Team;
 import com.vitrum.api.data.submodels.TeamStage;
 import com.vitrum.api.repositories.TeamRepository;
 import com.vitrum.api.repositories.TeamStageRepository;
-import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.data.response.*;
 import com.vitrum.api.data.models.Member;
 import com.vitrum.api.repositories.MemberRepository;
 import com.vitrum.api.data.request.TeamCreationRequest;
 import com.vitrum.api.data.models.User;
-import com.vitrum.api.data.enums.RoleInTeam;
 import com.vitrum.api.services.interfaces.TeamService;
 import com.vitrum.api.util.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -31,7 +28,6 @@ public class TeamServiceImpl implements TeamService {
 
     private final TeamRepository repository;
     private final MemberRepository memberRepository;
-    private final UserRepository userRepository;
     private final TeamStageRepository teamStageRepository;
     private final Converter converter;
 
@@ -46,7 +42,7 @@ public class TeamServiceImpl implements TeamService {
             repository.save(team);
 
             TeamStage.create(teamStageRepository, team, StageType.PREPARATION, null);
-            createMember(user, team, "Leader");
+            Member.create(memberRepository, user, team, "Leader");
 
             return TeamCreationResponse.builder()
                     .id(team.getId())
@@ -58,18 +54,6 @@ public class TeamServiceImpl implements TeamService {
         } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("Team with the same name already exists");
         }
-    }
-
-    @Override
-    public void addToTeam(String teamName, Map<String, String> request) {
-        var team = Team.findTeamByName(repository, teamName);
-        var user = userRepository.findByUsername(request.get("username"))
-                .orElseThrow(() -> new UsernameNotFoundException("Can't find user"));
-
-        if (memberRepository.existsByUserAndTeam(user, team))
-            throw new IllegalArgumentException("The user is already in the team");
-
-        createMember(user, team, "Member");
     }
 
     @Override
@@ -121,16 +105,5 @@ public class TeamServiceImpl implements TeamService {
     public TeamResponse findByName(String name) {
         var team = Team.findTeamByName(repository, name);
         return converter.mapTeamToTeamResponse(team);
-    }
-
-    private void createMember(User user, Team team, String role) {
-        memberRepository.save(
-                Member.builder()
-                        .user(user)
-                        .role(RoleInTeam.valueOf(role.toUpperCase()))
-                        .team(team)
-                        .isEmailsAllowed(true)
-                        .build()
-        );
     }
 }

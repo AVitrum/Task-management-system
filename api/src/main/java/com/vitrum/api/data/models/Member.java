@@ -55,4 +55,15 @@ public class Member {
                 team
         ).orElseThrow(() -> new IllegalArgumentException("Member not found"));
     }
+
+    public static void create(MemberRepository repository, User user, Team team, String role) {
+        repository.save(
+                Member.builder()
+                        .user(user)
+                        .role(RoleInTeam.valueOf(role.toUpperCase()))
+                        .team(team)
+                        .isEmailsAllowed(true)
+                        .build()
+        );
+    }
 }

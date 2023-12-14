@@ -95,7 +95,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public String update(Map<String, String> request, String teamName, String bundleTitle, Principal connectedUser) {
+    public String changeCategory(Map<String, String> request, String teamName, String bundleTitle, Principal connectedUser) {
         var task = Task.findTask(
                 repository,
                 Team.findTeamByName(teamRepository, teamName),

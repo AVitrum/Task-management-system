@@ -13,7 +13,7 @@ public interface TaskService {
 
     void create(String teamName, Principal connectedUser, TaskRequest request);
     void addPerformer(String teamName, String taskTitle, Principal connectedUser, String performerName);
-    String update(Map<String, String> request, String teamName, String taskTitle, Principal connectedUser);
+    String changeCategory(Map<String, String> request, String teamName, String taskTitle, Principal connectedUser);
     void deleteByTitle(String teamName, String taskTitle, Principal connectedUser);
     Task findByTitle(String teamName, String taskTitle, Principal connectedUser);
     List<TaskResponse> findAll(String team, Principal connectedUser);

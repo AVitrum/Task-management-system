@@ -2,6 +2,7 @@ package com.vitrum.api.services.implementations;
 
 import com.vitrum.api.data.enums.RoleInTeam;
 import com.vitrum.api.data.models.Member;
+import com.vitrum.api.data.models.Team;
 import com.vitrum.api.data.models.User;
 import com.vitrum.api.repositories.MemberRepository;
 import com.vitrum.api.repositories.UserRepository;
@@ -23,6 +24,18 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository repository;
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
+
+    @Override
+    public void addToTeam(String teamName, Map<String, String> request) {
+        var team = Team.findTeamByName(teamRepository, teamName);
+        var user = userRepository.findByUsername(request.get("username"))
+                .orElseThrow(() -> new UsernameNotFoundException("Can't find user"));
+
+        if (repository.existsByUserAndTeam(user, team))
+            throw new IllegalArgumentException("The user is already in the team");
+
+        Member.create(repository, user, team, "Member");
+    }
 
     @Override
     public void changeRole(Principal connectedUser, Map<String, String> request, String teamName) {

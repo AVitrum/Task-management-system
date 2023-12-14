@@ -9,11 +9,17 @@ import java.security.Principal;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/teams/{team}/members")
+@RequestMapping("/api/{team}/members")
 @RequiredArgsConstructor
 public class MemberController {
 
     private final MemberService service;
+
+    @PostMapping("/addMember")
+    public ResponseEntity<?> addMember(@PathVariable String team, @RequestBody Map<String, String> request) {
+        service.addToTeam(team, request);
+        return ResponseEntity.ok("Member added successfully");
+    }
 
     @PatchMapping("/changeRole")
     public ResponseEntity<?> changeRole(

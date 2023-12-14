@@ -40,14 +40,14 @@ public class TaskController {
         return ResponseEntity.ok("Added");
     }
 
-    @PatchMapping("/{task}/update")
-    public ResponseEntity<?> update (
+    @PatchMapping("/{task}/changeCategory")
+    public ResponseEntity<?> changeCategory (
             @RequestBody Map<String, String> request,
             @PathVariable String team,
             @PathVariable String task,
             Principal connectedUser
     ) {
-        return ResponseEntity.ok(service.update(request, team, task, connectedUser));
+        return ResponseEntity.ok(service.changeCategory(request, team, task, connectedUser));
     }
 
     @GetMapping("/tasks")
