@@ -1,6 +1,7 @@
 package com.vitrum.api.data.models;
 
 import com.vitrum.api.data.enums.Status;
+import com.vitrum.api.data.enums.TaskCategory;
 import com.vitrum.api.data.submodels.OldTask;
 import com.vitrum.api.repositories.TaskRepository;
 import jakarta.persistence.*;
@@ -9,8 +10,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "task")
@@ -24,48 +27,49 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
     private String title;
     private String description;
-    private Long priority;
     private Long version;
+    private LocalDateTime assignmentDate;
+    private LocalDateTime changeTime;
 
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @ElementCollection(targetClass = TaskCategory.class)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "task_categories", joinColumns = @JoinColumn(name = "task_id"))
+    @Column(name = "category")
+    private Set<TaskCategory> categories = new HashSet<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "bundle_id")
-    private Bundle bundle;
+    @JoinColumn(name = "team_id")
+    private Team team;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id")
+    private Member creator;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "performer_id")
+    private Member performer;
 
     @OneToMany(mappedBy = "task")
     private List<OldTask> oldTasks;
 
     @OneToMany(mappedBy = "task")
-    private List<File> files;
-
-    @OneToMany(mappedBy = "task")
     private List<Comment> comments;
 
-    public static Task findTaskByTitleAndBundle(TaskRepository repository, String taskTitle, Bundle bundle) {
-        return repository.findByTitleAndBundle(taskTitle, bundle)
+    public static Task findTask(TaskRepository taskRepository, Team team, String title) {
+        return taskRepository.findByTeamAndTitle(team, title)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
     }
 
-    @Override
-    public String toString() {
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        String formattedCreationTime = bundle.getAssignmentDate().format(dateFormatter);
-        String formattedDueDate = bundle.getDueDate().format(dateFormatter);
-
-        return "Task: " + title + '\n' +
-                "description: " + description + '\n' +
-                "assignmentTime: " + formattedCreationTime + '\n' +
-                "dueDate: " + formattedDueDate + '\n' +
-                "priority: " + priority + '\n' +
-                "version: " + version + '\n' +
-                "status: " + status.name() + '\n' +
-                "creator: " + bundle.getCreator().getUser().getEmail() + '\n' +
-                "performer: " + bundle.getPerformer().getUser().getEmail();
+    public void saveChangeDate(TaskRepository repository) {
+        this.setChangeTime(LocalDateTime.now());
+        repository.save(this);
     }
+
+
 }
+

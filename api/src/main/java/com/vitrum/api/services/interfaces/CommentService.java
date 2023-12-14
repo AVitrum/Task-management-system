@@ -5,5 +5,5 @@ import java.util.Map;
 
 public interface CommentService {
 
-    void add(Map<String, String> request, Principal connectedUser, String teamName, String bundleTitle, String taskTitle);
+    void add(Map<String, String> request, Principal connectedUser, String teamName, String taskTitle);
 }

@@ -1,7 +1,10 @@
 package com.vitrum.api.services.implementations;
 
+import com.vitrum.api.data.enums.StageType;
 import com.vitrum.api.data.models.Team;
+import com.vitrum.api.data.submodels.TeamStage;
 import com.vitrum.api.repositories.TeamRepository;
+import com.vitrum.api.repositories.TeamStageRepository;
 import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.data.response.*;
 import com.vitrum.api.data.models.Member;
@@ -29,6 +32,7 @@ public class TeamServiceImpl implements TeamService {
     private final TeamRepository repository;
     private final MemberRepository memberRepository;
     private final UserRepository userRepository;
+    private final TeamStageRepository teamStageRepository;
     private final Converter converter;
 
     @Override
@@ -41,6 +45,7 @@ public class TeamServiceImpl implements TeamService {
                     .build();
             repository.save(team);
 
+            TeamStage.create(teamStageRepository, team, StageType.PREPARATION, null);
             createMember(user, team, "Leader");
 
             return TeamCreationResponse.builder()
@@ -65,6 +70,32 @@ public class TeamServiceImpl implements TeamService {
             throw new IllegalArgumentException("The user is already in the team");
 
         createMember(user, team, "Member");
+    }
+
+    @Override
+    public void changeStage(String teamName, Map<String, String> request, Principal connectedUser) {
+        var team = Team.findTeamByName(repository, teamName);
+        var user = Member.getActionPerformer(memberRepository, connectedUser, team);
+
+        if (user.checkPermission())
+            throw new IllegalStateException("You do not have permission for this action");
+
+        StageType currentStage = team.getCurrentStage().getType();
+
+        var stages = StageType.values();
+        int currentIndex = currentStage.ordinal();
+
+        if (currentIndex < stages.length - 1) {
+            StageType nextStage = stages[currentIndex + 1];
+            teamStageRepository.delete(team.getCurrentStage());
+            TeamStage.create(teamStageRepository, team, nextStage, request.get("dueDate"));
+
+            // Дії для переходу
+
+        } else {
+            throw new IllegalStateException("This is the last stage");
+        }
+
     }
 
     @Override

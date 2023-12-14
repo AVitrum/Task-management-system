@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -13,11 +14,12 @@ import java.util.List;
 @AllArgsConstructor
 public class TaskResponse {
 
+    private Long id;
     private String title;
     private String description;
-    private Long priority;
-    private Long version;
-    private String status;
-    private List<CommentResponse> comments;
-    private List<String> files;
+    private MemberResponse creator;
+    private MemberResponse performer;
+    private List<String> categories;
+    private LocalDateTime assignmentDate;
+    private LocalDateTime changeTime;
 }

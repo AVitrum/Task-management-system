@@ -1,5 +1,6 @@
 package com.vitrum.api.data.models;
 
+import com.vitrum.api.data.submodels.TeamStage;
 import com.vitrum.api.repositories.TeamRepository;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -28,7 +29,10 @@ public class Team {
     private List<Member> members;
 
     @OneToMany(mappedBy = "team")
-    private List<Bundle> bundles;
+    private List<Task> tasks;
+
+    @OneToOne(mappedBy = "team")
+    private TeamStage currentStage;
 
     public static Team findTeamByName(TeamRepository teamRepository, String name) {
         return teamRepository.findByName(name)

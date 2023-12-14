@@ -1,10 +1,13 @@
 package com.vitrum.api.config;
 
+import com.vitrum.api.aspects.TaskCompletionAspect;
 import com.vitrum.api.auditing.ApplicationAuditAware;
 import com.vitrum.api.repositories.UserRepository;
+import com.vitrum.api.services.implementations.TaskServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -22,6 +25,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import java.util.Properties;
 
 @Configuration
+@EnableAspectJAutoProxy
 @RequiredArgsConstructor
 public class ApplicationConfiguration {
 
@@ -31,6 +35,11 @@ public class ApplicationConfiguration {
     public UserDetailsService userDetailsService() {
         return username -> repository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    @Bean
+    public TaskCompletionAspect taskCompletionAspect(TaskServiceImpl taskService) {
+        return new TaskCompletionAspect(taskService);
     }
 
     @Bean

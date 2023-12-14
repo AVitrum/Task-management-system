@@ -40,10 +40,10 @@ public class Member {
     private List<Comment> comments;
 
     @OneToMany(mappedBy = "creator")
-    private List<Bundle> creatorBundles;
+    private List<Task> creatorTasks;
 
     @OneToMany(mappedBy = "performer")
-    private List<Bundle> performerBundles;
+    private List<Task> performerTasks;
 
     public boolean checkPermission() {
         return this.getRole().equals(RoleInTeam.MEMBER);

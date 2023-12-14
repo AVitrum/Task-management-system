@@ -10,73 +10,46 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 
 @RestController
-@RequestMapping("/api/teams/{team}/bundles/{bundle}/tasks/history")
+@RequestMapping("/api/{team}/{task}/history")
 @RequiredArgsConstructor
 public class OldTaskController {
 
     private final OldTaskService service;
     private final Converter converter;
 
-    @GetMapping("/{taskTitle}")
+    @GetMapping
     public ResponseEntity<?> findAllByTitle(
             @PathVariable String team,
-            @PathVariable String taskTitle,
-            @PathVariable String bundle,
+            @PathVariable String task,
             Principal connectedUser
     ) {
         try {
-            return ResponseEntity.ok(service.findAllByTitle(taskTitle, team, bundle, connectedUser));
+            return ResponseEntity.ok(service.findAllByTitle(task, team, connectedUser));
         } catch (UsernameNotFoundException | IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @GetMapping("/{taskTitle}/{version}")
+    @GetMapping("/{version}")
     public ResponseEntity<?> getByVersion(
             @PathVariable String team,
-            @PathVariable String taskTitle,
-            @PathVariable String bundle,
+            @PathVariable String task,
             @PathVariable Long version,
             Principal connectedUser
     ) {
         try {
             return ResponseEntity.ok(converter.mapOldTaskToHistoryResponse(
-                    service.getByVersion(taskTitle, team, bundle, version, connectedUser))
+                    service.getByVersion(task, team, version, connectedUser))
             );
         } catch (UsernameNotFoundException | IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @PutMapping("/{taskTitle}/{version}")
-    public ResponseEntity<?> restore(
-            @PathVariable String team,
-            @PathVariable String taskTitle,
-            @PathVariable String bundle,
-            @PathVariable Long version,
-            Principal connectedUser
+    @DeleteMapping
+    public ResponseEntity<?> delete(@PathVariable String team, @PathVariable String task, Principal connectedUser) {
+        service.delete(task, team, connectedUser);
+        return ResponseEntity.ok("Deleted");
 
-    ) {
-        try {
-            service.restore(taskTitle, team, bundle, version, connectedUser);
-            return ResponseEntity.ok("Restored");
-        } catch (UsernameNotFoundException | IllegalArgumentException | IllegalStateException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/{taskTitle}")
-    public ResponseEntity<?> delete(
-            @PathVariable String team,
-            @PathVariable String taskTitle,
-            @PathVariable String bundle,
-            Principal connectedUser
-    ) {
-        try {
-            service.delete(taskTitle, team, bundle, connectedUser);
-            return ResponseEntity.ok("Deleted");
-        } catch (UsernameNotFoundException | IllegalArgumentException | IllegalStateException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
     }
 }

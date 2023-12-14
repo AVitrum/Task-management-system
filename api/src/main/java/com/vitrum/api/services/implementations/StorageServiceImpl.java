@@ -3,11 +3,10 @@ package com.vitrum.api.services.implementations;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
-import com.vitrum.api.data.models.Bundle;
 import com.vitrum.api.data.models.Task;
-import com.vitrum.api.repositories.BundleRepository;
-import com.vitrum.api.repositories.FileRepository;
+import com.vitrum.api.data.models.Team;
 import com.vitrum.api.repositories.TaskRepository;
+import com.vitrum.api.repositories.FileRepository;
 import com.vitrum.api.repositories.TeamRepository;
 import com.vitrum.api.services.interfaces.StorageService;
 import lombok.RequiredArgsConstructor;
@@ -34,28 +33,20 @@ public class StorageServiceImpl implements StorageService {
     private final AmazonS3 s3Client;
     private final FileRepository repository;
     private final TeamRepository teamRepository;
-    private final BundleRepository bundleRepository;
     private final TaskRepository taskRepository;
 
     @Override
-    public void upload(String teamName, String bundleTitle, String taskTitle, MultipartFile multipartFile) {
-        var task = Task.findTaskByTitleAndBundle(
+    public void upload(String teamName, String taskTitle, MultipartFile multipartFile) {
+        var task = Task.findTask(
                 taskRepository,
-                taskTitle,
-                Bundle.getBundleWithDateCheck(
-                        bundleRepository,
-                        teamRepository,
-                        taskRepository,
-                        teamName,
-                        bundleTitle
-                )
+                Team.findTeamByName(teamRepository, teamName),
+                taskTitle
         );
 
         File fileObj = convertMultiPartFileToFile(multipartFile);
         String originalFilename = multipartFile.getOriginalFilename();
-        String modifiedFilename = String.format("%s_%s_%s_%s",
+        String modifiedFilename = String.format("%s_%s_%s",
                 teamName,
-                bundleTitle,
                 taskTitle,
                 Objects.requireNonNull(originalFilename).replaceAll("\\s", "_"));
 
@@ -67,10 +58,9 @@ public class StorageServiceImpl implements StorageService {
 
         var file = com.vitrum.api.data.models.File.builder()
                 .name(modifiedFilename)
-                .path(String.format("%s/api/teams/%s/bundles/%s/tasks/%s/files/%s",
+                .path(String.format("%s/api/%s/%s/files/%s",
                         serverAddress,
                         teamName,
-                        bundleTitle,
                         taskTitle,
                         originalFilename)
                 )
@@ -81,10 +71,9 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public byte[] downloadFile(String teamName, String bundleTitle, String taskTitle, String fileName) {
-        String modifiedFilename = String.format("%s_%s_%s_%s",
+    public byte[] downloadFile(String teamName, String taskTitle, String fileName) {
+        String modifiedFilename = String.format("%s_%s_%s",
                 teamName,
-                bundleTitle,
                 taskTitle,
                 fileName
         );
@@ -98,22 +87,12 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public void deleteFile(String teamName, String bundleTitle, String taskTitle, String fileName) {
-        String modifiedFilename = String.format("%s_%s_%s_%s",
+    public void deleteFile(String teamName, String taskTitle, String fileName) {
+        String modifiedFilename = String.format("%s_%s_%s",
                 teamName,
-                bundleTitle,
                 taskTitle,
                 fileName
         );
-
-        Bundle.getBundleWithDateCheck(
-                bundleRepository,
-                teamRepository,
-                taskRepository,
-                teamName,
-                bundleTitle
-        );
-
         repository.delete(repository.findByName(modifiedFilename)
                 .orElseThrow(() -> new IllegalArgumentException("File not found")));
         s3Client.deleteObject(bucketName, modifiedFilename);

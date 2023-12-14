@@ -18,39 +18,20 @@ public class PasswordController {
     private final PasswordService service;
 
     @GetMapping("/recoverycode/{email}")
-    public ResponseEntity<?> getRecoverycode(
-            @PathVariable String email
-    ) {
-        try {
-            service.getRecoverycode(email);
-            return ResponseEntity.ok().body("Sent");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<?> getRecoverycode(@PathVariable String email) {
+        service.getRecoverycode(email);
+        return ResponseEntity.ok().body("Sent");
     }
 
     @PatchMapping
-    public ResponseEntity<?> change(
-            @Valid @RequestBody ChangePasswordRequest request,
-            Principal connectedUser
-    ) {
-        try {
-            service.changePassword(request, connectedUser);
-            return ResponseEntity.ok().build();
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<?> change(@Valid @RequestBody ChangePasswordRequest request, Principal connectedUser) {
+        service.changePassword(request, connectedUser);
+        return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/reset")
-    public ResponseEntity<?> reset(
-            @RequestBody ResetPasswordRequest request
-    ) {
-        try {
-            service.resetPassword(request);
-            return ResponseEntity.ok().body("Changed");
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<?> reset(@RequestBody ResetPasswordRequest request) {
+        service.resetPassword(request);
+        return ResponseEntity.ok().body("Changed");
     }
 }

@@ -10,8 +10,9 @@ import java.util.Map;
 
 public interface TeamService {
 
-    TeamCreationResponse create(TeamCreationRequest request, Principal connectedUser);
     void addToTeam(String teamName, Map<String, String> request);
+    void changeStage(String team, Map<String, String> request, Principal connectedUser);
+    TeamCreationResponse create(TeamCreationRequest request, Principal connectedUser);
     List<TeamResponse> getAll();
     List<TeamResponse> findByUser(Principal connectedUser);
     TeamResponse findByName(String name);
