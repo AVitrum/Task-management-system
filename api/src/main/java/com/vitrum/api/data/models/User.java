@@ -55,14 +55,15 @@ public class User implements UserDetails {
         return (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
     }
 
+    public String getTrueUsername() {
+        return username;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return role.getAuthorities();
     }
 
-    public String getTrueUsername() {
-        return username;
-    }
 
     @Override
     public String getPassword() {

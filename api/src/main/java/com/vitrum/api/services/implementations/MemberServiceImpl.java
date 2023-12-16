@@ -27,7 +27,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public void addToTeam(String teamName, Map<String, String> request) {
-        var team = Team.findTeamByName(teamRepository, teamName);
+        Team team = Team.findTeamByName(teamRepository, teamName);
         var user = userRepository.findByUsername(request.get("username"))
                 .orElseThrow(() -> new UsernameNotFoundException("Can't find user"));
 
@@ -40,8 +40,8 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public void changeRole(Principal connectedUser, Map<String, String> request, String teamName) {
         List<Member> members = getPerformerAndTarget(connectedUser, request, teamName);
-        var performer = members.get(0);
-        var target = members.get(1);
+        Member performer = members.get(0);
+        Member target = members.get(1);
 
         RoleInTeam role = RoleInTeam.valueOf(request.get("role").toUpperCase());
 
@@ -61,52 +61,45 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public void kick(Principal connectedUser, Map<String, String> request, String teamName) {
         List<Member> members = getPerformerAndTarget(connectedUser, request, teamName);
-        var performer = members.get(0);
-        var target = members.get(1);
+        Member performer = members.get(0);
+        Member target = members.get(1);
 
-        if (!performer.getRole().canChangeTo(target.getRole())) {
+        if (!performer.getRole().canChangeTo(target.getRole()))
             throw new IllegalArgumentException("You do not have permission to perform actions on this user");
-        }
 
-        if (performer.equals(target) && performer.getRole() == RoleInTeam.LEADER) {
+        if (performer.equals(target) && performer.getRole() == RoleInTeam.LEADER)
             throw new IllegalArgumentException("First, put someone else in the leadership role");
-        }
 
         repository.delete(target);
     }
 
     @Override
     public void changeEmailsMessagingStatus(String teamName, Principal connectedUser) {
-        var team = teamRepository.findByName(teamName)
-                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
-        var member = repository.findByUserAndTeam(User.getUserFromPrincipal(connectedUser), team)
-                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
-
+        Member member = Member.getActionPerformer(
+                repository,
+                connectedUser,
+                Team.findTeamByName(teamRepository, teamName)
+        );
         member.setEmailsAllowed(!member.isEmailsAllowed());
         repository.save(member);
     }
 
     @Override
     public boolean getEmailsMessagingStatus(String teamName, Principal connectedUser) {
-        var team = teamRepository.findByName(teamName)
-                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
-        var member = repository.findByUserAndTeam(User.getUserFromPrincipal(connectedUser), team)
-                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
-
-        return member.isEmailsAllowed();
+        return Member.getActionPerformer(
+                repository,
+                connectedUser,
+                Team.findTeamByName(teamRepository, teamName)
+        ).isEmailsAllowed();
     }
 
     private List<Member> getPerformerAndTarget(Principal connectedUser, Map<String, String> request, String teamName) {
-        var user = User.getUserFromPrincipal(connectedUser);
-        var team = teamRepository.findByName(teamName)
-                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
-        var performer = repository.findByUserAndTeam(user, team)
-                .orElseThrow(() -> new UsernameNotFoundException("Admin not found"));
+        Member performer = Member.getActionPerformer(repository, connectedUser, Team.findTeamByName(teamRepository, teamName));
 
-        var username = request.get("username");
-        var target = userRepository.findByUsername(username)
+        String username = request.get("username");
+        User target = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        var targetMember = repository.findByUserAndTeam(target, team)
+        var targetMember = repository.findByUserAndTeam(target, performer.getTeam())
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
 
         List<Member> container = new ArrayList<>();

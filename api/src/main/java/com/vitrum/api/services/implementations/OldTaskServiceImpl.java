@@ -60,13 +60,7 @@ public class OldTaskServiceImpl implements OldTaskService {
     public void delete(String taskTitle, String teamName, Principal connectedUser) {
         Task task = Task.findTask(taskRepository, Team.findTeamByName(teamRepository, teamName), taskTitle);
         checkDeletePermission(connectedUser, task);
-
-        List<OldTask> oldTasks = getOldTasks(task);
-        oldTasks.stream().map(OldTask::getComments).forEach(commentRepository::deleteAll);
-        repository.deleteAll(oldTasks);
-
-        commentRepository.deleteAll(task.getComments());
-        taskRepository.delete(task);
+        task.delete(taskRepository, commentRepository, repository);
 
         messageUtil.sendMessage(
                 task.getPerformer(),

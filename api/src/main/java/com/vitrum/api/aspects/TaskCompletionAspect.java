@@ -22,7 +22,7 @@ import java.util.*;
 public class TaskCompletionAspect {
 
     private final TaskService taskService;
-    private final Set<String> MODIFICATION_METHODS = new HashSet<>(Arrays.asList("POST", "PATCH", "DELETE"));
+    private final Set<String> MODIFICATION_METHODS = new HashSet<>(Arrays.asList("POST", "PUT", "PATCH", "DELETE"));
 
     @Before("execution(* com.vitrum.api.controllers.TaskController.*(..)) && args(..)")
     public void beforeTaskModification() {
@@ -56,9 +56,8 @@ public class TaskCompletionAspect {
 
     private String extractTeamName(HttpServletRequest request) {
         Object attribute = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-        if (attribute instanceof Map<?, ?> pathVariables) {
+        if (attribute instanceof Map<?, ?> pathVariables)
             return (String) pathVariables.get("team");
-        }
         return null;
     }
 }

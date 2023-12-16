@@ -39,7 +39,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public void register(RegisterRequest request) {
         try {
-            var user = User.builder()
+            User user = User.builder()
                     .username(request.getUsername().replaceAll("\\s", "_"))
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
@@ -101,13 +101,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         final String refreshToken;
         final String userEmail;
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith("Bearer "))
             return;
-        }
         refreshToken = authHeader.substring(7);
         userEmail = jwtService.extractEmail(refreshToken);
         if (userEmail != null) {
-            var user = this.repository.findByEmail(userEmail)
+            User user = this.repository.findByEmail(userEmail)
                     .orElseThrow();
             if (jwtService.isTokenValid(refreshToken, user)) {
                 var accessToken = jwtService.generateToken(user);
@@ -134,7 +133,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     private void saveUserToken(User user, String jwtToken) {
-        var token = Token.builder()
+        Token token = Token.builder()
                 .user(user)
                 .token(jwtToken)
                 .tokenType(TokenType.BEARER)

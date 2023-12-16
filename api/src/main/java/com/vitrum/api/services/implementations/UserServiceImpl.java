@@ -106,7 +106,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void addImage(Principal connectedUser, MultipartFile multipartFile) {
-        var user = User.getUserFromPrincipal(connectedUser);
+        User user = User.getUserFromPrincipal(connectedUser);
 
         var fileObj = StorageServiceImpl.convertMultiPartFileToFile(multipartFile);
         String originalFilename = multipartFile.getOriginalFilename();
@@ -124,7 +124,7 @@ public class UserServiceImpl implements UserService {
         String[] fileNameSplit = originalFilename.split("\\.");
         String fileExtension = fileNameSplit[fileNameSplit.length - 1];
 
-        var file = File.builder()
+        File file = File.builder()
                 .name(modifiedFilename)
                 .path(String.format("%s/api/users/image/%s", serverAddress, modifiedFilename))
                 .type(fileExtension)

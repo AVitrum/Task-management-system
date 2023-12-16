@@ -39,7 +39,7 @@ public class TeamStage {
         if (dueDateString != null)
             dueDate = LocalDateTime.parse(dueDateString, formatter);
 
-        var stage = TeamStage.builder()
+        TeamStage stage = TeamStage.builder()
                 .team(team)
                 .dueDate(dueDate)
                 .type(type)

@@ -37,7 +37,7 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public void upload(String teamName, String taskTitle, MultipartFile multipartFile) {
-        var task = Task.findTask(
+        Task task = Task.findTask(
                 taskRepository,
                 Team.findTeamByName(teamRepository, teamName),
                 taskTitle
