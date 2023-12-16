@@ -29,6 +29,17 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Created");
     }
 
+    @PutMapping("/{task}/update")
+    public ResponseEntity<?> update(
+            @RequestBody TaskRequest request,
+            @PathVariable String team,
+            @PathVariable String task,
+            Principal connectedUser
+    ) {
+        service.update(team, task, connectedUser, request);
+        return ResponseEntity.status(HttpStatus.OK).body("Updated");
+    }
+
     @PatchMapping("/{task}/addPerformer")
     public ResponseEntity<?> addPerformer(
             @RequestBody Map<String, String> request,

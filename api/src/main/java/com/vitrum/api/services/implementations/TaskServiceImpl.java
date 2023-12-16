@@ -4,7 +4,9 @@ import com.vitrum.api.data.enums.Status;
 import com.vitrum.api.data.enums.TaskCategory;
 import com.vitrum.api.data.models.Task;
 import com.vitrum.api.data.models.Team;
+import com.vitrum.api.data.models.User;
 import com.vitrum.api.data.request.TaskRequest;
+import com.vitrum.api.data.submodels.OldTask;
 import com.vitrum.api.repositories.*;
 import com.vitrum.api.data.response.TaskResponse;
 import com.vitrum.api.data.models.Member;
@@ -38,7 +40,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void create(String teamName, Principal connectedUser, TaskRequest request) {
-        var creator = Member.getActionPerformer(
+        Member creator = Member.getActionPerformer(
                 memberRepository,
                 connectedUser,
                 Team.findTeamByName(teamRepository, teamName)
@@ -66,16 +68,10 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void addPerformer(String teamName, String bundleTitle, Principal connectedUser, String performerName) {
-        var performer = findMemberByUsernameAndTeam(performerName, teamName);
-
-        var task = Task.findTask(
-                repository,
-                performer.getTeam(),
-                bundleTitle
-        );
-
-        var actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, performer.getTeam());
+    public void addPerformer(String teamName, String taskTitle, Principal connectedUser, String performerName) {
+        Task task = getTask(teamName, taskTitle);
+        Member performer = findMemberByUsernameAndTeam(performerName, task.getTeam());
+        Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, performer.getTeam());
 
         if (!actionPerformer.equals(task.getCreator())
                 && actionPerformer.checkPermission()
@@ -95,20 +91,39 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public String changeCategory(Map<String, String> request, String teamName, String bundleTitle, Principal connectedUser) {
-        var task = Task.findTask(
-                repository,
-                Team.findTeamByName(teamRepository, teamName),
-                bundleTitle
-        );
-        var actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
+    public void update(String teamName, String taskTitle, Principal connectedUser, TaskRequest request) {
+        Task task = getTask(teamName, taskTitle);
+        Member member = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
+
+        if (!member.equals(task.getCreator())
+                && !member.equals(task.getPerformer())
+                && member.checkPermission()
+        ) throw new IllegalStateException("You do not have permission for this action");
+
+        saveHistory(task);
+        updateTaskFields(request, task);
+    }
+
+    private void updateTaskFields(TaskRequest request, Task task) {
+        if (request.getDescription() != null)
+            task.setDescription(request.getDescription());
+        if (request.getStatus() != null)
+            task.setStatus(Status.valueOf(request.getStatus().toUpperCase()));
+
+        task.saveWithChangeDate(repository);
+    }
+
+    @Override
+    public String changeCategory(Map<String, String> request, String teamName, String taskTitle, Principal connectedUser) {
+        Task task = getTask(teamName, taskTitle);
+        Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
         if (!actionPerformer.equals(task.getCreator())
                 && !actionPerformer.equals(task.getPerformer())
                 && actionPerformer.checkPermission()
         ) throw new IllegalStateException("You do not have permission for this action");
 
-        var category = TaskCategory.valueOf(request.get("category").toUpperCase());
+        TaskCategory category = TaskCategory.valueOf(request.get("category").toUpperCase());
 
         String message;
 
@@ -120,7 +135,7 @@ public class TaskServiceImpl implements TaskService {
             message = "Removed";
         }
 
-        task.saveChangeDate(repository);
+        task.saveWithChangeDate(repository);
         return message;
     }
 
@@ -132,24 +147,19 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public LocalDateTime getDeadlineForTasks(String teamName) {
-        var team = Team.findTeamByName(teamRepository, teamName);
+        Team team = Team.findTeamByName(teamRepository, teamName);
         return team.getCurrentStage().getDueDate();
     }
 
     @Override
     public Task findByTitle(String teamName, String taskTitle, Principal connectedUser) {
-        return Task.findTask(
-                repository,
-                Team.findTeamByName(teamRepository, teamName),
-                taskTitle
-        );
+        return getTask(teamName, taskTitle);
     }
 
     @Override
-    public void deleteByTitle(String teamName, String bundleTitle, Principal connectedUser) {
-        Task task = findByTitle(teamName, bundleTitle, connectedUser);
-
-        var actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
+    public void deleteByTitle(String teamName, String taskTitle, Principal connectedUser) {
+        Task task = findByTitle(teamName, taskTitle, connectedUser);
+        Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
         if (actionPerformer.checkPermission())
             throw new IllegalArgumentException("You do not have permission to perform this action");
@@ -157,26 +167,34 @@ public class TaskServiceImpl implements TaskService {
         if (task.getStatus() == Status.DELETED)
             throw new IllegalArgumentException("The task has already been deleted and cannot be deleted again");
 
+        saveHistory(task);
+
         task.setStatus(Status.DELETED);
-        repository.save(task);
-
-        var oldTask = converter.mapTaskToOldTask(task);
-        oldTaskRepository.save(oldTask);
-        commentRepository.saveAll(oldTask.getComments());
-
-        commentRepository.deleteAll(task.getComments());
-        task.setComments(new ArrayList<>());
         repository.save(task);
     }
 
-    private Member findMemberByUsernameAndTeam(String username, String teamName) {
-        var team = teamRepository.findByName(teamName)
-                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
-        var user = userRepository.findByUsername(username)
+    private void saveHistory(Task task) {
+        OldTask oldTask = converter.mapTaskToOldTask(task);
+        oldTaskRepository.save(oldTask);
+        commentRepository.saveAll(oldTask.getComments());
+        commentRepository.deleteAll(task.getComments());
+        task.setComments(new ArrayList<>());
+    }
+
+    private Member findMemberByUsernameAndTeam(String username, Team team) {
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return memberRepository.findByUserAndTeam(user, team)
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
+    }
+
+    private Task getTask(String teamName, String taskTitle) {
+        return Task.findTask(
+                repository,
+                Team.findTeamByName(teamRepository, teamName),
+                taskTitle
+        );
     }
 
 }

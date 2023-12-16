@@ -3,6 +3,8 @@ package com.vitrum.api.data.models;
 import com.vitrum.api.data.enums.Status;
 import com.vitrum.api.data.enums.TaskCategory;
 import com.vitrum.api.data.submodels.OldTask;
+import com.vitrum.api.repositories.CommentRepository;
+import com.vitrum.api.repositories.OldTaskRepository;
 import com.vitrum.api.repositories.TaskRepository;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -65,11 +67,22 @@ public class Task {
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
     }
 
-    public void saveChangeDate(TaskRepository repository) {
+    public void saveWithChangeDate(TaskRepository repository) {
         this.setChangeTime(LocalDateTime.now());
         repository.save(this);
     }
 
+    public void delete(
+            TaskRepository taskRepository,
+            CommentRepository commentRepository,
+            OldTaskRepository oldTaskRepository
+    ) {
+        List<OldTask> oldTasks = this.getOldTasks();
+        oldTasks.stream().map(OldTask::getComments).forEach(commentRepository::deleteAll);
+        oldTaskRepository.deleteAll(oldTasks);
 
+        commentRepository.deleteAll(this.getComments());
+        taskRepository.delete(this);
+    }
 }
 

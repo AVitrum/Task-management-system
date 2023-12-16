@@ -26,7 +26,6 @@ public class OldTask {
     @Column(nullable = false)
     private String title;
     private String description;
-    private Long priority;
     private Long version;
 
     @Enumerated(EnumType.STRING)

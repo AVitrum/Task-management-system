@@ -28,7 +28,7 @@ public class PasswordServiceImpl implements PasswordService {
 
     @Override
     public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
-        var user = User.getUserFromPrincipal(connectedUser);
+        User user = User.getUserFromPrincipal(connectedUser);
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             throw new IllegalStateException("Wrong password!");
@@ -46,7 +46,7 @@ public class PasswordServiceImpl implements PasswordService {
 
     @Override
     public void resetPassword(ResetPasswordRequest request) {
-        var user = repository.findByEmail(request.getEmail())
+        User user = repository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Wrong email!"));
         Recoverycode recoverycode;
         try {
@@ -77,9 +77,9 @@ public class PasswordServiceImpl implements PasswordService {
 
     @Override
     public void getRecoverycode(String email) {
-        var user = repository.findByEmail(email)
+        User user = repository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Wrong email!"));
-        var recoverycode = generateRecoverycode(user);
+        Recoverycode recoverycode = generateRecoverycode(user);
 
         messageUtil.sendRecoverycodeByEmail(user, recoverycode);
     }

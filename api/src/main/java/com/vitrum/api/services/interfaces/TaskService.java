@@ -13,6 +13,9 @@ public interface TaskService {
 
     void create(String teamName, Principal connectedUser, TaskRequest request);
     void addPerformer(String teamName, String taskTitle, Principal connectedUser, String performerName);
+
+    void update(String teamName, String taskTitle, Principal connectedUser, TaskRequest request);
+
     String changeCategory(Map<String, String> request, String teamName, String taskTitle, Principal connectedUser);
     void deleteByTitle(String teamName, String taskTitle, Principal connectedUser);
     Task findByTitle(String teamName, String taskTitle, Principal connectedUser);

@@ -1,13 +1,13 @@
 package com.vitrum.api.services.implementations;
 
 import com.vitrum.api.data.enums.StageType;
+import com.vitrum.api.data.enums.Status;
+import com.vitrum.api.data.models.Task;
 import com.vitrum.api.data.models.Team;
 import com.vitrum.api.data.submodels.TeamStage;
-import com.vitrum.api.repositories.TeamRepository;
-import com.vitrum.api.repositories.TeamStageRepository;
+import com.vitrum.api.repositories.*;
 import com.vitrum.api.data.response.*;
 import com.vitrum.api.data.models.Member;
-import com.vitrum.api.repositories.MemberRepository;
 import com.vitrum.api.data.request.TeamCreationRequest;
 import com.vitrum.api.data.models.User;
 import com.vitrum.api.services.interfaces.TeamService;
@@ -29,13 +29,16 @@ public class TeamServiceImpl implements TeamService {
     private final TeamRepository repository;
     private final MemberRepository memberRepository;
     private final TeamStageRepository teamStageRepository;
+    private final TaskRepository taskRepository;
+    private final CommentRepository commentRepository;
+    private final OldTaskRepository oldTaskRepository;
     private final Converter converter;
 
     @Override
     public TeamCreationResponse create(TeamCreationRequest request, Principal connectedUser) {
         try {
             var user = User.getUserFromPrincipal(connectedUser);
-            var team = Team.builder()
+            Team team = Team.builder()
                     .name(request.getName().replaceAll("\\s", "_"))
                     .members(new ArrayList<>())
                     .build();
@@ -58,33 +61,24 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public void changeStage(String teamName, Map<String, String> request, Principal connectedUser) {
-        var team = Team.findTeamByName(repository, teamName);
+        Team team = Team.findTeamByName(repository, teamName);
         var user = Member.getActionPerformer(memberRepository, connectedUser, team);
 
         if (user.checkPermission())
             throw new IllegalStateException("You do not have permission for this action");
 
-        StageType currentStage = team.getCurrentStage().getType();
+        List<Task> tasks = team.getTasks();
 
-        var stages = StageType.values();
-        int currentIndex = currentStage.ordinal();
+        for (Task task : tasks)
+            if (!task.getStatus().equals(Status.APPROVED))
+                task.delete(taskRepository, commentRepository, oldTaskRepository);
 
-        if (currentIndex < stages.length - 1) {
-            StageType nextStage = stages[currentIndex + 1];
-            teamStageRepository.delete(team.getCurrentStage());
-            TeamStage.create(teamStageRepository, team, nextStage, request.get("dueDate"));
-
-            // Дії для переходу
-
-        } else {
-            throw new IllegalStateException("This is the last stage");
-        }
-
+        changeStage(request, team);
     }
 
     @Override
     public List<TeamResponse> getAll() {
-        var teams = repository.findAll();
+        List<Team> teams = repository.findAll();
         return teams.stream()
                 .map(converter::mapTeamToTeamResponse)
                 .collect(Collectors.toList());
@@ -103,7 +97,19 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public TeamResponse findByName(String name) {
-        var team = Team.findTeamByName(repository, name);
-        return converter.mapTeamToTeamResponse(team);
+        return converter.mapTeamToTeamResponse(Team.findTeamByName(repository, name));
+    }
+
+    private void changeStage(Map<String, String> request, Team team) {
+        StageType currentStage = team.getCurrentStage().getType();
+        var stages = StageType.values();
+        int currentIndex = currentStage.ordinal();
+        if (currentIndex < stages.length - 1) {
+            StageType nextStage = stages[currentIndex + 1];
+            teamStageRepository.delete(team.getCurrentStage());
+            TeamStage.create(teamStageRepository, team, nextStage, request.get("dueDate"));
+        } else {
+            throw new IllegalStateException("This is the last stage");
+        }
     }
 }
