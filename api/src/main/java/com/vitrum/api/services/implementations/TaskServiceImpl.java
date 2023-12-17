@@ -61,6 +61,7 @@ public class TaskServiceImpl implements TaskService {
                         .description(request.getDescription())
                         .status(Status.PENDING)
                         .version(0L)
+                        .completed(false)
                         .assignmentDate(LocalDateTime.now())
                         .changeTime(LocalDateTime.now())
                         .build()
@@ -78,6 +79,7 @@ public class TaskServiceImpl implements TaskService {
         ) throw new IllegalStateException("You do not have permission for this action");
 
         task.setPerformer(performer);
+        task.setStatus(Status.ASSIGNED);
         task.setAssignmentDate(LocalDateTime.now());
         repository.save(task);
 
@@ -91,26 +93,37 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public String changeStatus(String teamName, String taskTitle, Principal connectedUser) {
+        Task task = getTask(teamName, taskTitle);
+        Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
+
+        if (!actionPerformer.equals(task.getPerformer())
+                && !actionPerformer.equals(task.getCreator())
+                && actionPerformer.checkPermission()
+        ) throw new IllegalStateException("You do not have permission for this action");
+
+        Boolean currentStatus = task.getCompleted();
+
+        if (!currentStatus && task.getStatus().equals(Status.OVERDUE))
+            task.setStatus(Status.IN_REVIEW);
+
+        task.setCompleted(!currentStatus);
+        task.saveWithChangeDate(repository);
+
+        return task.getCompleted() ? "Marked as COMPLETED" : "You have marked a task as NOT COMPLETED";
+    }
+
+    @Override
     public void update(String teamName, String taskTitle, Principal connectedUser, TaskRequest request) {
         Task task = getTask(teamName, taskTitle);
         Member member = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
         if (!member.equals(task.getCreator())
-                && !member.equals(task.getPerformer())
                 && member.checkPermission()
         ) throw new IllegalStateException("You do not have permission for this action");
 
         saveHistory(task);
         updateTaskFields(request, task);
-    }
-
-    private void updateTaskFields(TaskRequest request, Task task) {
-        if (request.getDescription() != null)
-            task.setDescription(request.getDescription());
-        if (request.getStatus() != null)
-            task.setStatus(Status.valueOf(request.getStatus().toUpperCase()));
-
-        task.saveWithChangeDate(repository);
     }
 
     @Override
@@ -128,10 +141,10 @@ public class TaskServiceImpl implements TaskService {
         String message;
 
         if (!task.getCategories().contains(category)) {
-            task.getCategories().remove(category);
+            task.getCategories().add(category);
             message = "Added";
         } else {
-            task.getCategories().add(category);
+            task.getCategories().remove(category);
             message = "Removed";
         }
 
@@ -143,12 +156,32 @@ public class TaskServiceImpl implements TaskService {
     public List<TaskResponse> findAll(String teamName, Principal connectedUser) {
         List<Task> tasks = repository.findAllByTeam(Team.findTeamByName(teamRepository, teamName));
         return tasks.stream().map(converter::mapTaskToTaskResponse).collect(Collectors.toList());
-}
+    }
+
+    @Override
+    public List<TaskResponse> findAllInReview(String teamName, Principal connectedUser) {
+        return findAll(teamName, connectedUser).stream()
+                .filter(taskResponse -> taskResponse.getStatus().equals(Status.IN_REVIEW.name())).toList();
+    }
 
     @Override
     public LocalDateTime getDeadlineForTasks(String teamName) {
         Team team = Team.findTeamByName(teamRepository, teamName);
         return team.getCurrentStage().getDueDate();
+    }
+
+    @Override
+    public void markOverDueTasks(String teamName) {
+        Team team = Team.findTeamByName(teamRepository, teamName);
+        team.getTasks().forEach(task -> {
+            if (!task.getCompleted()
+                    && !task.getStatus().equals(Status.PENDING)
+                    && !task.getStatus().equals(Status.OVERDUE)
+            ) task.setStatus(Status.OVERDUE);
+            else if (!task.getStatus().equals(Status.APPROVED))
+                task.setStatus(Status.IN_REVIEW);
+            repository.save(task);
+        });
     }
 
     @Override
@@ -171,6 +204,16 @@ public class TaskServiceImpl implements TaskService {
 
         task.setStatus(Status.DELETED);
         repository.save(task);
+    }
+
+    private void updateTaskFields(TaskRequest request, Task task) {
+        if (request.getDescription() != null)
+            task.setDescription(request.getDescription());
+        if (request.getStatus() != null)
+            task.setStatus(Status.valueOf(request.getStatus().toUpperCase()));
+
+        task.setVersion(task.getVersion() + 1L);
+        task.saveWithChangeDate(repository);
     }
 
     private void saveHistory(Task task) {

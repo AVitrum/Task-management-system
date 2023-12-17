@@ -17,6 +17,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,14 +31,12 @@ public class TeamServiceImpl implements TeamService {
     private final MemberRepository memberRepository;
     private final TeamStageRepository teamStageRepository;
     private final TaskRepository taskRepository;
-    private final CommentRepository commentRepository;
-    private final OldTaskRepository oldTaskRepository;
     private final Converter converter;
 
     @Override
     public TeamCreationResponse create(TeamCreationRequest request, Principal connectedUser) {
         try {
-            var user = User.getUserFromPrincipal(connectedUser);
+            User user = User.getUserFromPrincipal(connectedUser);
             Team team = Team.builder()
                     .name(request.getName().replaceAll("\\s", "_"))
                     .members(new ArrayList<>())
@@ -62,16 +61,19 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public void changeStage(String teamName, Map<String, String> request, Principal connectedUser) {
         Team team = Team.findTeamByName(repository, teamName);
-        var user = Member.getActionPerformer(memberRepository, connectedUser, team);
+        Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, team);
 
-        if (user.checkPermission())
+        if (actionPerformer.checkPermission())
             throw new IllegalStateException("You do not have permission for this action");
 
-        List<Task> tasks = team.getTasks();
+        if (!LocalDateTime.now().isAfter(team.getCurrentStage().getDueDate()))
+            throw new IllegalStateException("It is impossible to move to the next " +
+                    "stage until the current one is completed");
 
-        for (Task task : tasks)
-            if (!task.getStatus().equals(Status.APPROVED))
-                task.delete(taskRepository, commentRepository, oldTaskRepository);
+        List<Task> tasks = team.getTasks();
+        tasks.stream().filter(task -> task.getStatus().equals(Status.APPROVED))
+                .forEach(task -> task.setStatus(Status.NOW_UNAVAILABLE));
+        taskRepository.saveAll(tasks);
 
         changeStage(request, team);
     }

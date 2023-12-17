@@ -61,9 +61,23 @@ public class TaskController {
         return ResponseEntity.ok(service.changeCategory(request, team, task, connectedUser));
     }
 
+    @PatchMapping("/{task}/changeStatus")
+    public ResponseEntity<?> changeStatus(
+            @PathVariable String team,
+            @PathVariable String task,
+            Principal connectedUser
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.changeStatus(team, task, connectedUser));
+    }
+
     @GetMapping("/tasks")
     public ResponseEntity<?> findAll(@PathVariable String team, Principal connectedUser) {
         return ResponseEntity.ok(service.findAll(team, connectedUser));
+    }
+
+    @GetMapping("/tasks/inReview")
+    public ResponseEntity<?> findAllInReview(@PathVariable String team, Principal connectedUser) {
+        return ResponseEntity.ok(service.findAllInReview(team, connectedUser));
     }
 
     @GetMapping("/{task}")
@@ -72,9 +86,7 @@ public class TaskController {
             @PathVariable String task,
             Principal connectedUser
     ) {
-        return ResponseEntity.ok(converter.mapTaskToTaskResponse(
-                service.findByTitle(team, task, connectedUser))
-        );
+        return ResponseEntity.ok(converter.mapTaskToTaskResponse(service.findByTitle(team, task, connectedUser)));
     }
 
     @DeleteMapping("/{task}")

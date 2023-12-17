@@ -14,6 +14,8 @@ public interface TaskService {
     void create(String teamName, Principal connectedUser, TaskRequest request);
     void addPerformer(String teamName, String taskTitle, Principal connectedUser, String performerName);
 
+    String changeStatus(String teamName, String taskTitle, Principal connectedUser);
+
     void update(String teamName, String taskTitle, Principal connectedUser, TaskRequest request);
 
     String changeCategory(Map<String, String> request, String teamName, String taskTitle, Principal connectedUser);
@@ -21,5 +23,9 @@ public interface TaskService {
     Task findByTitle(String teamName, String taskTitle, Principal connectedUser);
     List<TaskResponse> findAll(String team, Principal connectedUser);
 
+    List<TaskResponse> findAllInReview(String teamName, Principal coneectedUser);
+
     LocalDateTime getDeadlineForTasks(String teamName);
+
+    void markOverDueTasks(String teamName);
 }

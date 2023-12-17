@@ -33,8 +33,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository repository;
     private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     @Override
     public void register(RegisterRequest request) {

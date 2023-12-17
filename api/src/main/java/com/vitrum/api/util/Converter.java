@@ -65,6 +65,8 @@ public class Converter {
         return TaskResponse.builder()
                 .id(task.getId())
                 .title(task.getTitle())
+                .status(task.getStatus().name())
+                .isCompleted(task.getCompleted())
                 .description(task.getDescription())
                 .assignmentDate(task.getAssignmentDate())
                 .changeTime(task.getChangeTime())
