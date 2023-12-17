@@ -69,19 +69,19 @@ public class OldTaskServiceImpl implements OldTaskService {
         );
     }
 
-    private void checkUserPermission(Principal connectedUser, Task bundle) {
-        Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
+    private void checkUserPermission(Principal connectedUser, Task task) {
+        Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
-        if (!actionPerformer.equals(bundle.getCreator())
-                && !actionPerformer.equals(bundle.getPerformer())
+        if (!actionPerformer.equals(task.getCreator())
+                && !actionPerformer.equals(task.getPerformer())
                 && actionPerformer.checkPermission()
         ) throw new IllegalStateException("You cannot view other users' tasks");
     }
 
-    private void checkDeletePermission(Principal connectedUser, Task bundle) {
-        Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, bundle.getTeam());
+    private void checkDeletePermission(Principal connectedUser, Task task) {
+        Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
-        if (!actionPerformer.equals(bundle.getCreator())
+        if (!actionPerformer.equals(task.getCreator())
                 && actionPerformer.checkPermission()
         ) throw new IllegalStateException("You cannot view other users' tasks");
     }

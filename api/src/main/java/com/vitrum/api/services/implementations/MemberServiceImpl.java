@@ -4,9 +4,7 @@ import com.vitrum.api.data.enums.RoleInTeam;
 import com.vitrum.api.data.models.Member;
 import com.vitrum.api.data.models.Team;
 import com.vitrum.api.data.models.User;
-import com.vitrum.api.repositories.MemberRepository;
-import com.vitrum.api.repositories.UserRepository;
-import com.vitrum.api.repositories.TeamRepository;
+import com.vitrum.api.repositories.*;
 import com.vitrum.api.services.interfaces.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,6 +22,9 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository repository;
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
+    private final TaskRepository taskRepository;
+    private final CommentRepository commentRepository;
+    private final OldTaskRepository oldTaskRepository;
 
     @Override
     public void addToTeam(String teamName, Map<String, String> request) {
@@ -69,6 +70,15 @@ public class MemberServiceImpl implements MemberService {
 
         if (performer.equals(target) && performer.getRole() == RoleInTeam.LEADER)
             throw new IllegalArgumentException("First, put someone else in the leadership role");
+
+        target.getPerformerTasks().forEach(task -> {
+            if (task.getPerformer().equals(task.getCreator()))
+                task.delete(taskRepository, commentRepository, oldTaskRepository);
+            else {
+                task.setPerformer(task.getCreator());
+                taskRepository.save(task);
+            }
+        });
 
         repository.delete(target);
     }

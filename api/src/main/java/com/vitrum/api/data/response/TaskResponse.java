@@ -17,6 +17,8 @@ public class TaskResponse {
     private Long id;
     private String title;
     private String description;
+    private String status;
+    private Boolean isCompleted;
     private MemberResponse creator;
     private MemberResponse performer;
     private List<String> categories;

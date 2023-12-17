@@ -32,6 +32,7 @@ public class Task {
     private String title;
     private String description;
     private Long version;
+    private Boolean completed;
     private LocalDateTime assignmentDate;
     private LocalDateTime changeTime;
 
