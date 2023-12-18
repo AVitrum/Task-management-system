@@ -4,8 +4,10 @@ import com.vitrum.api.data.enums.RoleInTeam;
 import com.vitrum.api.data.models.Member;
 import com.vitrum.api.data.models.Team;
 import com.vitrum.api.data.models.User;
+import com.vitrum.api.data.response.MemberResponse;
 import com.vitrum.api.repositories.*;
 import com.vitrum.api.services.interfaces.MemberService;
+import com.vitrum.api.util.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,18 +28,28 @@ public class MemberServiceImpl implements MemberService {
     private final TaskRepository taskRepository;
     private final CommentRepository commentRepository;
     private final OldTaskRepository oldTaskRepository;
+    private final Converter converter;
 
     @Override
     public void addToTeam(String teamName, Map<String, String> request) {
         Team team = Team.findTeamByName(teamRepository, teamName);
-        var user = userRepository.findByUsername(request.get("username"))
-                .orElseThrow(() -> new UsernameNotFoundException("Can't find user"));
+        String username = request.get("username");
 
-        if (repository.existsByUserAndTeam(user, team))
-            throw new IllegalArgumentException("The user is already in the team");
-
-        Member.create(repository, user, team, "Member");
+        userRepository.findByUsername(username)
+                .or(() -> userRepository.findByEmail(username))
+                .ifPresentOrElse(
+                        user -> {
+                            if (repository.existsByUserAndTeam(user, team))
+                                throw new IllegalArgumentException("The user is already in the team");
+                            else
+                                Member.create(repository, user, team, "Member");
+                        },
+                        () -> {
+                            throw new UsernameNotFoundException("User not found");
+                        }
+                );
     }
+
 
     @Override
     public void changeRole(Principal connectedUser, Map<String, String> request, String teamName) {
@@ -101,6 +114,12 @@ public class MemberServiceImpl implements MemberService {
                 connectedUser,
                 Team.findTeamByName(teamRepository, teamName)
         ).isEmailsAllowed();
+    }
+
+    @Override
+    public List<MemberResponse> getAllByTeam(String team, Principal connectedUser) {
+        return Team.findTeamByName(teamRepository, team).getMembers()
+                .stream().map(converter::mapMemberToMemberResponse).collect(Collectors.toList());
     }
 
     private List<Member> getPerformerAndTarget(Principal connectedUser, Map<String, String> request, String teamName) {

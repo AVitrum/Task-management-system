@@ -124,7 +124,7 @@ public class TeamServiceImpl implements TeamService {
 
     private void createStages(StageDueDatesRequest request, Team team) {
         TeamStage.create(teamStageRepository, team, StageType.REQUIREMENTS, request.getRequirementsDueDate(), true, 1L);
-        TeamStage.create(teamStageRepository, team, StageType.DESIGN, request.getDesignDueDate(), false, 2L);
+        TeamStage.create(teamStageRepository, team, StageType.PROJECTING, request.getProjectingDueDate(), false, 2L);
         TeamStage.create(teamStageRepository, team, StageType.REVIEW, request.getReviewDueDate(), false, 3L);
         TeamStage.create(teamStageRepository, team, StageType.IMPLEMENTATION, request.getImplementationDueDate(), false, 4L);
         TeamStage.create(teamStageRepository, team, StageType.REVIEW, request.getSecondReviewDueDate(), false, 5L);

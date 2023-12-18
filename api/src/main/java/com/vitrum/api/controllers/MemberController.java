@@ -31,15 +31,20 @@ public class MemberController {
         return ResponseEntity.ok("Role changed successfully");
     }
 
-    @GetMapping("/emailsMessagingStatus")
-    public ResponseEntity<?> emailsMessagingStatus(@PathVariable String team, Principal connectedUser) {
-        return ResponseEntity.ok(service.getEmailsMessagingStatus(team, connectedUser));
-    }
-
     @PatchMapping("/changeEmailsMessagingStatus")
     public ResponseEntity<?> changeEmailsMessagingStatus(@PathVariable String team, Principal connectedUser) {
         service.changeEmailsMessagingStatus(team, connectedUser);
         return ResponseEntity.ok("Changed");
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllByTeam(@PathVariable String team, Principal connectedUser) {
+        return ResponseEntity.ok(service.getAllByTeam(team, connectedUser));
+    }
+
+    @GetMapping("/emailsMessagingStatus")
+    public ResponseEntity<?> emailsMessagingStatus(@PathVariable String team, Principal connectedUser) {
+        return ResponseEntity.ok(service.getEmailsMessagingStatus(team, connectedUser));
     }
 
     @DeleteMapping("/kick")

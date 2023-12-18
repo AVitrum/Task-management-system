@@ -58,18 +58,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        User user;
+        String username = request.getUsername();
 
-        if (repository.existsByUsername(request.getUsername()))
-        user = repository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("Wrong username"));
-        else if (repository.existsByEmail(request.getUsername()))
-            user = repository.findByEmail(request.getUsername())
-                    .orElseThrow(() -> new UsernameNotFoundException("Wrong username"));
-        else throw new UsernameNotFoundException("User not found");
+        User user = repository.findByUsername(username)
+                .or(() -> repository.findByEmail(username))
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        if (!user.isAccountNonLocked())
+        if (!user.isAccountNonLocked()) {
             throw new IllegalStateException("The account is blocked");
+        }
 
         try {
             authenticationManager.authenticate(
@@ -81,17 +78,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } catch (BadCredentialsException e) {
             throw new IllegalArgumentException("Wrong password");
         }
-            var jwtToken = jwtService.generateToken(user);
-            var refreshToken = jwtService.generateRefreshToken(user);
 
-            revokeAllUserTokens(user);
-            saveUserToken(user, jwtToken);
+        String jwtToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
 
-            return AuthenticationResponse.builder()
-                    .accessToken(jwtToken)
-                    .refreshToken(refreshToken)
-                    .build();
+        revokeAllUserTokens(user);
+        saveUserToken(user, jwtToken);
+
+        return AuthenticationResponse.builder()
+                .accessToken(jwtToken)
+                .refreshToken(refreshToken)
+                .build();
     }
+
 
     @Override
     public void refreshToken(

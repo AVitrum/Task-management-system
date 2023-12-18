@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class StageDueDatesRequest {
 
     private String requirementsDueDate;
-    private String designDueDate;
+    private String projectingDueDate;
     private String reviewDueDate;
     private String implementationDueDate;
     private String secondReviewDueDate;

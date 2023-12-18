@@ -1,6 +1,9 @@
 package com.vitrum.api.services.interfaces;
 
+import com.vitrum.api.data.response.MemberResponse;
+
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 public interface MemberService {
@@ -13,4 +16,6 @@ public interface MemberService {
     void changeEmailsMessagingStatus(String teamName, Principal connectedUser);
 
     boolean getEmailsMessagingStatus(String teamName, Principal connectedUser);
+
+    List<MemberResponse> getAllByTeam(String team, Principal connectedUser);
 }

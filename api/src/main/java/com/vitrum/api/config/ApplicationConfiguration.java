@@ -98,5 +98,4 @@ public class ApplicationConfiguration {
 
         return mailSender;
     }
-
 }
