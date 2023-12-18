@@ -132,7 +132,6 @@ public class TaskServiceImpl implements TaskService {
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
         if (!actionPerformer.equals(task.getCreator())
-                && !actionPerformer.equals(task.getPerformer())
                 && actionPerformer.checkPermission()
         ) throw new IllegalStateException("You do not have permission for this action");
 
@@ -162,26 +161,6 @@ public class TaskServiceImpl implements TaskService {
     public List<TaskResponse> findAllInReview(String teamName, Principal connectedUser) {
         return findAll(teamName, connectedUser).stream()
                 .filter(taskResponse -> taskResponse.getStatus().equals(Status.IN_REVIEW.name())).toList();
-    }
-
-    @Override
-    public LocalDateTime getDeadlineForTasks(String teamName) {
-        Team team = Team.findTeamByName(teamRepository, teamName);
-        return team.getCurrentStage().getDueDate();
-    }
-
-    @Override
-    public void markOverDueTasks(String teamName) {
-        Team team = Team.findTeamByName(teamRepository, teamName);
-        team.getTasks().forEach(task -> {
-            if (!task.getCompleted()
-                    && !task.getStatus().equals(Status.PENDING)
-                    && !task.getStatus().equals(Status.OVERDUE)
-            ) task.setStatus(Status.OVERDUE);
-            else if (!task.getStatus().equals(Status.APPROVED))
-                task.setStatus(Status.IN_REVIEW);
-            repository.save(task);
-        });
     }
 
     @Override
@@ -239,5 +218,4 @@ public class TaskServiceImpl implements TaskService {
                 taskTitle
         );
     }
-
 }

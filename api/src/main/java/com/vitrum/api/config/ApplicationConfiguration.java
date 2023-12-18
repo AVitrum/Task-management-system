@@ -4,7 +4,9 @@ import com.vitrum.api.aspects.TaskCompletionAspect;
 import com.vitrum.api.auditing.ApplicationAuditAware;
 import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.services.implementations.TaskServiceImpl;
+import com.vitrum.api.services.implementations.TeamServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -31,6 +33,9 @@ public class ApplicationConfiguration {
 
     private final UserRepository repository;
 
+    @Value("${spring.mail.password}")
+    private String mailPassword;
+
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> repository.findByEmail(username)
@@ -38,8 +43,8 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    public TaskCompletionAspect taskCompletionAspect(TaskServiceImpl taskService) {
-        return new TaskCompletionAspect(taskService);
+    public TaskCompletionAspect taskCompletionAspect(TeamServiceImpl teamService, TaskServiceImpl taskService) {
+        return new TaskCompletionAspect(teamService, taskService);
     }
 
     @Bean
@@ -84,7 +89,7 @@ public class ApplicationConfiguration {
         mailSender.setPort(587);
 
         mailSender.setUsername("tms.team.noreply@gmail.com");
-        mailSender.setPassword("qcleduqfkkcjbsry");
+        mailSender.setPassword(mailPassword);
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");

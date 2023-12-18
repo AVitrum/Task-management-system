@@ -1,5 +1,6 @@
 package com.vitrum.api.controllers;
 
+import com.vitrum.api.data.request.StageDueDatesRequest;
 import com.vitrum.api.data.request.TeamCreationRequest;
 import com.vitrum.api.services.interfaces.TeamService;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/teams")
@@ -22,19 +22,19 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(request, connectedUser));
     }
 
-    @PutMapping("/{team}/changeStage")
-    public ResponseEntity<?> changeStage(
+    @PutMapping("/{team}/setStages")
+    public ResponseEntity<?> setStage(
             @PathVariable String team,
-            @RequestBody Map<String, String> request,
+            @RequestBody StageDueDatesRequest request,
             Principal connectedUser
     ) {
-        service.changeStage(team, request, connectedUser);
+        service.setStageDueDates(request, team, connectedUser);
         return ResponseEntity.ok("Successfully");
     }
 
-    @GetMapping("/{name}")
-    public ResponseEntity<?> showByName(@PathVariable String name) {
-        return ResponseEntity.ok(service.findByName(name));
+    @GetMapping("/{team}")
+    public ResponseEntity<?> showByName(@PathVariable String team) {
+        return ResponseEntity.ok(service.findByName(team));
     }
 
     @GetMapping("/findByUser")
