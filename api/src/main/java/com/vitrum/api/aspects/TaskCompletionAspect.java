@@ -1,13 +1,13 @@
 package com.vitrum.api.aspects;
 
-import com.vitrum.api.services.interfaces.TaskService;
+import com.vitrum.api.data.enums.StageType;
+import com.vitrum.api.services.interfaces.TeamService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerMapping;
@@ -20,7 +20,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class TaskCompletionAspect {
 
-    private final TaskService taskService;
+    private final TeamService teamService;
 
     @Before("execution(* com.vitrum.api.controllers.TaskController.*(..)) && args(..)")
     public void beforeTaskModification(JoinPoint joinPoint) {
@@ -29,18 +29,18 @@ public class TaskCompletionAspect {
                 .getRequest();
 
         String teamName = extractTeamName(request);
-        LocalDateTime deadline = taskService.getDeadlineForTasks(teamName);
+        LocalDateTime deadline = teamService.findByName(teamName).getStageDueDate();
+        StageType current = StageType.valueOf(teamService.findByName(teamName).getStage().toUpperCase());
 
-        if (deadline != null && LocalDateTime.now().isAfter(deadline)) {
-            taskService.markOverDueTasks(teamName);
-            if (checkMethod(request, joinPoint))
-                throw new IllegalStateException("The stage is over, wait for the new one to start");
-        }
+        if (deadline != null && LocalDateTime.now().isAfter(deadline))
+            teamService.changeStage(teamName);
+
+        if (checkMethod(joinPoint) && current.equals(StageType.REVIEW))
+            throw new IllegalStateException("Stage is over. Wait for the reviewing to end");
     }
 
-    private boolean checkMethod(HttpServletRequest request, JoinPoint joinPoint) {
-        return !joinPoint.getSignature().getName().equals("update")
-                && RequestMethod.valueOf(request.getMethod()) != RequestMethod.GET;
+    private boolean checkMethod(JoinPoint joinPoint) {
+        return joinPoint.getSignature().getName().equals("changeStatus");
     }
 
     private String extractTeamName(HttpServletRequest request) {

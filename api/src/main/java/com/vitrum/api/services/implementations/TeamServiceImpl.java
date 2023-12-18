@@ -2,8 +2,8 @@ package com.vitrum.api.services.implementations;
 
 import com.vitrum.api.data.enums.StageType;
 import com.vitrum.api.data.enums.Status;
-import com.vitrum.api.data.models.Task;
 import com.vitrum.api.data.models.Team;
+import com.vitrum.api.data.request.StageDueDatesRequest;
 import com.vitrum.api.data.submodels.TeamStage;
 import com.vitrum.api.repositories.*;
 import com.vitrum.api.data.response.*;
@@ -17,10 +17,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,7 +42,6 @@ public class TeamServiceImpl implements TeamService {
                     .build();
             repository.save(team);
 
-            TeamStage.create(teamStageRepository, team, StageType.PREPARATION, null);
             Member.create(memberRepository, user, team, "Leader");
 
             return TeamCreationResponse.builder()
@@ -59,23 +57,17 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public void changeStage(String teamName, Map<String, String> request, Principal connectedUser) {
+    public void setStageDueDates(StageDueDatesRequest request, String teamName, Principal connectedUser) {
         Team team = Team.findTeamByName(repository, teamName);
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, team);
 
         if (actionPerformer.checkPermission())
             throw new IllegalStateException("You do not have permission for this action");
 
-        if (!LocalDateTime.now().isAfter(team.getCurrentStage().getDueDate()))
-            throw new IllegalStateException("It is impossible to move to the next " +
-                    "stage until the current one is completed");
+        if (teamStageRepository.existsByTeamAndIsCurrent(team, true))
+            throw new IllegalStateException("The stages are already planned");
 
-        List<Task> tasks = team.getTasks();
-        tasks.stream().filter(task -> task.getStatus().equals(Status.APPROVED))
-                .forEach(task -> task.setStatus(Status.NOW_UNAVAILABLE));
-        taskRepository.saveAll(tasks);
-
-        changeStage(request, team);
+        createStages(request, team);
     }
 
     @Override
@@ -102,16 +94,39 @@ public class TeamServiceImpl implements TeamService {
         return converter.mapTeamToTeamResponse(Team.findTeamByName(repository, name));
     }
 
-    private void changeStage(Map<String, String> request, Team team) {
-        StageType currentStage = team.getCurrentStage().getType();
-        var stages = StageType.values();
-        int currentIndex = currentStage.ordinal();
-        if (currentIndex < stages.length - 1) {
-            StageType nextStage = stages[currentIndex + 1];
-            teamStageRepository.delete(team.getCurrentStage());
-            TeamStage.create(teamStageRepository, team, nextStage, request.get("dueDate"));
-        } else {
-            throw new IllegalStateException("This is the last stage");
-        }
+    @Override
+    public void changeStage(String teamName) {
+        Team team = Team.findTeamByName(repository, teamName);
+        TeamStage current = team.getCurrentStage(teamStageRepository);
+
+        TeamStage next = teamStageRepository.findByTeamAndNumber(team, current.getNumber() + 1).orElseThrow(
+                () -> new IllegalStateException("Error"));
+
+        current.setIsCurrent(false);
+        next.setIsCurrent(true);
+        teamStageRepository.saveAll(Arrays.asList(current, next));
+
+        checkTasks(team);
+    }
+
+    private void checkTasks(Team team) {
+        team.getTasks().forEach(task -> {
+            if (!task.getCompleted()
+                    && !task.getStatus().equals(Status.PENDING)
+                    && !task.getStatus().equals(Status.OVERDUE)
+            ) task.setStatus(Status.OVERDUE);
+            else if (!task.getStatus().equals(Status.APPROVED)
+                    && !task.getStatus().equals(Status.PENDING)
+            ) task.setStatus(Status.IN_REVIEW);
+            taskRepository.save(task);
+        });
+    }
+
+    private void createStages(StageDueDatesRequest request, Team team) {
+        TeamStage.create(teamStageRepository, team, StageType.REQUIREMENTS, request.getRequirementsDueDate(), true, 1L);
+        TeamStage.create(teamStageRepository, team, StageType.DESIGN, request.getDesignDueDate(), false, 2L);
+        TeamStage.create(teamStageRepository, team, StageType.REVIEW, request.getReviewDueDate(), false, 3L);
+        TeamStage.create(teamStageRepository, team, StageType.IMPLEMENTATION, request.getImplementationDueDate(), false, 4L);
+        TeamStage.create(teamStageRepository, team, StageType.REVIEW, request.getSecondReviewDueDate(), false, 5L);
     }
 }

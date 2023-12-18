@@ -3,6 +3,7 @@ package com.vitrum.api.util;
 import com.vitrum.api.data.models.*;
 import com.vitrum.api.data.response.*;
 import com.vitrum.api.data.submodels.OldTask;
+import com.vitrum.api.repositories.TeamStageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,13 +15,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class Converter {
 
+    private final TeamStageRepository teamStageRepository;
+
     public TeamResponse mapTeamToTeamResponse(Team team) {
         return TeamResponse.builder()
                 .id(team.getId())
                 .name(team.getName())
                 .members(getMemberResponse(team))
-                .stage(team.getCurrentStage().getType().toString())
-                .stageDueDate(team.getCurrentStage().getDueDate())
+                .stage(team.getCurrentStage(teamStageRepository).getType().toString())
+                .stageDueDate(team.getCurrentStage(teamStageRepository).getDueDate())
                 .build();
     }
 

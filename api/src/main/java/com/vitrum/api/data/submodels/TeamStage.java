@@ -27,12 +27,21 @@ public class TeamStage {
     @Enumerated(EnumType.STRING)
     private StageType type;
     private LocalDateTime dueDate;
+    private Boolean isCurrent;
+    private Long number;
 
-    @OneToOne
-    @JoinColumn(name = "team_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "task_id")
     private Team team;
 
-    public static TeamStage create(TeamStageRepository repository, Team team, StageType type, String dueDateString) {
+    public static TeamStage create(
+            TeamStageRepository repository,
+            Team team,
+            StageType type,
+            String dueDateString,
+            Boolean isCurrent,
+            Long number
+    ) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime dueDate = LocalDateTime.now().plusDays(1);
 
@@ -43,6 +52,8 @@ public class TeamStage {
                 .team(team)
                 .dueDate(dueDate)
                 .type(type)
+                .isCurrent(isCurrent)
+                .number(number)
                 .build();
         repository.save(stage);
         return stage;
