@@ -1,7 +1,6 @@
 package com.vitrum.api.aspects;
 
 import com.vitrum.api.data.enums.StageType;
-import com.vitrum.api.services.interfaces.TaskService;
 import com.vitrum.api.services.interfaces.TeamService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -22,15 +21,12 @@ import java.util.*;
 public class TaskCompletionAspect {
 
     private final TeamService teamService;
-    private final TaskService taskService;
 
     @Before("execution(* com.vitrum.api.controllers.TaskController.*(..)) && args(..)")
     public void beforeTaskModification(JoinPoint joinPoint) {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder
                 .currentRequestAttributes())
                 .getRequest();
-
-        System.out.println(joinPoint.getSignature().getName());
 
         String teamName = extractTeamName(request);
         LocalDateTime deadline = teamService.findByName(teamName).getStageDueDate();
