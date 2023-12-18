@@ -7,6 +7,7 @@ import com.vitrum.api.repositories.TeamStageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,12 +19,21 @@ public class Converter {
     private final TeamStageRepository teamStageRepository;
 
     public TeamResponse mapTeamToTeamResponse(Team team) {
+
+        String stage = null;
+        LocalDateTime dueDate = null;
+
+        if (teamStageRepository.existsByTeamAndIsCurrent(team, true)) {
+            stage = team.getCurrentStage(teamStageRepository).getType().name();
+            dueDate = team.getCurrentStage(teamStageRepository).getDueDate();
+        }
+
         return TeamResponse.builder()
                 .id(team.getId())
                 .name(team.getName())
                 .members(getMemberResponse(team))
-                .stage(team.getCurrentStage(teamStageRepository).getType().toString())
-                .stageDueDate(team.getCurrentStage(teamStageRepository).getDueDate())
+                .stage(stage)
+                .stageDueDate(dueDate)
                 .build();
     }
 
