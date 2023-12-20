@@ -21,6 +21,11 @@ public class MemberController {
         return ResponseEntity.ok("Member added successfully");
     }
 
+    @GetMapping("/checkPermission")
+    public ResponseEntity<Boolean> isCurrentUserManager(@PathVariable String team, Principal connectedUser) {
+        return ResponseEntity.ok(service.isCurrentUserManager(team, connectedUser));
+    }
+
     @PatchMapping("/changeRole")
     public ResponseEntity<?> changeRole(
             Principal connectedUser,

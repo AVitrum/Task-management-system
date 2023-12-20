@@ -12,6 +12,7 @@ import com.vitrum.api.data.request.TeamCreationRequest;
 import com.vitrum.api.data.models.User;
 import com.vitrum.api.services.interfaces.TeamService;
 import com.vitrum.api.util.Converter;
+import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class TeamServiceImpl implements TeamService {
     private final MemberRepository memberRepository;
     private final TeamStageRepository teamStageRepository;
     private final TaskRepository taskRepository;
+    private final MessageUtil messageUtil;
     private final Converter converter;
 
     @Override
@@ -106,16 +108,32 @@ public class TeamServiceImpl implements TeamService {
         next.setIsCurrent(true);
         teamStageRepository.saveAll(Arrays.asList(current, next));
 
-        checkTasks(team);
+        if (next.getType().equals(StageType.REVIEW))
+            verifyTaskCompletion(team);
+        else
+            nextStage(team);
     }
 
-    private void checkTasks(Team team) {
+    private void nextStage(Team team) {
+        team.getTasks().stream().filter(task ->
+                task.getStatus().equals(Status.APPROVED)
+        ).forEach(task -> {
+            task.setStatus(Status.ASSIGNED);
+            task.setCompleted(false);
+            taskRepository.save(task);
+        });
+    }
+
+    private void verifyTaskCompletion(Team team) {
         team.getTasks().forEach(task -> {
             if (!task.getCompleted()
                     && !task.getStatus().equals(Status.PENDING)
+                    && !task.getStatus().equals(Status.UNCOMPLETED)
                     && !task.getStatus().equals(Status.OVERDUE)
-            ) task.setStatus(Status.OVERDUE);
-            else if (!task.getStatus().equals(Status.APPROVED)
+            ) {
+                task.setStatus(Status.UNCOMPLETED);
+                messageUtil.sendMessage(task.getPerformer(), "TMS INFO!", String.format("You are overdue for a task - %s", task.getTitle()));
+            } else if (!task.getStatus().equals(Status.APPROVED)
                     && !task.getStatus().equals(Status.PENDING)
             ) task.setStatus(Status.IN_REVIEW);
             taskRepository.save(task);

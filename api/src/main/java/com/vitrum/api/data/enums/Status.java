@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Status {
     COMPLETED,
+    UNCOMPLETED,
     PENDING,
     ASSIGNED,
     OVERDUE,

@@ -15,7 +15,7 @@ public interface TaskService {
     void update(String teamName, String taskTitle, Principal connectedUser, TaskRequest request);
     void deleteByTitle(String teamName, String taskTitle, Principal connectedUser);
 
-    String changeStatus(String teamName, String taskTitle, Principal connectedUser);
+    String confirmTask(String teamName, String taskTitle, Principal connectedUser);
     String changeCategory(Map<String, String> request, String teamName, String taskTitle, Principal connectedUser);
 
     Task findByTitle(String teamName, String taskTitle, Principal connectedUser);

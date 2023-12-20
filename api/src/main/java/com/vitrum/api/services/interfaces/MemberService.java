@@ -9,6 +9,9 @@ import java.util.Map;
 public interface MemberService {
 
     void addToTeam(String team, Map<String, String> request);
+
+    boolean isCurrentUserManager(String teamName, Principal connectedUser);
+
     void changeRole(Principal connectedUser, Map<String, String> request, String teamName);
 
     void kick(Principal connectedUser, Map<String, String> request, String teamName);

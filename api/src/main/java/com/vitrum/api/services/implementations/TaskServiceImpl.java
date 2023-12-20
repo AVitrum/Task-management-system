@@ -1,5 +1,6 @@
 package com.vitrum.api.services.implementations;
 
+import com.vitrum.api.data.enums.StageType;
 import com.vitrum.api.data.enums.Status;
 import com.vitrum.api.data.enums.TaskCategory;
 import com.vitrum.api.data.models.Task;
@@ -34,6 +35,7 @@ public class TaskServiceImpl implements TaskService {
     private final MemberRepository memberRepository;
     private final OldTaskRepository oldTaskRepository;
     private final CommentRepository commentRepository;
+    private final TeamStageRepository teamStageRepository;
     private final MessageUtil messageUtil;
     private final Converter converter;
 
@@ -93,7 +95,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public String changeStatus(String teamName, String taskTitle, Principal connectedUser) {
+    public String confirmTask(String teamName, String taskTitle, Principal connectedUser) {
         Task task = getTask(teamName, taskTitle);
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
@@ -104,8 +106,8 @@ public class TaskServiceImpl implements TaskService {
 
         Boolean currentStatus = task.getCompleted();
 
-        if (!currentStatus && task.getStatus().equals(Status.OVERDUE))
-            task.setStatus(Status.IN_REVIEW);
+        if (!currentStatus && task.getStatus().equals(Status.UNCOMPLETED))
+            task.setStatus(Status.OVERDUE);
 
         task.setCompleted(!currentStatus);
         task.saveWithChangeDate(repository);
@@ -124,6 +126,13 @@ public class TaskServiceImpl implements TaskService {
 
         saveHistory(task);
         updateTaskFields(request, task);
+
+        if (task.getTeam().getCurrentStage(teamStageRepository).getType().equals(StageType.REVIEW)
+                || !task.getStatus().equals(Status.APPROVED)) return;
+
+        task.setStatus(Status.ASSIGNED);
+        task.setCompleted(false);
+        repository.save(task);
     }
 
     @Override

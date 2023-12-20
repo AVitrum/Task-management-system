@@ -61,13 +61,13 @@ public class TaskController {
         return ResponseEntity.ok(service.changeCategory(request, team, task, connectedUser));
     }
 
-    @PatchMapping("/{task}/changeStatus")
-    public ResponseEntity<?> changeStatus(
+    @PatchMapping("/{task}/confirmTask")
+    public ResponseEntity<?> confirmTask(
             @PathVariable String team,
             @PathVariable String task,
             Principal connectedUser
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.changeStatus(team, task, connectedUser));
+        return ResponseEntity.status(HttpStatus.OK).body(service.confirmTask(team, task, connectedUser));
     }
 
     @GetMapping("/tasks")

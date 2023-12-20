@@ -50,6 +50,16 @@ public class MemberServiceImpl implements MemberService {
                 );
     }
 
+    @Override
+    public boolean isCurrentUserManager(String teamName, Principal connectedUser) {
+        Member currentUser = repository.findByUserAndTeam(
+                User.getUserFromPrincipal(connectedUser),
+                Team.findTeamByName(teamRepository, teamName)
+        ).orElseThrow(() -> new IllegalArgumentException("Member not found"));
+
+        return !currentUser.checkPermission();
+    }
+
 
     @Override
     public void changeRole(Principal connectedUser, Map<String, String> request, String teamName) {

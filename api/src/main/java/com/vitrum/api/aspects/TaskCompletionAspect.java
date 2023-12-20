@@ -32,16 +32,17 @@ public class TaskCompletionAspect {
         LocalDateTime deadline = teamService.findByName(teamName).getStageDueDate();
         StageType current = StageType.valueOf(teamService.findByName(teamName).getStage().toUpperCase());
 
+//        if (checkMethod(joinPoint) && current.equals(StageType.REVIEW))
+//            throw new IllegalStateException("Stage is over. Wait for the reviewing to end");
+
         if (deadline != null && LocalDateTime.now().isAfter(deadline))
             teamService.changeStage(teamName);
-
-        if (checkMethod(joinPoint) && current.equals(StageType.REVIEW))
-            throw new IllegalStateException("Stage is over. Wait for the reviewing to end");
     }
 
-    private boolean checkMethod(JoinPoint joinPoint) {
-        return joinPoint.getSignature().getName().equals("changeStatus");
-    }
+//    private boolean checkMethod(JoinPoint joinPoint) {
+//        System.out.println(joinPoint.getSignature().getName());
+//        return joinPoint.getSignature().getName().equals("changeStatus");
+//    }
 
     private String extractTeamName(HttpServletRequest request) {
         Object attribute = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
