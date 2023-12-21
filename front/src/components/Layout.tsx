@@ -2,22 +2,20 @@ import { Outlet } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 
-
 export default function Layout() {
-    return (
-        <div className="flex flex-col min-h-screen bg-gradient-to-r from-purple-800 to-pink-800 fixed w-full top-0">
-            <header >
-                <Header />
-            </header>
+  return (
+    <div className="min-h-screen bg-gradient-to-r from-purple-800 to-pink-800  w-full ">
+      <header className="fixed w-full top-0">
+        <Header />
+      </header>
 
-            <main className="flex-grow  mt-14 mb-14" >
-                <Outlet />
-                
-            </main>
+      <main className="  ">
+        <Outlet />
+      </main>
 
-            <footer className="  ">
-                <Footer/>
-            </footer>
-        </div>
-    );
+      <footer className="fixed bottom-0 w-full  ">
+        <Footer />
+      </footer>
+    </div>
+  );
 }
