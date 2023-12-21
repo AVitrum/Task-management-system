@@ -30,7 +30,12 @@ public class TaskCompletionAspect {
 
         String teamName = extractTeamName(request);
         LocalDateTime deadline = teamService.findByName(teamName).getStageDueDate();
-        StageType current = StageType.valueOf(teamService.findByName(teamName).getStage().toUpperCase());
+        StageType current;
+        try {
+            current = StageType.valueOf(teamService.findByName(teamName).getStage().toUpperCase());
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("Stage not found");
+        }
 
 //        if (checkMethod(joinPoint) && current.equals(StageType.REVIEW))
 //            throw new IllegalStateException("Stage is over. Wait for the reviewing to end");

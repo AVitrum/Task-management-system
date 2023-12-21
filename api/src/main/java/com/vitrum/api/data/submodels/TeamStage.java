@@ -43,7 +43,7 @@ public class TeamStage {
             Long number
     ) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime dueDate = LocalDateTime.now().plusDays(1);
+        LocalDateTime dueDate = LocalDateTime.parse("2100-01-01 00:00:00", formatter);
 
         if (dueDateString != null)
             dueDate = LocalDateTime.parse(dueDateString, formatter);

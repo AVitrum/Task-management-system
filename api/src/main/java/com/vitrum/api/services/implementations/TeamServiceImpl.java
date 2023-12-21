@@ -146,5 +146,6 @@ public class TeamServiceImpl implements TeamService {
         TeamStage.create(teamStageRepository, team, StageType.REVIEW, request.getReviewDueDate(), false, 3L);
         TeamStage.create(teamStageRepository, team, StageType.IMPLEMENTATION, request.getImplementationDueDate(), false, 4L);
         TeamStage.create(teamStageRepository, team, StageType.REVIEW, request.getSecondReviewDueDate(), false, 5L);
+        TeamStage.create(teamStageRepository, team, StageType.FINAL, null, false, 6L);
     }
 }

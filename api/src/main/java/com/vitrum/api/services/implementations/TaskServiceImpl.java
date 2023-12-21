@@ -51,7 +51,7 @@ public class TaskServiceImpl implements TaskService {
         if (creator.checkPermission())
             throw new IllegalArgumentException("You do not have permission to perform this action");
 
-        if (repository.existsByTitleAndTeam(request.getTitle(), creator.getTeam()))
+        if (repository.existsByTitleAndTeam(request.getTitle().replaceAll("\\s", "_"), creator.getTeam()))
             throw new IllegalArgumentException("Task with the same name already exists");
 
         repository.save(
