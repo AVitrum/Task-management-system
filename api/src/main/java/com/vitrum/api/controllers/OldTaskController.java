@@ -19,8 +19,8 @@ public class OldTaskController {
 
     @GetMapping
     public ResponseEntity<?> findAllByTitle(
-            @PathVariable String team,
-            @PathVariable String task,
+            @PathVariable Long team,
+            @PathVariable Long task,
             Principal connectedUser
     ) {
         try {
@@ -32,8 +32,8 @@ public class OldTaskController {
 
     @GetMapping("/{version}")
     public ResponseEntity<?> getByVersion(
-            @PathVariable String team,
-            @PathVariable String task,
+            @PathVariable Long team,
+            @PathVariable Long task,
             @PathVariable Long version,
             Principal connectedUser
     ) {
@@ -47,7 +47,7 @@ public class OldTaskController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> delete(@PathVariable String team, @PathVariable String task, Principal connectedUser) {
+    public ResponseEntity<?> delete(@PathVariable Long team, @PathVariable Long task, Principal connectedUser) {
         service.delete(task, team, connectedUser);
         return ResponseEntity.ok("Deleted");
 

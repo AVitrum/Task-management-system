@@ -31,8 +31,8 @@ public class MemberServiceImpl implements MemberService {
     private final Converter converter;
 
     @Override
-    public void addToTeam(String teamName, Map<String, String> request) {
-        Team team = Team.findTeamByName(teamRepository, teamName);
+    public void addToTeam(Long teamId, Map<String, String> request) {
+        Team team = Team.findTeamById(teamRepository, teamId);
         String username = request.get("username");
 
         userRepository.findByUsername(username)
@@ -51,10 +51,10 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public boolean isCurrentUserManager(String teamName, Principal connectedUser) {
+    public boolean isCurrentUserManager(Long teamId, Principal connectedUser) {
         Member currentUser = repository.findByUserAndTeam(
                 User.getUserFromPrincipal(connectedUser),
-                Team.findTeamByName(teamRepository, teamName)
+                Team.findTeamById(teamRepository, teamId)
         ).orElseThrow(() -> new IllegalArgumentException("Member not found"));
 
         return !currentUser.checkPermission();
@@ -62,8 +62,8 @@ public class MemberServiceImpl implements MemberService {
 
 
     @Override
-    public void changeRole(Principal connectedUser, Map<String, String> request, String teamName) {
-        List<Member> members = getPerformerAndTarget(connectedUser, request, teamName);
+    public void changeRole(Long teamId, Principal connectedUser, Map<String, String> request) {
+        List<Member> members = getPerformerAndTarget(connectedUser, request, teamId);
         Member performer = members.get(0);
         Member target = members.get(1);
 
@@ -83,8 +83,8 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public void kick(Principal connectedUser, Map<String, String> request, String teamName) {
-        List<Member> members = getPerformerAndTarget(connectedUser, request, teamName);
+    public void kick(Long teamId, Principal connectedUser, Map<String, String> request) {
+        List<Member> members = getPerformerAndTarget(connectedUser, request, teamId);
         Member performer = members.get(0);
         Member target = members.get(1);
 
@@ -107,33 +107,33 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public void changeEmailsMessagingStatus(String teamName, Principal connectedUser) {
+    public void changeEmailsMessagingStatus(Long teamId, Principal connectedUser) {
         Member member = Member.getActionPerformer(
                 repository,
                 connectedUser,
-                Team.findTeamByName(teamRepository, teamName)
+                Team.findTeamById(teamRepository, teamId)
         );
         member.setEmailsAllowed(!member.isEmailsAllowed());
         repository.save(member);
     }
 
     @Override
-    public boolean getEmailsMessagingStatus(String teamName, Principal connectedUser) {
+    public boolean getEmailsMessagingStatus(Long teamId, Principal connectedUser) {
         return Member.getActionPerformer(
                 repository,
                 connectedUser,
-                Team.findTeamByName(teamRepository, teamName)
+                Team.findTeamById(teamRepository, teamId)
         ).isEmailsAllowed();
     }
 
     @Override
-    public List<MemberResponse> getAllByTeam(String team, Principal connectedUser) {
-        return Team.findTeamByName(teamRepository, team).getMembers()
+    public List<MemberResponse> getAllByTeam(Long teamId, Principal connectedUser) {
+        return Team.findTeamById(teamRepository, teamId).getMembers()
                 .stream().map(converter::mapMemberToMemberResponse).collect(Collectors.toList());
     }
 
-    private List<Member> getPerformerAndTarget(Principal connectedUser, Map<String, String> request, String teamName) {
-        Member performer = Member.getActionPerformer(repository, connectedUser, Team.findTeamByName(teamRepository, teamName));
+    private List<Member> getPerformerAndTarget(Principal connectedUser, Map<String, String> request, Long teamId) {
+        Member performer = Member.getActionPerformer(repository, connectedUser, Team.findTeamById(teamRepository, teamId));
 
         String username = request.get("username");
         User target = userRepository.findByUsername(username)

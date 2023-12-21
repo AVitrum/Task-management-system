@@ -24,7 +24,7 @@ public class TeamController {
 
     @PutMapping("/{team}/setStages")
     public ResponseEntity<?> setStage(
-            @PathVariable String team,
+            @PathVariable Long team,
             @RequestBody StageDueDatesRequest request,
             Principal connectedUser
     ) {
@@ -33,8 +33,8 @@ public class TeamController {
     }
 
     @GetMapping("/{team}")
-    public ResponseEntity<?> showByName(@PathVariable String team) {
-        return ResponseEntity.ok(service.findByName(team));
+    public ResponseEntity<?> showByName(@PathVariable Long team) {
+        return ResponseEntity.ok(service.findById(team));
     }
 
     @GetMapping("/findByUser")

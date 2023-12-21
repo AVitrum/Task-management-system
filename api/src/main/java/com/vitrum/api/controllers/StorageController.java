@@ -22,8 +22,8 @@ public class StorageController {
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadFile(
-            @PathVariable String team,
-            @PathVariable String task,
+            @PathVariable Long team,
+            @PathVariable Long task,
             @RequestParam(value = "file") MultipartFile file
     ) {
         service.upload(team, task, file);
@@ -32,8 +32,8 @@ public class StorageController {
 
     @GetMapping("/download/{fileName}")
     public ResponseEntity<?> downloadFile(
-            @PathVariable String team,
-            @PathVariable String task,
+            @PathVariable Long team,
+            @PathVariable Long task,
             @PathVariable String fileName
     ) {
         byte[] data = service.downloadFile(team, task, fileName);
@@ -51,8 +51,8 @@ public class StorageController {
 
     @DeleteMapping("/delete/{fileName}")
     public ResponseEntity<String> deleteFile(
-            @PathVariable String team,
-            @PathVariable String task,
+            @PathVariable Long team,
+            @PathVariable Long task,
             @PathVariable String fileName
     ) {
         service.deleteFile(team, task, fileName);

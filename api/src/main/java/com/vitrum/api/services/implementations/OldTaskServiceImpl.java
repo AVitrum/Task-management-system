@@ -28,11 +28,11 @@ public class OldTaskServiceImpl implements OldTaskService {
 
     @Override
     public List<HistoryResponse> findAllByTitle(
-            String taskTitle,
-            String teamName,
+            Long taskId,
+            Long teamId,
             Principal connectedUser
     ) {
-        Task task = Task.findTask(taskRepository, Team.findTeamByName(teamRepository, teamName), taskTitle);
+        Task task = Task.findTask(taskRepository, Team.findTeamById(teamRepository, teamId), taskId);
 
         List<OldTask> oldTasks = getOldTasks(task);
 
@@ -43,20 +43,20 @@ public class OldTaskServiceImpl implements OldTaskService {
 
     @Override
     public OldTask getByVersion(
-            String taskTitle,
-            String teamName,
+            Long taskId,
+            Long teamId,
             Long version,
             Principal connectedUser
     ) {
-        Task task = Task.findTask(taskRepository, Team.findTeamByName(teamRepository, teamName), taskTitle);
+        Task task = Task.findTask(taskRepository, Team.findTeamById(teamRepository, teamId), taskId);
 
         return repository.findByTaskAndVersion(task, version)
                 .orElseThrow(() -> new IllegalArgumentException("Task version not found"));
     }
 
     @Override
-    public void delete(String taskTitle, String teamName, Principal connectedUser) {
-        Task task = Task.findTask(taskRepository, Team.findTeamByName(teamRepository, teamName), taskTitle);
+    public void delete(Long taskId, Long teamId, Principal connectedUser) {
+        Task task = Task.findTask(taskRepository, Team.findTeamById(teamRepository, teamId), taskId);
         checkPermission(connectedUser, task);
         task.delete(taskRepository, commentRepository, repository);
 

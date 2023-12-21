@@ -28,11 +28,11 @@ public class TaskCompletionAspect {
                 .currentRequestAttributes())
                 .getRequest();
 
-        String teamName = extractTeamName(request);
-        LocalDateTime deadline = teamService.findByName(teamName).getStageDueDate();
+        Long teamId = Long.parseLong(Objects.requireNonNull(extractTeamName(request)));
+        LocalDateTime deadline = teamService.findById(teamId).getStageDueDate();
         StageType current;
         try {
-            current = StageType.valueOf(teamService.findByName(teamName).getStage().toUpperCase());
+            current = StageType.valueOf(teamService.findById(teamId).getStage().toUpperCase());
         } catch (NullPointerException e) {
             throw new IllegalArgumentException("Stage not found");
         }
@@ -41,7 +41,7 @@ public class TaskCompletionAspect {
 //            throw new IllegalStateException("Stage is over. Wait for the reviewing to end");
 
         if (deadline != null && LocalDateTime.now().isAfter(deadline))
-            teamService.changeStage(teamName);
+            teamService.changeStage(teamId);
     }
 
 //    private boolean checkMethod(JoinPoint joinPoint) {

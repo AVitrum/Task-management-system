@@ -16,13 +16,13 @@ public class MemberController {
     private final MemberService service;
 
     @PostMapping("/addMember")
-    public ResponseEntity<?> addMember(@PathVariable String team, @RequestBody Map<String, String> request) {
+    public ResponseEntity<?> addMember(@PathVariable Long team, @RequestBody Map<String, String> request) {
         service.addToTeam(team, request);
         return ResponseEntity.ok("Member added successfully");
     }
 
     @GetMapping("/checkPermission")
-    public ResponseEntity<Boolean> isCurrentUserManager(@PathVariable String team, Principal connectedUser) {
+    public ResponseEntity<Boolean> isCurrentUserManager(@PathVariable Long team, Principal connectedUser) {
         return ResponseEntity.ok(service.isCurrentUserManager(team, connectedUser));
     }
 
@@ -30,25 +30,25 @@ public class MemberController {
     public ResponseEntity<?> changeRole(
             Principal connectedUser,
             @RequestBody Map<String, String> request,
-            @PathVariable String team
+            @PathVariable Long team
     ) {
-        service.changeRole(connectedUser, request, team);
+        service.changeRole(team, connectedUser, request);
         return ResponseEntity.ok("Role changed successfully");
     }
 
     @PatchMapping("/changeEmailsMessagingStatus")
-    public ResponseEntity<?> changeEmailsMessagingStatus(@PathVariable String team, Principal connectedUser) {
+    public ResponseEntity<?> changeEmailsMessagingStatus(@PathVariable Long team, Principal connectedUser) {
         service.changeEmailsMessagingStatus(team, connectedUser);
         return ResponseEntity.ok("Changed");
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllByTeam(@PathVariable String team, Principal connectedUser) {
+    public ResponseEntity<?> getAllByTeam(@PathVariable Long team, Principal connectedUser) {
         return ResponseEntity.ok(service.getAllByTeam(team, connectedUser));
     }
 
     @GetMapping("/emailsMessagingStatus")
-    public ResponseEntity<?> emailsMessagingStatus(@PathVariable String team, Principal connectedUser) {
+    public ResponseEntity<?> emailsMessagingStatus(@PathVariable Long team, Principal connectedUser) {
         return ResponseEntity.ok(service.getEmailsMessagingStatus(team, connectedUser));
     }
 
@@ -56,9 +56,9 @@ public class MemberController {
     public ResponseEntity<?> kick(
             Principal connectedUser,
             @RequestBody Map<String, String> request,
-            @PathVariable String team
+            @PathVariable Long team
     ) {
-        service.kick(connectedUser, request, team);
+        service.kick(team, connectedUser, request);
         return ResponseEntity.ok("Kicked successfully");
     }
 }

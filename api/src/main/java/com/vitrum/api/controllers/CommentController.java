@@ -19,8 +19,8 @@ public class CommentController {
     @PostMapping("/addComment")
     public ResponseEntity<?> add(
             @RequestBody Map<String, String> request,
-            @PathVariable String team,
-            @PathVariable String task,
+            @PathVariable Long team,
+            @PathVariable Long task,
             Principal connectedUser
     ) {
         service.add(request, connectedUser, team, task);

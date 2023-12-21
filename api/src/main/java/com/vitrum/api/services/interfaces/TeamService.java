@@ -10,10 +10,10 @@ import java.util.List;
 
 public interface TeamService {
 
-    void setStageDueDates(StageDueDatesRequest request, String teamName, Principal connectedUser);
-    void changeStage(String teamName);
+    void setStageDueDates(StageDueDatesRequest request, Long teamId, Principal connectedUser);
+    void changeStage(Long teamId);
 
-    TeamResponse findByName(String name);
+    TeamResponse findById(Long id);
 
     TeamCreationResponse create(TeamCreationRequest request, Principal connectedUser);
 

@@ -29,7 +29,7 @@ public class Converter {
 
         return TeamResponse.builder()
                 .id(team.getId())
-                .name(team.getName())
+                .name(team.getName().replaceAll("_", " "))
                 .members(getMemberResponse(team))
                 .stage(stage)
                 .stageDueDate(dueDate)

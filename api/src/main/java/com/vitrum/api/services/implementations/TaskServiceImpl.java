@@ -39,11 +39,11 @@ public class TaskServiceImpl implements TaskService {
 
 
     @Override
-    public void create(String teamName, Principal connectedUser, TaskRequest request) {
+    public void create(Long teamId, Principal connectedUser, TaskRequest request) {
         Member creator = Member.getActionPerformer(
                 memberRepository,
                 connectedUser,
-                Team.findTeamByName(teamRepository, teamName)
+                Team.findTeamById(teamRepository, teamId)
         );
 
         if (creator.checkPermission())
@@ -69,8 +69,8 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void addPerformer(String teamName, String taskTitle, Principal connectedUser, String performerName) {
-        Task task = getTask(teamName, taskTitle);
+    public void addPerformer(Long teamId, Long taskId, Principal connectedUser, String performerName) {
+        Task task = getTask(teamId, taskId);
 
         ifDeleted(task);
 
@@ -93,14 +93,15 @@ public class TaskServiceImpl implements TaskService {
                 performer,
                 "TMS Info!", String.format(
                         "Team: %s\n" +
-                                "New tasks have been added to you by %s", teamName, actionPerformer.getUser().getEmail()
+                                "New tasks have been added to you by %s", task.getTeam().getName(),
+                        actionPerformer.getUser().getEmail()
                 )
         );
     }
 
     @Override
-    public String confirmTask(String teamName, String taskTitle, Principal connectedUser) {
-        Task task = getTask(teamName, taskTitle);
+    public String confirmTask(Long teamId, Long taskId, Principal connectedUser) {
+        Task task = getTask(teamId, taskId);
 
         ifDeleted(task);
 
@@ -123,8 +124,8 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void update(String teamName, String taskTitle, Principal connectedUser, TaskRequest request) {
-        Task task = getTask(teamName, taskTitle);
+    public void update(Long teamId, Long taskId, Principal connectedUser, TaskRequest request) {
+        Task task = getTask(teamId, taskId);
 
         ifDeleted(task);
 
@@ -144,12 +145,13 @@ public class TaskServiceImpl implements TaskService {
         task.setCompleted(false);
         repository.save(task);
 
-        messageUtil.sendMessage(task.getPerformer(), teamName + " Info!", "Task has been updated: " + taskTitle);
+        messageUtil.sendMessage(task.getPerformer(), task.getTeam().getName() + " Info!",
+                "Task has been updated: " + task.getTitle());
     }
 
     @Override
-    public String changeCategory(Map<String, String> request, String teamName, String taskTitle, Principal connectedUser) {
-        Task task = getTask(teamName, taskTitle);
+    public String changeCategory(Map<String, String> request, Long teamId, Long taskId, Principal connectedUser) {
+        Task task = getTask(teamId, taskId);
 
         ifDeleted(task);
 
@@ -176,25 +178,25 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskResponse> findAll(String teamName, Principal connectedUser) {
-        List<Task> tasks = repository.findAllByTeam(Team.findTeamByName(teamRepository, teamName));
+    public List<TaskResponse> findAll(Long teamId, Principal connectedUser) {
+        List<Task> tasks = repository.findAllByTeam(Team.findTeamById(teamRepository, teamId));
         return tasks.stream().map(converter::mapTaskToTaskResponse).collect(Collectors.toList());
     }
 
     @Override
-    public List<TaskResponse> findAllInReview(String teamName, Principal connectedUser) {
-        return findAll(teamName, connectedUser).stream()
+    public List<TaskResponse> findAllInReview(Long teamId, Principal connectedUser) {
+        return findAll(teamId, connectedUser).stream()
                 .filter(taskResponse -> taskResponse.getStatus().equals(Status.IN_REVIEW.name())).toList();
     }
 
     @Override
-    public Task findByTitle(String teamName, String taskTitle, Principal connectedUser) {
-        return getTask(teamName, taskTitle);
+    public Task findByTitle(Long teamId, Long taskId, Principal connectedUser) {
+        return getTask(teamId, taskId);
     }
 
     @Override
-    public void restoreByTitle(String taskTitle, String teamName, Principal connectedUser) {
-        Task task = Task.findTask(repository, Team.findTeamByName(teamRepository, teamName), taskTitle);
+    public void restoreByTitle(Long taskTitle, Long teamId, Principal connectedUser) {
+        Task task = Task.findTask(repository, Team.findTeamById(teamRepository, teamId), taskTitle);
         checkPermission(connectedUser, task);
 
         if (task.getStatus().equals(Status.DELETED)) {
@@ -205,12 +207,13 @@ public class TaskServiceImpl implements TaskService {
             repository.save(task);
         } else throw new IllegalStateException("Task wasn't delete");
 
-        messageUtil.sendMessage(task.getPerformer(), teamName + " Info!", "The task has been restored: " + taskTitle);
+        messageUtil.sendMessage(task.getPerformer(), task.getTeam().getName() + " Info!",
+                "The task has been restored: " + task.getTitle());
     }
 
     @Override
-    public void deleteByTitle(String teamName, String taskTitle, Principal connectedUser) {
-        Task task = findByTitle(teamName, taskTitle, connectedUser);
+    public void deleteByTitle(Long teamId, Long taskId, Principal connectedUser) {
+        Task task = findByTitle(teamId, taskId, connectedUser);
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
         if (actionPerformer.checkPermission())
@@ -249,11 +252,11 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> new UsernameNotFoundException("Member not found"));
     }
 
-    private Task getTask(String teamName, String taskTitle) {
+    private Task getTask(Long teamId, Long taskId) {
         return Task.findTask(
                 repository,
-                Team.findTeamByName(teamRepository, teamName),
-                taskTitle
+                Team.findTeamById(teamRepository, teamId),
+                taskId
         );
     }
 
