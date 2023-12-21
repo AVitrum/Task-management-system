@@ -1,6 +1,5 @@
 package com.vitrum.api.data.models;
 
-import com.vitrum.api.data.submodels.OldTask;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,8 +30,4 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id")
     private Task task;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "old_task_id")
-    private OldTask oldTask;
 }

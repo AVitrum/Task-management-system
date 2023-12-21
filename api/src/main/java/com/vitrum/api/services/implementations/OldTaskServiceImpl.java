@@ -33,7 +33,6 @@ public class OldTaskServiceImpl implements OldTaskService {
             Principal connectedUser
     ) {
         Task task = Task.findTask(taskRepository, Team.findTeamByName(teamRepository, teamName), taskTitle);
-        checkUserPermission(connectedUser, task);
 
         List<OldTask> oldTasks = getOldTasks(task);
 
@@ -50,7 +49,6 @@ public class OldTaskServiceImpl implements OldTaskService {
             Principal connectedUser
     ) {
         Task task = Task.findTask(taskRepository, Team.findTeamByName(teamRepository, teamName), taskTitle);
-        checkUserPermission(connectedUser, task);
 
         return repository.findByTaskAndVersion(task, version)
                 .orElseThrow(() -> new IllegalArgumentException("Task version not found"));
@@ -59,7 +57,7 @@ public class OldTaskServiceImpl implements OldTaskService {
     @Override
     public void delete(String taskTitle, String teamName, Principal connectedUser) {
         Task task = Task.findTask(taskRepository, Team.findTeamByName(teamRepository, teamName), taskTitle);
-        checkDeletePermission(connectedUser, task);
+        checkPermission(connectedUser, task);
         task.delete(taskRepository, commentRepository, repository);
 
         messageUtil.sendMessage(
@@ -69,21 +67,12 @@ public class OldTaskServiceImpl implements OldTaskService {
         );
     }
 
-    private void checkUserPermission(Principal connectedUser, Task task) {
-        Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
-
-        if (!actionPerformer.equals(task.getCreator())
-                && !actionPerformer.equals(task.getPerformer())
-                && actionPerformer.checkPermission()
-        ) throw new IllegalStateException("You cannot view other users' tasks");
-    }
-
-    private void checkDeletePermission(Principal connectedUser, Task task) {
+    private void checkPermission(Principal connectedUser, Task task) {
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
         if (!actionPerformer.equals(task.getCreator())
                 && actionPerformer.checkPermission()
-        ) throw new IllegalStateException("You cannot view other users' tasks");
+        ) throw new IllegalStateException("You do not have permission for this action");
     }
 
     private List<OldTask> getOldTasks(Task task) {

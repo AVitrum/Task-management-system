@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,7 +33,6 @@ public class TaskServiceImpl implements TaskService {
     private final UserRepository userRepository;
     private final MemberRepository memberRepository;
     private final OldTaskRepository oldTaskRepository;
-    private final CommentRepository commentRepository;
     private final TeamStageRepository teamStageRepository;
     private final MessageUtil messageUtil;
     private final Converter converter;
@@ -73,6 +71,9 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void addPerformer(String teamName, String taskTitle, Principal connectedUser, String performerName) {
         Task task = getTask(teamName, taskTitle);
+
+        ifDeleted(task);
+
         Member performer = findMemberByUsernameAndTeam(performerName, task.getTeam());
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, performer.getTeam());
 
@@ -81,7 +82,10 @@ public class TaskServiceImpl implements TaskService {
         ) throw new IllegalStateException("You do not have permission for this action");
 
         task.setPerformer(performer);
-        task.setStatus(Status.ASSIGNED);
+        if (performer.equals(actionPerformer))
+            task.setStatus(Status.PENDING);
+        else
+            task.setStatus(Status.ASSIGNED);
         task.setAssignmentDate(LocalDateTime.now());
         repository.save(task);
 
@@ -97,6 +101,9 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public String confirmTask(String teamName, String taskTitle, Principal connectedUser) {
         Task task = getTask(teamName, taskTitle);
+
+        ifDeleted(task);
+
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
         if (!actionPerformer.equals(task.getPerformer())
@@ -118,6 +125,9 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void update(String teamName, String taskTitle, Principal connectedUser, TaskRequest request) {
         Task task = getTask(teamName, taskTitle);
+
+        ifDeleted(task);
+
         Member member = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
         if (!member.equals(task.getCreator())
@@ -133,11 +143,16 @@ public class TaskServiceImpl implements TaskService {
         task.setStatus(Status.ASSIGNED);
         task.setCompleted(false);
         repository.save(task);
+
+        messageUtil.sendMessage(task.getPerformer(), teamName + " Info!", "Task has been updated: " + taskTitle);
     }
 
     @Override
     public String changeCategory(Map<String, String> request, String teamName, String taskTitle, Principal connectedUser) {
         Task task = getTask(teamName, taskTitle);
+
+        ifDeleted(task);
+
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
         if (!actionPerformer.equals(task.getCreator())
@@ -178,6 +193,22 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public void restoreByTitle(String taskTitle, String teamName, Principal connectedUser) {
+        Task task = Task.findTask(repository, Team.findTeamByName(teamRepository, teamName), taskTitle);
+        checkPermission(connectedUser, task);
+
+        if (task.getStatus().equals(Status.DELETED)) {
+            saveHistory(task);
+            task.setStatus(task.getPerformer().equals(task.getCreator()) ? Status.PENDING : Status.ASSIGNED);
+            task.setVersion(task.getVersion() + 1);
+            System.out.println(task.getVersion());
+            repository.save(task);
+        } else throw new IllegalStateException("Task wasn't delete");
+
+        messageUtil.sendMessage(task.getPerformer(), teamName + " Info!", "The task has been restored: " + taskTitle);
+    }
+
+    @Override
     public void deleteByTitle(String teamName, String taskTitle, Principal connectedUser) {
         Task task = findByTitle(teamName, taskTitle, connectedUser);
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
@@ -190,6 +221,7 @@ public class TaskServiceImpl implements TaskService {
 
         saveHistory(task);
 
+        task.setVersion(task.getVersion() + 1);
         task.setStatus(Status.DELETED);
         repository.save(task);
     }
@@ -207,9 +239,6 @@ public class TaskServiceImpl implements TaskService {
     private void saveHistory(Task task) {
         OldTask oldTask = converter.mapTaskToOldTask(task);
         oldTaskRepository.save(oldTask);
-        commentRepository.saveAll(oldTask.getComments());
-        commentRepository.deleteAll(task.getComments());
-        task.setComments(new ArrayList<>());
     }
 
     private Member findMemberByUsernameAndTeam(String username, Team team) {
@@ -226,5 +255,18 @@ public class TaskServiceImpl implements TaskService {
                 Team.findTeamByName(teamRepository, teamName),
                 taskTitle
         );
+    }
+
+    private void checkPermission(Principal connectedUser, Task task) {
+        Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
+
+        if (!actionPerformer.equals(task.getCreator())
+                && actionPerformer.checkPermission()
+        ) throw new IllegalStateException("You do not have permission for this action");
+    }
+
+    private static void ifDeleted(Task task) {
+        if (task.getStatus().equals(Status.DELETED))
+            throw new IllegalStateException("The task has been deleted");
     }
 }

@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -86,33 +85,19 @@ public class Converter {
                 .creator(mapMemberToMemberResponse(task.getCreator()))
                 .performer(mapMemberToMemberResponse(task.getPerformer()))
                 .categories(categories)
+                .comments(task.getComments().stream().map(this::mapCommentToCommentResponse).toList())
                 .build();
     }
 
     public OldTask mapTaskToOldTask(Task task) {
-        OldTask oldTask = OldTask.builder()
+        return OldTask.builder()
                 .title(task.getTitle())
                 .description(task.getDescription())
                 .version(task.getVersion())
                 .status(task.getStatus())
                 .task(task)
                 .build();
-
-        List<Comment> comments = new ArrayList<>();
-        task.getComments().forEach(comment -> {
-            Comment newComment = Comment.builder()
-                    .text(comment.getText())
-                    .creationTime(comment.getCreationTime())
-                    .author(comment.getAuthor())
-                    .oldTask(oldTask)
-                    .build();
-            comments.add(newComment);
-        });
-
-        oldTask.setComments(comments);
-        return oldTask;
     }
-
 
     public HistoryResponse mapOldTaskToHistoryResponse(OldTask oldTask) {
         return HistoryResponse.builder()
@@ -122,9 +107,6 @@ public class Converter {
                 .title(oldTask.getTitle())
                 .description(oldTask.getDescription())
                 .status(oldTask.getStatus().name())
-                .comments(oldTask.getComments().stream()
-                        .map(this::mapCommentToCommentResponse)
-                        .collect(Collectors.toList()))
                 .build();
     }
 }

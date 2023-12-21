@@ -51,6 +51,12 @@ public class TaskController {
         return ResponseEntity.ok("Added");
     }
 
+    @PutMapping("/{task}/restore")
+    public ResponseEntity<?> restore(@PathVariable String team, @PathVariable String task, Principal connectedUser) {
+        service.restoreByTitle(task, team, connectedUser);
+        return ResponseEntity.ok("Restored");
+    }
+
     @PatchMapping("/{task}/changeCategory")
     public ResponseEntity<?> changeCategory (
             @RequestBody Map<String, String> request,

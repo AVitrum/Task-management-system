@@ -13,6 +13,7 @@ public interface TaskService {
     void create(String teamName, Principal connectedUser, TaskRequest request);
     void addPerformer(String teamName, String taskTitle, Principal connectedUser, String performerName);
     void update(String teamName, String taskTitle, Principal connectedUser, TaskRequest request);
+    void restoreByTitle(String taskTitle, String teamName, Principal connectedUser);
     void deleteByTitle(String teamName, String taskTitle, Principal connectedUser);
 
     String confirmTask(String teamName, String taskTitle, Principal connectedUser);

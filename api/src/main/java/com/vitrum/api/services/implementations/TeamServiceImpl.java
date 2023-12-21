@@ -130,11 +130,13 @@ public class TeamServiceImpl implements TeamService {
                     && !task.getStatus().equals(Status.PENDING)
                     && !task.getStatus().equals(Status.UNCOMPLETED)
                     && !task.getStatus().equals(Status.OVERDUE)
+                    && !task.getStatus().equals(Status.DELETED)
             ) {
                 task.setStatus(Status.UNCOMPLETED);
                 messageUtil.sendMessage(task.getPerformer(), "TMS INFO!", String.format("You are overdue for a task - %s", task.getTitle()));
             } else if (!task.getStatus().equals(Status.APPROVED)
                     && !task.getStatus().equals(Status.PENDING)
+                    && !task.getStatus().equals(Status.DELETED)
             ) task.setStatus(Status.IN_REVIEW);
             taskRepository.save(task);
         });

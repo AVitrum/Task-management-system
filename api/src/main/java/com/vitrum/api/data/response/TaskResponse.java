@@ -24,4 +24,5 @@ public class TaskResponse {
     private List<String> categories;
     private LocalDateTime assignmentDate;
     private LocalDateTime changeTime;
+    private List<CommentResponse> comments;
 }

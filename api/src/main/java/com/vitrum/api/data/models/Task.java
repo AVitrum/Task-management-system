@@ -79,7 +79,6 @@ public class Task {
             OldTaskRepository oldTaskRepository
     ) {
         List<OldTask> oldTasks = this.getOldTasks();
-        oldTasks.stream().map(OldTask::getComments).forEach(commentRepository::deleteAll);
         oldTaskRepository.deleteAll(oldTasks);
 
         commentRepository.deleteAll(this.getComments());
