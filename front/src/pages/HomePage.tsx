@@ -1,37 +1,29 @@
 import { useContext } from "react";
 import { UserContext } from "../components/UserContext";
+import ModalWindow from "../components/Modal/ModalWindow";
 
 export default function HomePage() {
+  const { userInfo } = useContext(UserContext);
 
-    const {userInfo} = useContext(UserContext);
-
-    return(
-        <div className="text-white" >
-          <br/>
-          <br/>
-          <br/>
-          <br/>
-          <br/>
-          Here will be something interesting but later
-          <br/>
-          <>
-          {userInfo.id}
-          </>
-          <br/>
-  
-      
-          <>
-          {userInfo.email}
-          </>
-          <br/>
-          <>
-          {userInfo.username}
-          </>
-          <br/>
-          <>
-          {userInfo.role}
-          
-          </>
+  return (
+    <div className="text-white">
+      {userInfo.id === 0 || userInfo.id === undefined ? (
+        <div>
+        
         </div>
-    );
+      ) : (
+        <div className="flex justify-center py-96">
+          <>{userInfo.id}</>
+          <br/>
+          <>{userInfo.email}</>
+          <br/>
+          <>{userInfo.username}</>
+          <br/>
+          <>{userInfo.role}</>
+          <ModalWindow/>
+        </div>
+      )}
+      Here will be something interesting but later
+    </div>
+  );
 }
