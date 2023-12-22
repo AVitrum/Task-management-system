@@ -24,8 +24,8 @@ public class CommentServiceImpl implements CommentService {
     private final TeamRepository teamRepository;
 
     @Override
-    public void add(Map<String, String> request, Principal connectedUser, String teamName, String taskTitle) {
-        Task task = Task.findTask(taskRepository, Team.findTeamByName(teamRepository, teamName), taskTitle);
+    public void add(Map<String, String> request, Principal connectedUser, Long teamId, Long taskId) {
+        Task task = Task.findTask(taskRepository, Team.findTeamById(teamRepository, teamId), taskId);
 
 
         if (task.getStatus().equals(Status.DELETED))

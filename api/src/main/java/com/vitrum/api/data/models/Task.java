@@ -63,8 +63,8 @@ public class Task {
     @OneToMany(mappedBy = "task")
     private List<Comment> comments;
 
-    public static Task findTask(TaskRepository taskRepository, Team team, String title) {
-        return taskRepository.findByTeamAndTitle(team, title)
+    public static Task findTask(TaskRepository taskRepository, Team team, Long id) {
+        return taskRepository.findByIdAndTeam(id, team)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
     }
 

@@ -4,9 +4,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface StorageService {
 
-    void upload(String team, String taskTitle, MultipartFile multipartFile);
+    void upload(Long team, Long task, MultipartFile multipartFile);
 
-    byte[] downloadFile(String fileName, String taskTitle, String teamN);
+    byte[] downloadFile(Long task, Long team, String fileName);
 
-    void deleteFile(String teamName, String taskTitle, String fileName);
+    void deleteFile(Long team, Long task, String fileName);
 }

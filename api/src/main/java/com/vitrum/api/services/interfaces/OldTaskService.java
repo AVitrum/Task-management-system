@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface OldTaskService {
 
-    List<HistoryResponse> findAllByTitle(String task, String team, Principal connectedUser);
-    OldTask getByVersion(String task, String team, Long version, Principal connectedUser);
-    void delete(String task, String team, Principal connectedUser);
+    List<HistoryResponse> findAllByTitle(Long task, Long team, Principal connectedUser);
+    OldTask getByVersion(Long task, Long team, Long version, Principal connectedUser);
+    void delete(Long task, Long team, Principal connectedUser);
 }

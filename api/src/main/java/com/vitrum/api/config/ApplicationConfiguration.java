@@ -2,6 +2,8 @@ package com.vitrum.api.config;
 
 import com.vitrum.api.aspects.TaskCompletionAspect;
 import com.vitrum.api.auditing.ApplicationAuditAware;
+import com.vitrum.api.repositories.MemberRepository;
+import com.vitrum.api.repositories.TeamStageRepository;
 import com.vitrum.api.repositories.UserRepository;
 import com.vitrum.api.services.implementations.TeamServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -42,8 +44,12 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    public TaskCompletionAspect taskCompletionAspect(TeamServiceImpl teamService) {
-        return new TaskCompletionAspect(teamService);
+    public TaskCompletionAspect taskCompletionAspect(
+            TeamServiceImpl teamService,
+            TeamStageRepository teamStageRepository,
+            MemberRepository memberRepository
+    ) {
+        return new TaskCompletionAspect(teamService, teamStageRepository, memberRepository);
     }
 
     @Bean

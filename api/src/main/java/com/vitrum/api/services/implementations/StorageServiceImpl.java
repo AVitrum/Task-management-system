@@ -36,19 +36,22 @@ public class StorageServiceImpl implements StorageService {
     private final TaskRepository taskRepository;
 
     @Override
-    public void upload(String teamName, String taskTitle, MultipartFile multipartFile) {
+    public void upload(Long teamId, Long taskId, MultipartFile multipartFile) {
         Task task = Task.findTask(
                 taskRepository,
-                Team.findTeamByName(teamRepository, teamName),
-                taskTitle
+                Team.findTeamById(teamRepository, teamId),
+                taskId
         );
 
         File fileObj = convertMultiPartFileToFile(multipartFile);
         String originalFilename = multipartFile.getOriginalFilename();
         String modifiedFilename = String.format("%s_%s_%s",
-                teamName,
-                taskTitle,
+                task.getTeam().getName(),
+                task.getTitle(),
                 Objects.requireNonNull(originalFilename).replaceAll("\\s", "_"));
+
+        if (repository.existsByName(modifiedFilename))
+            throw new IllegalArgumentException("File with same name already exist in the task");
 
         s3Client.putObject(new PutObjectRequest(bucketName, modifiedFilename, fileObj));
         fileObj.delete();
@@ -60,9 +63,9 @@ public class StorageServiceImpl implements StorageService {
                 .name(modifiedFilename)
                 .path(String.format("%s/api/%s/%s/files/%s",
                         serverAddress,
-                        teamName,
-                        taskTitle,
-                        originalFilename)
+                        teamId,
+                        taskId,
+                        originalFilename.replaceAll("\\s", "_"))
                 )
                 .type(fileExtension)
                 .task(task)
@@ -71,10 +74,10 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public byte[] downloadFile(String teamName, String taskTitle, String fileName) {
+    public byte[] downloadFile(Long teamId, Long taskId, String fileName) {
         String modifiedFilename = String.format("%s_%s_%s",
-                teamName,
-                taskTitle,
+                teamId,
+                taskId,
                 fileName
         );
 
@@ -87,10 +90,10 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public void deleteFile(String teamName, String taskTitle, String fileName) {
+    public void deleteFile(Long teamId, Long taskId, String fileName) {
         String modifiedFilename = String.format("%s_%s_%s",
-                teamName,
-                taskTitle,
+                teamId,
+                taskId,
                 fileName
         );
         repository.delete(repository.findByName(modifiedFilename)

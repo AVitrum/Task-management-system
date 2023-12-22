@@ -9,9 +9,7 @@ import java.util.Optional;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    Optional<Task> findByTeamAndTitle(Team team, String title);
+    Optional<Task> findByIdAndTeam(Long id, Team team);
 
     List<Task> findAllByTeam(Team team);
-
-    Boolean existsByTitleAndTeam(String title, Team team);
 }

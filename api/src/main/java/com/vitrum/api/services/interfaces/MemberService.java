@@ -8,17 +8,17 @@ import java.util.Map;
 
 public interface MemberService {
 
-    void addToTeam(String team, Map<String, String> request);
+    void addToTeam(Long teamId, Map<String, String> request);
 
-    boolean isCurrentUserManager(String teamName, Principal connectedUser);
+    boolean isCurrentUserManager(Long teamId, Principal connectedUser);
 
-    void changeRole(Principal connectedUser, Map<String, String> request, String teamName);
+    void changeRole(Long teamId, Principal connectedUser, Map<String, String> request);
 
-    void kick(Principal connectedUser, Map<String, String> request, String teamName);
+    void kick(Long teamId, Principal connectedUser, Map<String, String> request);
 
-    void changeEmailsMessagingStatus(String teamName, Principal connectedUser);
+    void changeEmailsMessagingStatus(Long teamId, Principal connectedUser);
 
-    boolean getEmailsMessagingStatus(String teamName, Principal connectedUser);
+    boolean getEmailsMessagingStatus(Long teamId, Principal connectedUser);
 
-    List<MemberResponse> getAllByTeam(String team, Principal connectedUser);
+    List<MemberResponse> getAllByTeam(Long teamId, Principal connectedUser);
 }

@@ -1,5 +1,6 @@
 package com.vitrum.api.services.interfaces;
 
+import com.vitrum.api.data.models.Team;
 import com.vitrum.api.data.request.StageDueDatesRequest;
 import com.vitrum.api.data.request.TeamCreationRequest;
 import com.vitrum.api.data.response.TeamCreationResponse;
@@ -10,10 +11,10 @@ import java.util.List;
 
 public interface TeamService {
 
-    void setStageDueDates(StageDueDatesRequest request, String teamName, Principal connectedUser);
-    void changeStage(String teamName);
+    void setStageDueDates(StageDueDatesRequest request, Long teamId, Principal connectedUser);
+    void changeStage(Long teamId);
 
-    TeamResponse findByName(String name);
+    Team findById(Long id);
 
     TeamCreationResponse create(TeamCreationRequest request, Principal connectedUser);
 

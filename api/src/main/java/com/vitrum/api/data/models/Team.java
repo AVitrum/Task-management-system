@@ -35,8 +35,8 @@ public class Team {
     @OneToMany(mappedBy = "team")
     private List<TeamStage> stages;
 
-    public static Team findTeamByName(TeamRepository teamRepository, String name) {
-        return teamRepository.findByName(name)
+    public static Team findTeamById(TeamRepository teamRepository, Long id) {
+        return teamRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Team not found"));
     }
 

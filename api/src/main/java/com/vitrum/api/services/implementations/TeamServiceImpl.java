@@ -59,8 +59,8 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public void setStageDueDates(StageDueDatesRequest request, String teamName, Principal connectedUser) {
-        Team team = Team.findTeamByName(repository, teamName);
+    public void setStageDueDates(StageDueDatesRequest request, Long teamId, Principal connectedUser) {
+        Team team = Team.findTeamById(repository, teamId);
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, team);
 
         if (actionPerformer.checkPermission())
@@ -92,13 +92,14 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public TeamResponse findByName(String name) {
-        return converter.mapTeamToTeamResponse(Team.findTeamByName(repository, name));
+    public Team findById(Long id) {
+        return Team.findTeamById(repository, id);
     }
 
+
     @Override
-    public void changeStage(String teamName) {
-        Team team = Team.findTeamByName(repository, teamName);
+    public void changeStage(Long id) {
+        Team team = Team.findTeamById(repository, id);
         TeamStage current = team.getCurrentStage(teamStageRepository);
 
         TeamStage next = teamStageRepository.findByTeamAndNumber(team, current.getNumber() + 1).orElseThrow(

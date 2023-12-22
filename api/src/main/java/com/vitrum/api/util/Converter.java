@@ -29,7 +29,7 @@ public class Converter {
 
         return TeamResponse.builder()
                 .id(team.getId())
-                .name(team.getName())
+                .name(team.getName().replaceAll("_", " "))
                 .members(getMemberResponse(team))
                 .stage(stage)
                 .stageDueDate(dueDate)
@@ -76,7 +76,7 @@ public class Converter {
 
         return TaskResponse.builder()
                 .id(task.getId())
-                .title(task.getTitle())
+                .title(task.getTitle().replaceAll("_", " "))
                 .status(task.getStatus().name())
                 .isCompleted(task.getCompleted())
                 .description(task.getDescription())

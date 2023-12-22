@@ -22,7 +22,7 @@ public class TaskController {
     @PostMapping("/createTask")
     public ResponseEntity<?> create(
             @RequestBody TaskRequest request,
-            @PathVariable String team,
+            @PathVariable Long team,
             Principal connectedUser
     ) {
         service.create(team, connectedUser, request);
@@ -32,8 +32,8 @@ public class TaskController {
     @PutMapping("/{task}/update")
     public ResponseEntity<?> update(
             @RequestBody TaskRequest request,
-            @PathVariable String team,
-            @PathVariable String task,
+            @PathVariable Long team,
+            @PathVariable Long task,
             Principal connectedUser
     ) {
         service.update(team, task, connectedUser, request);
@@ -43,8 +43,8 @@ public class TaskController {
     @PatchMapping("/{task}/addPerformer")
     public ResponseEntity<?> addPerformer(
             @RequestBody Map<String, String> request,
-            @PathVariable String team,
-            @PathVariable String task,
+            @PathVariable Long team,
+            @PathVariable Long task,
             Principal connectedUser
     ) {
         service.addPerformer(team, task, connectedUser, request.get("performer"));
@@ -52,7 +52,7 @@ public class TaskController {
     }
 
     @PutMapping("/{task}/restore")
-    public ResponseEntity<?> restore(@PathVariable String team, @PathVariable String task, Principal connectedUser) {
+    public ResponseEntity<?> restore(@PathVariable Long team, @PathVariable Long task, Principal connectedUser) {
         service.restoreByTitle(task, team, connectedUser);
         return ResponseEntity.ok("Restored");
     }
@@ -60,8 +60,8 @@ public class TaskController {
     @PatchMapping("/{task}/changeCategory")
     public ResponseEntity<?> changeCategory (
             @RequestBody Map<String, String> request,
-            @PathVariable String team,
-            @PathVariable String task,
+            @PathVariable Long team,
+            @PathVariable Long task,
             Principal connectedUser
     ) {
         return ResponseEntity.ok(service.changeCategory(request, team, task, connectedUser));
@@ -69,27 +69,27 @@ public class TaskController {
 
     @PatchMapping("/{task}/confirmTask")
     public ResponseEntity<?> confirmTask(
-            @PathVariable String team,
-            @PathVariable String task,
+            @PathVariable Long team,
+            @PathVariable Long task,
             Principal connectedUser
     ) {
         return ResponseEntity.status(HttpStatus.OK).body(service.confirmTask(team, task, connectedUser));
     }
 
     @GetMapping("/tasks")
-    public ResponseEntity<?> findAll(@PathVariable String team, Principal connectedUser) {
+    public ResponseEntity<?> findAll(@PathVariable Long team, Principal connectedUser) {
         return ResponseEntity.ok(service.findAll(team, connectedUser));
     }
 
     @GetMapping("/tasks/inReview")
-    public ResponseEntity<?> findAllInReview(@PathVariable String team, Principal connectedUser) {
+    public ResponseEntity<?> findAllInReview(@PathVariable Long team, Principal connectedUser) {
         return ResponseEntity.ok(service.findAllInReview(team, connectedUser));
     }
 
     @GetMapping("/{task}")
     public ResponseEntity<?> findByTitle(
-            @PathVariable String team,
-            @PathVariable String task,
+            @PathVariable Long team,
+            @PathVariable Long task,
             Principal connectedUser
     ) {
         return ResponseEntity.ok(converter.mapTaskToTaskResponse(service.findByTitle(team, task, connectedUser)));
@@ -97,8 +97,8 @@ public class TaskController {
 
     @DeleteMapping("/{task}")
     public ResponseEntity<?> deleteByTitle(
-            @PathVariable String team,
-            @PathVariable String task,
+            @PathVariable Long team,
+            @PathVariable Long task,
             Principal connectedUser
     ) {
         service.deleteByTitle(team, task, connectedUser);
