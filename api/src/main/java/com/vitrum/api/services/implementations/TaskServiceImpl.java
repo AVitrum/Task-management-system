@@ -1,6 +1,5 @@
 package com.vitrum.api.services.implementations;
 
-import com.vitrum.api.data.enums.StageType;
 import com.vitrum.api.data.enums.Status;
 import com.vitrum.api.data.enums.TaskCategory;
 import com.vitrum.api.data.models.Task;
@@ -69,7 +68,7 @@ public class TaskServiceImpl implements TaskService {
     public void addPerformer(Long teamId, Long taskId, Principal connectedUser, String performerName) {
         Task task = getTask(teamId, taskId);
 
-        ifDeleted(task);
+        ifDeletedOrCompleted(task);
 
         Member performer = findMemberByUsernameAndTeam(performerName, task.getTeam());
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, performer.getTeam());
@@ -100,7 +99,7 @@ public class TaskServiceImpl implements TaskService {
     public String confirmTask(Long teamId, Long taskId, Principal connectedUser) {
         Task task = getTask(teamId, taskId);
 
-        ifDeleted(task);
+        ifDeletedOrCompleted(task);
 
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
@@ -111,7 +110,8 @@ public class TaskServiceImpl implements TaskService {
 
         Boolean currentStatus = task.getCompleted();
 
-        if (!currentStatus && task.getStatus().equals(Status.UNCOMPLETED))
+        if (!currentStatus
+                && LocalDateTime.now().isAfter(task.getTeam().getCurrentStage(teamStageRepository).getDueDate()))
             task.setStatus(Status.OVERDUE);
 
         task.setCompleted(!currentStatus);
@@ -124,7 +124,7 @@ public class TaskServiceImpl implements TaskService {
     public void update(Long teamId, Long taskId, Principal connectedUser, TaskRequest request) {
         Task task = getTask(teamId, taskId);
 
-        ifDeleted(task);
+        ifDeletedOrCompleted(task);
 
         Member member = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
@@ -132,14 +132,14 @@ public class TaskServiceImpl implements TaskService {
                 && member.checkPermission()
         ) throw new IllegalStateException("You do not have permission for this action");
 
+        if (Status.valueOf(request.getStatus().toUpperCase()).equals(Status.COMPLETED)
+                && !task.getCompleted()
+        ) throw new IllegalArgumentException("The task must be marked as completed");
+
+
         saveHistory(task);
         updateTaskFields(request, task);
 
-        if (task.getTeam().getCurrentStage(teamStageRepository).getType().equals(StageType.REVIEW)
-                || !task.getStatus().equals(Status.APPROVED)) return;
-
-        task.setStatus(Status.ASSIGNED);
-        task.setCompleted(false);
         repository.save(task);
 
         messageUtil.sendMessage(task.getPerformer(), task.getTeam().getName() + " Info!",
@@ -150,7 +150,7 @@ public class TaskServiceImpl implements TaskService {
     public String changeCategory(Map<String, String> request, Long teamId, Long taskId, Principal connectedUser) {
         Task task = getTask(teamId, taskId);
 
-        ifDeleted(task);
+        ifDeletedOrCompleted(task);
 
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
@@ -267,8 +267,10 @@ public class TaskServiceImpl implements TaskService {
         ) throw new IllegalStateException("You do not have permission for this action");
     }
 
-    private static void ifDeleted(Task task) {
+    private static void ifDeletedOrCompleted(Task task) {
         if (task.getStatus().equals(Status.DELETED))
             throw new IllegalStateException("The task has been deleted");
+        if (task.getStatus().equals(Status.COMPLETED))
+            throw new IllegalStateException("The task has been completed");
     }
 }

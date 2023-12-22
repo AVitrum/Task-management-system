@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum StageType {
     REQUIREMENTS,
-    PROJECTING,
-    IMPLEMENTATION,
     REVIEW,
-    FINAL
+    IMPLEMENTATION,
 }

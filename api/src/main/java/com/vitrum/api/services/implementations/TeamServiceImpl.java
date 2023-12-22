@@ -2,6 +2,7 @@ package com.vitrum.api.services.implementations;
 
 import com.vitrum.api.data.enums.StageType;
 import com.vitrum.api.data.enums.Status;
+import com.vitrum.api.data.models.Task;
 import com.vitrum.api.data.models.Team;
 import com.vitrum.api.data.request.StageDueDatesRequest;
 import com.vitrum.api.data.submodels.TeamStage;
@@ -111,44 +112,22 @@ public class TeamServiceImpl implements TeamService {
 
         if (next.getType().equals(StageType.REVIEW))
             verifyTaskCompletion(team);
-        else
-            nextStage(team);
-    }
-
-    private void nextStage(Team team) {
-        team.getTasks().stream().filter(task ->
-                task.getStatus().equals(Status.APPROVED)
-        ).forEach(task -> {
-            task.setStatus(Status.ASSIGNED);
-            task.setCompleted(false);
-            taskRepository.save(task);
-        });
     }
 
     private void verifyTaskCompletion(Team team) {
-        team.getTasks().forEach(task -> {
-            if (!task.getCompleted()
-                    && !task.getStatus().equals(Status.PENDING)
-                    && !task.getStatus().equals(Status.UNCOMPLETED)
-                    && !task.getStatus().equals(Status.OVERDUE)
-                    && !task.getStatus().equals(Status.DELETED)
-            ) {
-                task.setStatus(Status.UNCOMPLETED);
-                messageUtil.sendMessage(task.getPerformer(), "TMS INFO!", String.format("You are overdue for a task - %s", task.getTitle()));
-            } else if (!task.getStatus().equals(Status.APPROVED)
-                    && !task.getStatus().equals(Status.PENDING)
-                    && !task.getStatus().equals(Status.DELETED)
-            ) task.setStatus(Status.IN_REVIEW);
-            taskRepository.save(task);
-        });
+        for (Task task : team.getTasks()) {
+            if (task.getCompleted()) {
+                task.setStatus(Status.IN_REVIEW);
+                taskRepository.save(task);
+            }
+            else if (task.getStatus().equals(Status.ASSIGNED))
+                messageUtil.sendMessage(task.getPerformer(), task.getTeam().getName() + " Info!", "You have overdue a task");
+        }
     }
 
     private void createStages(StageDueDatesRequest request, Team team) {
         TeamStage.create(teamStageRepository, team, StageType.REQUIREMENTS, request.getRequirementsDueDate(), true, 1L);
-        TeamStage.create(teamStageRepository, team, StageType.PROJECTING, request.getProjectingDueDate(), false, 2L);
+        TeamStage.create(teamStageRepository, team, StageType.IMPLEMENTATION, request.getImplementationDueDate(), false, 2L);
         TeamStage.create(teamStageRepository, team, StageType.REVIEW, request.getReviewDueDate(), false, 3L);
-        TeamStage.create(teamStageRepository, team, StageType.IMPLEMENTATION, request.getImplementationDueDate(), false, 4L);
-        TeamStage.create(teamStageRepository, team, StageType.REVIEW, request.getSecondReviewDueDate(), false, 5L);
-        TeamStage.create(teamStageRepository, team, StageType.FINAL, null, false, 6L);
     }
 }

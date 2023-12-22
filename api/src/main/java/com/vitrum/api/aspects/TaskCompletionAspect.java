@@ -51,7 +51,7 @@ public class TaskCompletionAspect {
         if (currentUser.checkPermission() && current.equals(StageType.REVIEW) && !checkMethod(joinPoint))
             throw new IllegalStateException("Stage is over. Wait for the reviewing to end");
 
-        if (deadline != null && LocalDateTime.now().isAfter(deadline))
+        if (deadline != null && LocalDateTime.now().isAfter(deadline) && teamStage.getNumber() != 3)
             teamService.changeStage(teamId);
     }
 

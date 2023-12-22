@@ -11,7 +11,6 @@ public enum Status {
     PENDING,
     ASSIGNED,
     OVERDUE,
-    APPROVED,
     IN_REVIEW,
     DELETED,
     NOW_UNAVAILABLE,
