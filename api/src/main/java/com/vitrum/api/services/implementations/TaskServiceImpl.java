@@ -49,9 +49,6 @@ public class TaskServiceImpl implements TaskService {
         if (creator.checkPermission())
             throw new IllegalArgumentException("You do not have permission to perform this action");
 
-        if (repository.existsByTitleAndTeam(request.getTitle().replaceAll("\\s", "_"), creator.getTeam()))
-            throw new IllegalArgumentException("Task with the same name already exists");
-
         repository.save(
                 Task.builder()
                         .creator(creator)
@@ -230,6 +227,8 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private void updateTaskFields(TaskRequest request, Task task) {
+        if (request.getTitle() != null)
+            task.setTitle(request.getTitle().replaceAll("\\s", "_"));
         if (request.getDescription() != null)
             task.setDescription(request.getDescription());
         if (request.getStatus() != null)

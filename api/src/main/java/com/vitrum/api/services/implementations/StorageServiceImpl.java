@@ -50,6 +50,9 @@ public class StorageServiceImpl implements StorageService {
                 task.getTitle(),
                 Objects.requireNonNull(originalFilename).replaceAll("\\s", "_"));
 
+        if (repository.existsByName(modifiedFilename))
+            throw new IllegalArgumentException("File with same name already exist in the task");
+
         s3Client.putObject(new PutObjectRequest(bucketName, modifiedFilename, fileObj));
         fileObj.delete();
 
@@ -60,9 +63,9 @@ public class StorageServiceImpl implements StorageService {
                 .name(modifiedFilename)
                 .path(String.format("%s/api/%s/%s/files/%s",
                         serverAddress,
-                        task.getTeam().getName(),
-                        task.getTitle(),
-                        originalFilename)
+                        teamId,
+                        taskId,
+                        originalFilename.replaceAll("\\s", "_"))
                 )
                 .type(fileExtension)
                 .task(task)
@@ -72,15 +75,9 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public byte[] downloadFile(Long teamId, Long taskId, String fileName) {
-        Task task = Task.findTask(
-                taskRepository,
-                Team.findTeamById(teamRepository, teamId),
-                taskId
-        );
-
         String modifiedFilename = String.format("%s_%s_%s",
-                task.getTeam().getName(),
-                task.getTitle(),
+                teamId,
+                taskId,
                 fileName
         );
 
@@ -94,14 +91,9 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public void deleteFile(Long teamId, Long taskId, String fileName) {
-        Task task = Task.findTask(
-                taskRepository,
-                Team.findTeamById(teamRepository, teamId),
-                taskId
-        );
         String modifiedFilename = String.format("%s_%s_%s",
-                task.getTeam().getName(),
-                task.getTitle(),
+                teamId,
+                taskId,
                 fileName
         );
         repository.delete(repository.findByName(modifiedFilename)

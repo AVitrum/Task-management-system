@@ -76,7 +76,7 @@ public class Converter {
 
         return TaskResponse.builder()
                 .id(task.getId())
-                .title(task.getTitle())
+                .title(task.getTitle().replaceAll("_", " "))
                 .status(task.getStatus().name())
                 .isCompleted(task.getCompleted())
                 .description(task.getDescription())

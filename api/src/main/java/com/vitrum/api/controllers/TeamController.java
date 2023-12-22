@@ -3,6 +3,7 @@ package com.vitrum.api.controllers;
 import com.vitrum.api.data.request.StageDueDatesRequest;
 import com.vitrum.api.data.request.TeamCreationRequest;
 import com.vitrum.api.services.interfaces.TeamService;
+import com.vitrum.api.util.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.security.Principal;
 public class TeamController {
 
     private final TeamService service;
+    private final Converter converter;
 
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody TeamCreationRequest request, Principal connectedUser) {
@@ -33,8 +35,8 @@ public class TeamController {
     }
 
     @GetMapping("/{team}")
-    public ResponseEntity<?> showByName(@PathVariable Long team) {
-        return ResponseEntity.ok(service.findById(team));
+    public ResponseEntity<?> findById(@PathVariable Long team) {
+        return ResponseEntity.ok(converter.mapTeamToTeamResponse(service.findById(team)));
     }
 
     @GetMapping("/findByUser")

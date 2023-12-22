@@ -92,9 +92,10 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public TeamResponse findById(Long id) {
-        return converter.mapTeamToTeamResponse(Team.findTeamById(repository, id));
+    public Team findById(Long id) {
+        return Team.findTeamById(repository, id);
     }
+
 
     @Override
     public void changeStage(Long id) {

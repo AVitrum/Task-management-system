@@ -1,5 +1,6 @@
 package com.vitrum.api.services.interfaces;
 
+import com.vitrum.api.data.models.Team;
 import com.vitrum.api.data.request.StageDueDatesRequest;
 import com.vitrum.api.data.request.TeamCreationRequest;
 import com.vitrum.api.data.response.TeamCreationResponse;
@@ -13,7 +14,7 @@ public interface TeamService {
     void setStageDueDates(StageDueDatesRequest request, Long teamId, Principal connectedUser);
     void changeStage(Long teamId);
 
-    TeamResponse findById(Long id);
+    Team findById(Long id);
 
     TeamCreationResponse create(TeamCreationRequest request, Principal connectedUser);
 
