@@ -46,8 +46,8 @@ public class StorageServiceImpl implements StorageService {
         File fileObj = convertMultiPartFileToFile(multipartFile);
         String originalFilename = multipartFile.getOriginalFilename();
         String modifiedFilename = String.format("%s_%s_%s",
-                task.getTeam().getName(),
-                task.getTitle(),
+                teamId,
+                taskId,
                 Objects.requireNonNull(originalFilename).replaceAll("\\s", "_"));
 
         if (repository.existsByName(modifiedFilename))
@@ -65,7 +65,7 @@ public class StorageServiceImpl implements StorageService {
                         serverAddress,
                         teamId,
                         taskId,
-                        originalFilename.replaceAll("\\s", "_"))
+                        modifiedFilename.replaceAll("\\s", "_"))
                 )
                 .type(fileExtension)
                 .task(task)
@@ -75,13 +75,10 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public byte[] downloadFile(Long teamId, Long taskId, String fileName) {
-        String modifiedFilename = String.format("%s_%s_%s",
-                teamId,
-                taskId,
-                fileName
-        );
+        var file = repository.findByName(fileName).orElseThrow(
+                () -> new IllegalArgumentException("File not found"));
 
-        S3Object s3Object = s3Client.getObject(bucketName, modifiedFilename);
+        S3Object s3Object = s3Client.getObject(bucketName, file.getName());
         try (S3ObjectInputStream inputStream = s3Object.getObjectContent()) {
             return IOUtils.toByteArray(inputStream);
         } catch (IOException e) {
@@ -91,14 +88,9 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public void deleteFile(Long teamId, Long taskId, String fileName) {
-        String modifiedFilename = String.format("%s_%s_%s",
-                teamId,
-                taskId,
-                fileName
-        );
-        repository.delete(repository.findByName(modifiedFilename)
+        repository.delete(repository.findByName(fileName)
                 .orElseThrow(() -> new IllegalArgumentException("File not found")));
-        s3Client.deleteObject(bucketName, modifiedFilename);
+        s3Client.deleteObject(bucketName, fileName);
     }
 
     public static File convertMultiPartFileToFile(MultipartFile file) {

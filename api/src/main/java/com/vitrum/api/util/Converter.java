@@ -71,6 +71,13 @@ public class Converter {
                 .build();
     }
 
+    public FileResponse mapFileToFileResponse(File file) {
+        return FileResponse.builder()
+                .name(file.getName())
+                .path(file.getPath())
+                .build();
+    }
+
     public TaskResponse mapTaskToTaskResponse(Task task) {
         List<String> categories = task.getCategories().stream().map(Enum::name).toList();
 
@@ -86,6 +93,7 @@ public class Converter {
                 .performer(mapMemberToMemberResponse(task.getPerformer()))
                 .categories(categories)
                 .comments(task.getComments().stream().map(this::mapCommentToCommentResponse).toList())
+                .files(task.getFiles().stream().map(this::mapFileToFileResponse).toList())
                 .build();
     }
 

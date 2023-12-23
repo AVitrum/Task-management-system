@@ -28,6 +28,7 @@ public class MemberServiceImpl implements MemberService {
     private final TaskRepository taskRepository;
     private final CommentRepository commentRepository;
     private final OldTaskRepository oldTaskRepository;
+    private final FileRepository fileRepository;
     private final Converter converter;
 
     @Override
@@ -96,7 +97,7 @@ public class MemberServiceImpl implements MemberService {
 
         target.getPerformerTasks().forEach(task -> {
             if (task.getPerformer().equals(task.getCreator()))
-                task.delete(taskRepository, commentRepository, oldTaskRepository);
+                task.delete(taskRepository, commentRepository, oldTaskRepository, fileRepository);
             else {
                 task.setPerformer(task.getCreator());
                 taskRepository.save(task);

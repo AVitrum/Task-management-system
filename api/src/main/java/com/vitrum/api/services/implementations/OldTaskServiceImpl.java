@@ -23,6 +23,7 @@ public class OldTaskServiceImpl implements OldTaskService {
     private final TaskRepository taskRepository;
     private final MemberRepository memberRepository;
     private final CommentRepository commentRepository;
+    private final FileRepository fileRepository;
     private final MessageUtil messageUtil;
     private final Converter converter;
 
@@ -58,7 +59,7 @@ public class OldTaskServiceImpl implements OldTaskService {
     public void delete(Long taskId, Long teamId, Principal connectedUser) {
         Task task = Task.findTask(taskRepository, Team.findTeamById(teamRepository, teamId), taskId);
         checkPermission(connectedUser, task);
-        task.delete(taskRepository, commentRepository, repository);
+        task.delete(taskRepository, commentRepository, repository, fileRepository);
 
         messageUtil.sendMessage(
                 task.getPerformer(),

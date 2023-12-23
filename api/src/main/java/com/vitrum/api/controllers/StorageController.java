@@ -30,7 +30,7 @@ public class StorageController {
         return ResponseEntity.ok("Uploaded");
     }
 
-    @GetMapping("/download/{fileName}")
+    @GetMapping("/{fileName}")
     public ResponseEntity<?> downloadFile(
             @PathVariable Long team,
             @PathVariable Long task,
@@ -49,7 +49,7 @@ public class StorageController {
                 .body(resource);
     }
 
-    @DeleteMapping("/delete/{fileName}")
+    @DeleteMapping("/{fileName}")
     public ResponseEntity<String> deleteFile(
             @PathVariable Long team,
             @PathVariable Long task,

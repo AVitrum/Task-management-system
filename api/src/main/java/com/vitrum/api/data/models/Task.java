@@ -4,6 +4,7 @@ import com.vitrum.api.data.enums.Status;
 import com.vitrum.api.data.enums.TaskCategory;
 import com.vitrum.api.data.submodels.OldTask;
 import com.vitrum.api.repositories.CommentRepository;
+import com.vitrum.api.repositories.FileRepository;
 import com.vitrum.api.repositories.OldTaskRepository;
 import com.vitrum.api.repositories.TaskRepository;
 import jakarta.persistence.*;
@@ -63,6 +64,9 @@ public class Task {
     @OneToMany(mappedBy = "task")
     private List<Comment> comments;
 
+    @OneToMany(mappedBy = "task")
+    private List<File> files;
+
     public static Task findTask(TaskRepository taskRepository, Team team, Long id) {
         return taskRepository.findByIdAndTeam(id, team)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found"));
@@ -76,12 +80,13 @@ public class Task {
     public void delete(
             TaskRepository taskRepository,
             CommentRepository commentRepository,
-            OldTaskRepository oldTaskRepository
+            OldTaskRepository oldTaskRepository,
+            FileRepository fileRepository
     ) {
-        List<OldTask> oldTasks = this.getOldTasks();
-        oldTaskRepository.deleteAll(oldTasks);
-
         commentRepository.deleteAll(this.getComments());
+        oldTaskRepository.deleteAll(this.getOldTasks());
+        fileRepository.deleteAll(this.getFiles());
+
         taskRepository.delete(this);
     }
 }
