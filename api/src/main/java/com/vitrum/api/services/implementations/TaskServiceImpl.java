@@ -13,7 +13,6 @@ import com.vitrum.api.data.response.TaskResponse;
 import com.vitrum.api.data.models.Member;
 import com.vitrum.api.services.interfaces.TaskService;
 import com.vitrum.api.util.Converter;
-import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,6 @@ public class TaskServiceImpl implements TaskService {
     private final MemberRepository memberRepository;
     private final OldTaskRepository oldTaskRepository;
     private final TeamStageRepository teamStageRepository;
-    private final MessageUtil messageUtil;
     private final Converter converter;
 
 
@@ -85,15 +83,6 @@ public class TaskServiceImpl implements TaskService {
             task.setStatus(Status.ASSIGNED);
         task.setAssignmentDate(LocalDateTime.now());
         repository.save(task);
-
-        messageUtil.sendMessage(
-                performer,
-                "TMS Info!", String.format(
-                        "Team: %s\n" +
-                                "New tasks have been added to you by %s", task.getTeam().getName(),
-                        actionPerformer.getUser().getEmail()
-                )
-        );
     }
 
     @Override
@@ -163,9 +152,6 @@ public class TaskServiceImpl implements TaskService {
         updateTaskFields(request, task);
 
         repository.save(task);
-
-        messageUtil.sendMessage(task.getPerformer(), task.getTeam().getName() + " Info!",
-                "Task has been updated: " + task.getTitle());
     }
 
     @Override
@@ -209,13 +195,13 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task findByTitle(Long teamId, Long taskId, Principal connectedUser) {
+    public Task findById(Long teamId, Long taskId) {
         return getTask(teamId, taskId);
     }
 
     @Override
-    public void restoreByTitle(Long taskTitle, Long teamId, Principal connectedUser) {
-        Task task = Task.findTask(repository, Team.findTeamById(teamRepository, teamId), taskTitle);
+    public void restoreById(Long taskId, Long teamId, Principal connectedUser) {
+        Task task = Task.findTask(repository, Team.findTeamById(teamRepository, teamId), taskId);
         checkPermission(connectedUser, task);
 
         if (task.getStatus().equals(Status.DELETED)) {
@@ -224,15 +210,13 @@ public class TaskServiceImpl implements TaskService {
             task.setVersion(task.getVersion() + 1);
             System.out.println(task.getVersion());
             repository.save(task);
-        } else throw new IllegalStateException("Task wasn't delete");
-
-        messageUtil.sendMessage(task.getPerformer(), task.getTeam().getName() + " Info!",
-                "The task has been restored: " + task.getTitle());
+        } else
+            throw new IllegalStateException("Task wasn't delete");
     }
 
     @Override
     public void deleteByTitle(Long teamId, Long taskId, Principal connectedUser) {
-        Task task = findByTitle(teamId, taskId, connectedUser);
+        Task task = findById(teamId, taskId);
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
         if (actionPerformer.checkPermission())

@@ -53,7 +53,7 @@ public class TaskController {
 
     @PutMapping("/{task}/restore")
     public ResponseEntity<?> restore(@PathVariable Long team, @PathVariable Long task, Principal connectedUser) {
-        service.restoreByTitle(task, team, connectedUser);
+        service.restoreById(task, team, connectedUser);
         return ResponseEntity.ok("Restored");
     }
 
@@ -87,12 +87,11 @@ public class TaskController {
     }
 
     @GetMapping("/{task}")
-    public ResponseEntity<?> findByTitle(
+    public ResponseEntity<?> findById(
             @PathVariable Long team,
-            @PathVariable Long task,
-            Principal connectedUser
+            @PathVariable Long task
     ) {
-        return ResponseEntity.ok(converter.mapTaskToTaskResponse(service.findByTitle(team, task, connectedUser)));
+        return ResponseEntity.ok(converter.mapTaskToTaskResponse(service.findById(team, task)));
     }
 
     @DeleteMapping("/{task}")
