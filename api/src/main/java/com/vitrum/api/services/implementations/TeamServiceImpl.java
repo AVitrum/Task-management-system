@@ -121,7 +121,9 @@ public class TeamServiceImpl implements TeamService {
                 taskRepository.save(task);
             }
             else if (task.getStatus().equals(Status.ASSIGNED))
-                messageUtil.sendMessage(task.getPerformer(), task.getTeam().getName() + " Info!", "You have overdue a task");
+                messageUtil.sendMessage(task.getPerformer(),
+                        task.getTeam().getName() + " Info!",
+                        "You have overdue a task: " + task.getTitle());
         }
     }
 

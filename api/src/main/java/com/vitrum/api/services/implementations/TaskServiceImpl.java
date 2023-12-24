@@ -1,5 +1,6 @@
 package com.vitrum.api.services.implementations;
 
+import com.vitrum.api.data.enums.StageType;
 import com.vitrum.api.data.enums.Status;
 import com.vitrum.api.data.enums.TaskCategory;
 import com.vitrum.api.data.models.Task;
@@ -99,6 +100,9 @@ public class TaskServiceImpl implements TaskService {
     public String confirmTask(Long teamId, Long taskId, Principal connectedUser) {
         Task task = getTask(teamId, taskId);
 
+        if (task.getTeam().getCurrentStage(teamStageRepository).getType().equals(StageType.REQUIREMENTS))
+            throw new IllegalStateException("You cannot mark a task as completed during this stage.");
+
         ifDeletedOrCompleted(task);
 
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
@@ -111,8 +115,12 @@ public class TaskServiceImpl implements TaskService {
         Boolean currentStatus = task.getCompleted();
 
         if (!currentStatus
-                && LocalDateTime.now().isAfter(task.getTeam().getCurrentStage(teamStageRepository).getDueDate()))
-            task.setStatus(Status.OVERDUE);
+                && !task.getStatus().equals(Status.UNCOMPLETED)
+                && task.getTeam().getCurrentStage(teamStageRepository).getType().equals(StageType.REVIEW)
+        ) task.setStatus(Status.OVERDUE);
+
+        if (task.getStatus().equals(Status.UNCOMPLETED))
+            task.setStatus(Status.IN_REVIEW);
 
         task.setCompleted(!currentStatus);
         task.saveWithChangeDate(repository);
@@ -132,10 +140,24 @@ public class TaskServiceImpl implements TaskService {
                 && member.checkPermission()
         ) throw new IllegalStateException("You do not have permission for this action");
 
+        if (task.getStatus().equals(Status.PENDING))
+            throw new IllegalArgumentException("First, add the performer");
+
+        boolean isCurrentStageReview = task.getTeam().getCurrentStage(teamStageRepository)
+                .getType().equals(StageType.REVIEW);
+
+        if ((request.getStatus().toUpperCase().equals(Status.UNCOMPLETED.name())
+                || request.getStatus().toUpperCase().equals(Status.COMPLETED.name()))
+                && !isCurrentStageReview
+        ) throw new IllegalStateException("These statuses are only allowed during the review");
+
         if (Status.valueOf(request.getStatus().toUpperCase()).equals(Status.COMPLETED)
                 && !task.getCompleted()
+                && isCurrentStageReview
         ) throw new IllegalArgumentException("The task must be marked as completed");
 
+        if (request.getStatus().toUpperCase().equals(Status.UNCOMPLETED.name()))
+            task.setCompleted(false);
 
         saveHistory(task);
         updateTaskFields(request, task);
