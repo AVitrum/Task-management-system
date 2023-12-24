@@ -42,7 +42,8 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/users/password/recoverycode/**",
-                                "/api/users/password/reset")
+                                "/api/users/password/reset",
+                                "/api/users/image/**")
                             .permitAll()
                         .requestMatchers(
                                 "/api/users/changeCredentials",
@@ -51,8 +52,10 @@ public class SecurityConfiguration {
                                 "api/users/delete"
                         ).hasRole(ADMIN.name())
                         .requestMatchers(
-                                "/api/users/**",
-                                "/api/**"
+                                "/api/users/profile",
+                                "/api/users/password/**",
+                                "/api/teams/**",
+                                "/api/{team}/**"
                         ).hasAnyRole(USER.name(), ADMIN.name())
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

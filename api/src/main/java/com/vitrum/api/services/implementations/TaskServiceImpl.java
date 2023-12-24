@@ -13,6 +13,7 @@ import com.vitrum.api.data.response.TaskResponse;
 import com.vitrum.api.data.models.Member;
 import com.vitrum.api.services.interfaces.TaskService;
 import com.vitrum.api.util.Converter;
+import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ public class TaskServiceImpl implements TaskService {
     private final OldTaskRepository oldTaskRepository;
     private final TeamStageRepository teamStageRepository;
     private final Converter converter;
+    private final MessageUtil messageUtil;
 
 
     @Override
@@ -72,9 +74,7 @@ public class TaskServiceImpl implements TaskService {
         Member performer = findMemberByUsernameAndTeam(performerName, task.getTeam());
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, performer.getTeam());
 
-        if (!actionPerformer.equals(task.getCreator())
-                && actionPerformer.checkPermission()
-        ) throw new IllegalStateException("You do not have permission for this action");
+        checkManager(actionPerformer, task);
 
         task.setPerformer(performer);
         if (performer.equals(actionPerformer))
@@ -83,6 +83,14 @@ public class TaskServiceImpl implements TaskService {
             task.setStatus(Status.ASSIGNED);
         task.setAssignmentDate(LocalDateTime.now());
         repository.save(task);
+
+        messageUtil.sendMessage(
+                task.getPerformer(),
+                "TMS Info!", String.format(
+                        "Team: %s\n" +
+                                "New tasks have been added to you ", task.getTeam().getName()
+                )
+        );
     }
 
     @Override
@@ -125,33 +133,43 @@ public class TaskServiceImpl implements TaskService {
 
         Member member = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
-        if (!member.equals(task.getCreator())
-                && member.checkPermission()
-        ) throw new IllegalStateException("You do not have permission for this action");
+        checkManager(member, task);
 
-        if (task.getStatus().equals(Status.PENDING))
-            throw new IllegalArgumentException("First, add the performer");
+        if (request.getStatus() != null) {
+            boolean isCurrentStageReview = task.getTeam().getCurrentStage(teamStageRepository)
+                    .getType().equals(StageType.REVIEW);
 
-        boolean isCurrentStageReview = task.getTeam().getCurrentStage(teamStageRepository)
-                .getType().equals(StageType.REVIEW);
+            boolean isApprovalMethod = request.getStatus().toUpperCase().equals(Status.UNCOMPLETED.name())
+                    || request.getStatus().toUpperCase().equals(Status.COMPLETED.name());
 
-        if ((request.getStatus().toUpperCase().equals(Status.UNCOMPLETED.name())
-                || request.getStatus().toUpperCase().equals(Status.COMPLETED.name()))
-                && !isCurrentStageReview
-        ) throw new IllegalStateException("These statuses are only allowed during the review");
+            if (task.getStatus().equals(Status.PENDING) && isApprovalMethod)
+                throw new IllegalArgumentException("First, add the performer");
 
-        if (Status.valueOf(request.getStatus().toUpperCase()).equals(Status.COMPLETED)
-                && !task.getCompleted()
-                && isCurrentStageReview
-        ) throw new IllegalArgumentException("The task must be marked as completed");
+            if (isApprovalMethod && !isCurrentStageReview)
+                throw new IllegalStateException("These status is only allowed during the review");
 
-        if (request.getStatus().toUpperCase().equals(Status.UNCOMPLETED.name()))
-            task.setCompleted(false);
+            if (Status.valueOf(request.getStatus().toUpperCase()).equals(Status.COMPLETED)
+                    && !task.getCompleted()
+                    && isCurrentStageReview
+            ) throw new IllegalArgumentException("The task must be marked as completed");
+
+            if (request.getStatus().toUpperCase().equals(Status.UNCOMPLETED.name()))
+                task.setCompleted(false);
+        }
 
         saveHistory(task);
         updateTaskFields(request, task);
 
         repository.save(task);
+
+        messageUtil.sendMessage(task.getPerformer(), task.getTeam().getName() + " Info!",
+                "Task has been updated: " + task.getTitle());
+    }
+
+    private static void checkManager(Member member, Task task) {
+        if (!member.equals(task.getCreator())
+                && member.checkPermission()
+        ) throw new IllegalStateException("You do not have permission for this action");
     }
 
     @Override
@@ -162,9 +180,7 @@ public class TaskServiceImpl implements TaskService {
 
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
-        if (!actionPerformer.equals(task.getCreator())
-                && actionPerformer.checkPermission()
-        ) throw new IllegalStateException("You do not have permission for this action");
+        checkManager(actionPerformer, task);
 
         TaskCategory category = TaskCategory.valueOf(request.get("category").toUpperCase());
 
@@ -202,7 +218,8 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void restoreById(Long taskId, Long teamId, Principal connectedUser) {
         Task task = Task.findTask(repository, Team.findTeamById(teamRepository, teamId), taskId);
-        checkPermission(connectedUser, task);
+
+        checkManager(Member.getActionPerformer(memberRepository, connectedUser, task.getTeam()), task);
 
         if (task.getStatus().equals(Status.DELETED)) {
             saveHistory(task);
@@ -212,6 +229,9 @@ public class TaskServiceImpl implements TaskService {
             repository.save(task);
         } else
             throw new IllegalStateException("Task wasn't delete");
+
+        messageUtil.sendMessage(task.getPerformer(), task.getTeam().getName() + " Info!",
+                "The task has been restored: " + task.getTitle());
     }
 
     @Override
@@ -265,15 +285,7 @@ public class TaskServiceImpl implements TaskService {
         );
     }
 
-    private void checkPermission(Principal connectedUser, Task task) {
-        Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
-
-        if (!actionPerformer.equals(task.getCreator())
-                && actionPerformer.checkPermission()
-        ) throw new IllegalStateException("You do not have permission for this action");
-    }
-
-    private static void ifDeletedOrCompleted(Task task) {
+    private void ifDeletedOrCompleted(Task task) {
         if (task.getStatus().equals(Status.DELETED))
             throw new IllegalStateException("The task has been deleted");
         if (task.getStatus().equals(Status.COMPLETED))

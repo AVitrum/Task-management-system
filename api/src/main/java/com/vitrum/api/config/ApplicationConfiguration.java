@@ -5,9 +5,7 @@ import com.vitrum.api.auditing.ApplicationAuditAware;
 import com.vitrum.api.repositories.MemberRepository;
 import com.vitrum.api.repositories.TeamStageRepository;
 import com.vitrum.api.repositories.UserRepository;
-import com.vitrum.api.services.implementations.TaskServiceImpl;
 import com.vitrum.api.services.implementations.TeamServiceImpl;
-import com.vitrum.api.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -49,11 +47,9 @@ public class ApplicationConfiguration {
     public TaskAspect taskCompletionAspect(
             TeamServiceImpl teamService,
             TeamStageRepository teamStageRepository,
-            MemberRepository memberRepository,
-            TaskServiceImpl taskService,
-            MessageUtil messageUtil
+            MemberRepository memberRepository
     ) {
-        return new TaskAspect(teamService, teamStageRepository, memberRepository, taskService, messageUtil);
+        return new TaskAspect(teamService, teamStageRepository, memberRepository);
     }
 
     @Bean
