@@ -14,7 +14,6 @@ interface Member {
 }
 
 export default function MembersPage() {
-
   const [members, setMembers] = useState<Member[]>([]);
   const [ifManager, setIfManager] = useState(false);
 
@@ -23,7 +22,7 @@ export default function MembersPage() {
 
   const [username, setName] = useState("");
   const { token } = useContext(UserContext);
-  const { name: teamName } = useParams<{ name: string }>();
+  const { name: teamId } = useParams<{ name: string }>();
 
   const navigate = useNavigate();
 
@@ -37,10 +36,10 @@ export default function MembersPage() {
     setIsPlusClicked(!isPlusClicked);
   };
 
-  if(showModal) {
-    document.body.classList.add('active-modal')
+  if (showModal) {
+    document.body.classList.add("active-modal");
   } else {
-    document.body.classList.remove('active-modal')
+    document.body.classList.remove("active-modal");
   }
 
   const notify = (message: string) => {
@@ -61,7 +60,7 @@ export default function MembersPage() {
 
     try {
       const response = await axios.post(
-        `${backendIp}/api/${teamName}/members/addMember`,
+        `${backendIp}/api/${teamId}/members/addMember`,
         {
           username,
         },
@@ -81,7 +80,7 @@ export default function MembersPage() {
 
   const removeMember = async (username: string) => {
     try {
-      await axios.delete(`${backendIp}/api/${teamName}/members/kick`, {
+      await axios.delete(`${backendIp}/api/${teamId}/members/kick`, {
         data: {
           username: username,
         },
@@ -98,9 +97,9 @@ export default function MembersPage() {
     }
   };
 
-  const fetchData = async () => {
+  const getMembers = async () => {
     try {
-      const res = await axios.get(`${backendIp}/api/${teamName}/members/all`, {
+      const res = await axios.get(`${backendIp}/api/${teamId}/members/all`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -111,10 +110,10 @@ export default function MembersPage() {
       notify(error.res.data);
     }
   };
-  const fetchData2 = async () => {
+  const findManager = async () => {
     try {
       const res = await axios.get(
-        `${backendIp}/api/${teamName}/members/checkPermission`,
+        `${backendIp}/api/${teamId}/members/checkPermission`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -129,72 +128,83 @@ export default function MembersPage() {
   };
 
   useEffect(() => {
-    fetchData();
-    fetchData2();
-  }, [token, teamName]);
+    getMembers();
+    findManager();
+  }, [token, teamId]);
 
   return (
-    <div className="flex-col justify-start w-72">
-      <div className="bg-white pl-2 pr-4 pb-4 rounded-sm shadow-2xl lg:h-[52rem] md:h-[50rem] h-[48rem] overflow-auto custom-scrollbar overscroll-contain">
-        <div className="flex items-center my-2">
-          <h1 className="font-bold text-lg px-20 bg-white">Members</h1>
-          <a className="pr-4" onClick={showModal ? closeModal : openModal}>
-            <span className="sr-only"></span>
-            <img className="h-6 max-w-none svg-class" src={showModal ? "/minus.svg" : "/plus.svg"} alt="" />
-          </a>
-        </div>
-
-        {showModal && (
-          <Modal onClose={closeModal} onCloseButton={closeModal}>
-            <form className="centerForm" onSubmit={(e) => onSubmit(e)}>
-              <input
-                type="text"
-                placeholder="Type name of your member or email"
-                value={username}
-                onChange={(ev) => setName(ev.target.value)}
-                className="memInput"
+    <>
+      <div className="flex flex-row mr-[20px]">
+        <div className="w-80 bg-white  rounded-sm shadow-2xl lg:h-[51.55rem] md:h-[50rem] h-[48rem] overflow-auto custom-scrollbar  ">
+          <div className="flex items-center py-2">
+            <h1 className="font-bold text-lg px-20 bg-white">Members</h1>
+            <a className="" onClick={showModal ? closeModal : openModal}>
+              <span className="sr-only"></span>
+              <img
+                className="h-6 max-w-none svg-class"
+                src={showModal ? "/minus.svg" : "/plus.svg"}
+                alt=""
               />
+            </a>
+          </div>
 
-              <div className="centerForm">
-                <button className="button-32 " type="submit">
-                  <span className="text">Create</span>
-                </button>
-              </div>
-            </form>
-          </Modal>
-        )}
-        {ifManager ? (
-          <ul className="bg-slate-400 my-4 py-4 pl-2 pr-10 rounded-md">
-            <ul>
-              {members.map((member) => (
-                <li
-                  key={member.id}
-                  className="flex justify-between items-center"
-                >
-                  {member.name} - {member.role}
-                  {member.role === "MEMBER" ? (
-                    <button onClick={() => removeMember(member.name)}>
-                      Remove
-                    </button>
-                  ) : (
-                    <></>
-                  )}
-                </li>
-              ))}
+          {showModal && (
+            <Modal onClose={closeModal} onCloseButton={closeModal}>
+              <form className="centerForm" onSubmit={(e) => onSubmit(e)}>
+                <input
+                  type="text"
+                  placeholder="Type name of your member or email"
+                  value={username}
+                  onChange={(ev) => setName(ev.target.value)}
+                  className="memInput"
+                />
+
+                <div className="centerForm">
+                  <button className="button-32 " type="submit">
+                    <span className="text">Add Member</span>
+                  </button>
+                </div>
+              </form>
+            </Modal>
+          )}
+          {ifManager ? (
+            <ul className="bg-slate-400 mx-2 py-4 px-2  rounded-md">
+              <ul>
+                {members.map((member) => (
+                  <li
+                    key={member.id}
+                    className="flex justify-between items-center"
+                  >
+                    {member.name} - {member.role}
+                    {member.role === "MEMBER" ? (
+                      <button onClick={() => removeMember(member.name)}>
+                        <span className="sr-only"></span>
+                        <img
+                          className="h-4 max-w-none svg-class"
+                          src="/cross.svg"
+                          alt=""
+                        />
+                      </button>
+                    ) : (
+                      <></>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </ul>
-          </ul>
-        ) : (
-          <ul className="bg-slate-400 my-4 py-4 pl-2 pr-10 rounded-md">
-            <ul>
-              {members.map((member) => (
-                <li key={member.id}>
-                  {member.name} - {member.role}
-                </li>
-              ))}
+          ) : (
+            <ul className="bg-slate-400 my-4 py-4 pl-2 pr-10 rounded-md">
+              <ul>
+                {members.map((member) => (
+                  <li key={member.id}>
+                    {member.name} - {member.role}
+                  </li>
+                ))}
+              </ul>
             </ul>
-          </ul>
-        )}
-      </div>
+          )}
+        </div>
+     </div>
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -207,6 +217,6 @@ export default function MembersPage() {
         pauseOnHover
         theme="colored"
       />
-    </div>
+    </>
   );
 }

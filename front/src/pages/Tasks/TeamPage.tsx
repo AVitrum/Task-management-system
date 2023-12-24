@@ -48,13 +48,13 @@ export default function TeamPage() {
   
   return (
     <div>
-      <div className="flex-col justify-start w-52 pt-20 ">
+      <div className="flex-col justify-start w-52  ">
         <h1 className=" w-full font-bold text-lg px-6 pt-2  bg-white">
           List of Teams
         </h1>
         <div
           className=" pl-2 pr-4  pb-5  rounded-sm bg-white
-                shadow-2xl  h-[50rem] overflow-auto custom-scrollbar "
+                shadow-2xl  h-[49.3rem] overflow-auto custom-scrollbar  "
         >
           <ul>
             {teams.map((team) => (
@@ -63,7 +63,7 @@ export default function TeamPage() {
                   <h2 className="font-bold text-lg">{team.name}</h2>
 
                   <Link
-                   to={`/tasksLayout/${team.name}`}
+                   to={`/tasksLayout/${team.id}`}
                    state={{ members: team.members }}
                     className="bg-green-400 rounded-md px-2 text-sm"
                   >

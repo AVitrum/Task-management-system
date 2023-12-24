@@ -20,7 +20,7 @@ export default function HomePage() {
           <>{userInfo.username}</>
           <br/>
           <>{userInfo.role}</>
-          <ModalWindow/>
+          
         </div>
       )}
       Here will be something interesting but later

@@ -25,6 +25,7 @@ export default function AppRoutes() {
           <Route path="/showTeam" element={<TeamPage />} />
           <Route path="/members/:id" element={<MembersPage />} />
           <Route path="/tasksLayout/:name" element={<TasksLayout/>} />
+          <Route path="/tasksLayout/:name/:id" element={<TasksLayout/>} />
           
         </Route>
       </Routes>

@@ -33,13 +33,20 @@ interface Task {
 }
 
 export default function TasksPage() {
+  const [members, setMembers] = useState<Member[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const { token, userInfo } = useContext(UserContext);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [performer, setPerformer] = useState("");
+
   const [showModal, setShowModal] = useState(false);
+  const [addPerformerModel, setAddPerformerModel] = useState(false);
   const [isPlusClicked, setIsPlusClicked] = useState(false);
-  const { name: teamName } = useParams<{ name: string }>();
+  const [ifManager, setIfManager] = useState(false);
+
+  const { name: teamId } = useParams<{ name: string }>();
+  const [taskId, setTaskId] = useState("");
 
   const navigate = useNavigate();
 
@@ -65,11 +72,25 @@ export default function TasksPage() {
     setShowModal(false);
     setIsPlusClicked(!isPlusClicked);
   };
-  
-  if(showModal) {
-    document.body.classList.add('active-modal')
+
+  const openAddPerformerModal = () => {
+    setAddPerformerModel(true);
+  };
+
+  const closeAddPerformerModal = () => {
+    setAddPerformerModel(false);
+  };
+
+  const handleAddPerformerAndSetTaskId = (taskId: string) => {
+    setTaskId(taskId);
+    openAddPerformerModal(); 
+   
+  };
+
+  if (showModal) {
+    document.body.classList.add("active-modal");
   } else {
-    document.body.classList.remove('active-modal')
+    document.body.classList.remove("active-modal");
   }
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -77,7 +98,7 @@ export default function TasksPage() {
 
     try {
       const response = await axios.post(
-        `${backendIp}/api/${teamName}/createTask`,
+        `${backendIp}/api/${teamId}/createTask`,
         {
           title,
           description,
@@ -96,9 +117,28 @@ export default function TasksPage() {
     }
   };
 
+  const removeTask = async (taskId: string) => {
+    try {
+      await axios.delete(`${backendIp}/api/${teamId}/${taskId}/history`, {
+        data: {
+          username: taskId,
+        },
+
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      getTask();
+      notify("You delete team ");
+    } catch (error) {
+      notify("Failed to delete team");
+    }
+  };
+
   const getTask = async () => {
     try {
-      const res = await axios.get(`${backendIp}/api/${teamName}/tasks`, {
+      const res = await axios.get(`${backendIp}/api/${teamId}/tasks`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -110,86 +150,432 @@ export default function TasksPage() {
     }
   };
 
+  const addPerformerSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      await axios.patch(
+        `${backendIp}/api/${teamId}/${taskId}/addPerformer`,
+        {
+          performer,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      window.location.reload();
+      getTask();
+    } catch (error: any) {
+      notify(error.response.data);
+    }
+  };
+  const getMembers = async () => {
+    try {
+      const res = await axios.get(`${backendIp}/api/${teamId}/members/all`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setMembers(res.data);
+    } catch (error: any) {
+      notify(error.res.data);
+    }
+  };
+  const findManager = async () => {
+    try {
+      const res = await axios.get(
+        `${backendIp}/api/${teamId}/members/checkPermission`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setIfManager(res.data);
+    } catch (error: any) {
+      notify(error.res.data);
+    }
+  };
+
   useEffect(() => {
+    getMembers();
+    findManager();
     getTask();
-  }, [token, teamName]);
+  }, [token, teamId, taskId]);
 
   return (
     <>
-      <div className="card bg-gray-400 ">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold">Pending</h2>
-          <div className="flex items-center my-2">
-            <a className="pr-4" onClick={showModal ? closeModal : openModal}>
-              <span className="sr-only"></span>
-              <img
-                className="h-6 max-w-none svg-class"
-                src={showModal ? "/minus.svg" : "/plus.svg"}
-                alt=""
-              />
-            </a>
+      <div className="flex flex-row gap-[20px]">
+        <div className="flex flex-col ">
+          <div className="card  bg-gray-500 ">
+            <div className="flex justify-between items-center ">
+              <h2 className="text-xl font-bold">Pending</h2>
+              <div className="flex  my-2">
+                <a
+                  className="pr-4"
+                  onClick={showModal ? closeModal : openModal}
+                >
+                  <span className="sr-only"></span>
+                  <img
+                    className="h-6 max-w-none svg-class"
+                    src={showModal ? "/minus.svg" : "/plus.svg"}
+                    alt=""
+                  />
+                </a>
+              </div>
+            </div>
+          </div>
+          <div className="card bg-gray-400 h-[47rem] overflow-auto custom-scrollbar">
+            {showModal && (
+              <Modal onClose={closeModal} onCloseButton={closeModal}>
+                <form className="centerForm" onSubmit={(e) => onSubmit(e)}>
+                  <input
+                    type="text"
+                    placeholder="Type title of new task"
+                    value={title}
+                    onChange={(ev) => setTitle(ev.target.value)}
+                    className="memInput"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Type description to new task"
+                    value={description}
+                    onChange={(ev) => setDescription(ev.target.value)}
+                    className="memInput"
+                  />
+
+                  <div className="centerForm pt-2">
+                    <button className="button-32 " type="submit">
+                      <span className="text">Create Task</span>
+                    </button>
+                  </div>
+                </form>
+              </Modal>
+            )}
+            {addPerformerModel && (
+              <Modal
+                onClose={closeAddPerformerModal}
+                onCloseButton={closeAddPerformerModal}
+              >
+                <form
+                  className="centerForm"
+                  onSubmit={(e) => addPerformerSubmit(e)}
+                >
+                  <input
+                    type="text"
+                    placeholder="Type username of performer"
+                    value={performer}
+                    onChange={(ev) => setPerformer(ev.target.value)}
+                    className="memInput"
+                  />
+
+                  <div className="centerForm pt-2">
+                    <button className="button-32 " type="submit">
+                      <span className="text">Add Performer</span>
+                    </button>
+                  </div>
+                </form>
+              </Modal>
+            )}
+
+            <ul>
+              {tasks.map((task) => (
+                <li key={task.id} className="">
+                  {task.status === "PENDING" ? (
+                    <>
+                      {ifManager ? (
+                        <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
+                          <div className="flex justify-between items-center rounded">
+                            <h2 className="font-bold text-lg break-words">
+                              {task.title}
+                            </h2>
+
+                            <button onClick={() => removeTask(task.id)}>
+                              <span className="sr-only"></span>
+                              <img
+                                className="h-4 max-w-none svg-class"
+                                src="/cross.svg"
+                                alt=""
+                              />
+                            </button>
+                          </div>
+
+                          <div className="flex justify-center  bg-green-400 hover:bg-green-500 rounded-md  text-sm ml-24 py-1 pl-1">
+                            <a
+                              className=" svg-class "
+                              onClick={() =>
+                                handleAddPerformerAndSetTaskId(task.id)
+                              }
+                            >
+                              <div className="flex">
+                                <div> Add Performer</div>
+                                <img
+                                  className="h-5 pl-3 max-w-none svg-class"
+                                  src="/plus.svg"
+                                  alt=""
+                                />{" "}
+                              </div>
+                            </a>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
+                          <div className="flex justify-between items-center rounded">
+                            <h2 className="font-bold text-lg break-words">
+                              {task.title}
+                            </h2>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
-        {showModal && (
-                  <Modal onClose={closeModal} onCloseButton={closeModal}>
-                    <form className="centerForm" onSubmit={(e) => onSubmit(e)}>
-                      <input
-                        type="text"
-                        placeholder="Type title of new task"
-                        value={title}
-                        onChange={(ev) => setTitle(ev.target.value)}
-                        className="memInput"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Type description to new task"
-                        value={description}
-                        onChange={(ev) => setDescription(ev.target.value)}
-                        className="memInput"
-                      />
+        <div className="flex flex-col ">
+          <div className="card  bg-blue-500 ">
+            <div className="flex justify-between items-center ">
+              <h2 className="text-xl font-bold">Assigned</h2>
+            </div>
+          </div>
+          <div className="card  bg-blue-600 h-[47.8rem] overflow-auto custom-scrollbar">
+            {showModal && (
+              <Modal onClose={closeModal} onCloseButton={closeModal}>
+                <form className="centerForm" onSubmit={(e) => onSubmit(e)}>
+                  <input
+                    type="text"
+                    placeholder="Type title of new task"
+                    value={title}
+                    onChange={(ev) => setTitle(ev.target.value)}
+                    className="memInput"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Type description to new task"
+                    value={description}
+                    onChange={(ev) => setDescription(ev.target.value)}
+                    className="memInput"
+                  />
 
-                      <div className="centerForm">
-                        <button className="button-32 " type="submit">
-                          <span className="text">Create</span>
-                        </button>
-                      </div>
-                    </form>
-                  </Modal>
-                )}
-        <ul className=" my-4 py-4 pl-2 pr-5 rounded-md">
-          <ul>
-            {tasks.map((task) => (
-              <li key={task.id}>
-                
-                {task.status === "PENDING" ? (
-                  <>
-                    <div className=" bg-orange-400  my-4  py-4 pl-2 pr-5 rounded-md ">
-                      <h2 className="font-bold text-lg break-words">{task.title}</h2>
-                    </div>
-                  </>
-                ) : (
-                  <></>
-                )}
-              </li>
-            ))}
-          </ul>
-        </ul>
-      </div>
+                  <div className="centerForm pt-2">
+                    <button className="button-32 " type="submit">
+                      <span className="text">Create Task</span>
+                    </button>
+                  </div>
+                </form>
+              </Modal>
+            )}
 
-      <div className="card  bg-blue-600">
-        <h2 className="text-xl font-bold">Assigned</h2>
-        <div>yes</div>
-        <div>yes</div>
-        <div>yes</div>
-      </div>
+            <ul>
+              {tasks.map((task) => (
+                <li key={task.id} className="">
+                  {task.status === "ASSIGNED" ? (
+                    <>
+                      {ifManager ? (
+                        <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
+                          <div className="flex justify-between items-center rounded">
+                            <h2 className="font-bold text-lg break-words">
+                              {task.title}
+                            </h2>
 
-      <div className="card bg-yellow-400 ">
-        <h2 className="text-xl font-bold">In Review</h2>
-      </div>
+                            <button onClick={() => removeTask(task.id)}>
+                              <span className="sr-only"></span>
+                              <img
+                                className="h-4 max-w-none svg-class"
+                                src="/cross.svg"
+                                alt=""
+                              />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
+                          <div className="flex justify-between items-center rounded">
+                            <h2 className="font-bold text-lg break-words">
+                              {task.title}
+                            </h2>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className="flex flex-col ">
+          <div className="card  bg-yellow-500 ">
+            <div className="flex justify-between items-center ">
+              <h2 className="text-xl font-bold">In Review</h2>
+            </div>
+          </div>
+          <div className="card  bg-yellow-400 h-[47.8rem] overflow-auto custom-scrollbar">
+            {showModal && (
+              <Modal onClose={closeModal} onCloseButton={closeModal}>
+                <form className="centerForm" onSubmit={(e) => onSubmit(e)}>
+                  <input
+                    type="text"
+                    placeholder="Type title of new task"
+                    value={title}
+                    onChange={(ev) => setTitle(ev.target.value)}
+                    className="memInput"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Type description to new task"
+                    value={description}
+                    onChange={(ev) => setDescription(ev.target.value)}
+                    className="memInput"
+                  />
 
-      <div className="card bg-green-500">
-        <h2 className="text-xl font-bold">Completed</h2>
+                  <div className="centerForm pt-2">
+                    <button className="button-32 " type="submit">
+                      <span className="text">Create Task</span>
+                    </button>
+                  </div>
+                </form>
+              </Modal>
+            )}
+
+            <ul>
+              {tasks.map((task) => (
+                <li key={task.id} className="">
+                  {task.status === "In Review" ? (
+                    <>
+                      {ifManager ? (
+                        <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
+                          <div className="flex justify-between items-center rounded">
+                            <h2 className="font-bold text-lg break-words">
+                              {task.title}
+                            </h2>
+
+                            <button onClick={() => removeTask(task.id)}>
+                              <span className="sr-only"></span>
+                              <img
+                                className="h-4 max-w-none svg-class"
+                                src="/cross.svg"
+                                alt=""
+                              />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
+                          <div className="flex justify-between items-center rounded">
+                            <h2 className="font-bold text-lg break-words">
+                              {task.title}
+                            </h2>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="flex flex-col ">
+          <div className="card  bg-green-600 ">
+            <div className="flex justify-between items-center ">
+              <h2 className="text-xl font-bold">In Review</h2>
+            </div>
+          </div>
+          <div className="card  bg-green-500 h-[47.8rem] overflow-auto custom-scrollbar">
+            {showModal && (
+              <Modal onClose={closeModal} onCloseButton={closeModal}>
+                <form className="centerForm" onSubmit={(e) => onSubmit(e)}>
+                  <input
+                    type="text"
+                    placeholder="Type title of new task"
+                    value={title}
+                    onChange={(ev) => setTitle(ev.target.value)}
+                    className="memInput"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Type description to new task"
+                    value={description}
+                    onChange={(ev) => setDescription(ev.target.value)}
+                    className="memInput"
+                  />
+
+                  <div className="centerForm pt-2">
+                    <button className="button-32 " type="submit">
+                      <span className="text">Create Task</span>
+                    </button>
+                  </div>
+                </form>
+              </Modal>
+            )}
+
+            <ul>
+              {tasks.map((task) => (
+                <li key={task.id} className="">
+                  {task.status === "In Review" ? (
+                    <>
+                      {ifManager ? (
+                        <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
+                          <div className="flex justify-between items-center rounded">
+                            <h2 className="font-bold text-lg break-words">
+                              {task.title}
+                            </h2>
+
+                            <button onClick={() => removeTask(task.id)}>
+                              <span className="sr-only"></span>
+                              <img
+                                className="h-4 max-w-none svg-class"
+                                src="/cross.svg"
+                                alt=""
+                              />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
+                          <div className="flex justify-between items-center rounded">
+                            <h2 className="font-bold text-lg break-words">
+                              {task.title}
+                            </h2>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </>
   );
 }

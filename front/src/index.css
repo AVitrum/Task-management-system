@@ -9,15 +9,11 @@
 }
 body {
   font-family: "Roboto Slab", serif;
+  margin: 0;
+  background: linear-gradient(to right, #6b21a8, #86198f);
+ 
 }
 
-.custom-scrollbar {
-  /* Наприклад, фіксована висота віконечка */
-  overflow-x: auto; /* Відображення вертикальної прокрутки при необхідності */
-
-  scrollbar-width: thin; /* Товщина скролбара (може бути auto або thin) */
-  scrollbar-color: #4caf50 #f1f1f1; /* Колір скролбара та фону */
-}
 
 /* WebKit (Chrome, Safari) */
 .custom-scrollbar::-webkit-scrollbar {
@@ -32,7 +28,7 @@ body {
   background-color: #f1f1f1;
 }
 .card {
-  @apply w-80 p-4 rounded-lg;
+  @apply w-80 p-4 ;
 }
 .padding-r {
   @apply sm:pr-16 pr-8;
