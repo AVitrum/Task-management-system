@@ -2,7 +2,6 @@ package com.vitrum.api.services.implementations;
 
 import com.vitrum.api.data.enums.StageType;
 import com.vitrum.api.data.enums.Status;
-import com.vitrum.api.data.models.Task;
 import com.vitrum.api.data.models.Team;
 import com.vitrum.api.data.request.StageDueDatesRequest;
 import com.vitrum.api.data.submodels.TeamStage;
@@ -115,16 +114,15 @@ public class TeamServiceImpl implements TeamService {
     }
 
     private void verifyTaskCompletion(Team team) {
-        for (Task task : team.getTasks()) {
+        team.getTasks().forEach(task -> {
             if (task.getCompleted()) {
                 task.setStatus(Status.IN_REVIEW);
                 taskRepository.save(task);
-            }
-            else if (task.getStatus().equals(Status.ASSIGNED))
+            } else if (task.getStatus().equals(Status.ASSIGNED))
                 messageUtil.sendMessage(task.getPerformer(),
                         task.getTeam().getName() + " Info!",
                         "You have overdue a task: " + task.getTitle());
-        }
+        });
     }
 
     private void createStages(StageDueDatesRequest request, Team team) {

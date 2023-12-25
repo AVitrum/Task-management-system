@@ -1,5 +1,6 @@
 package com.vitrum.api.data.models;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.vitrum.api.data.enums.Status;
 import com.vitrum.api.data.enums.TaskCategory;
 import com.vitrum.api.data.submodels.OldTask;
@@ -81,11 +82,15 @@ public class Task {
             TaskRepository taskRepository,
             CommentRepository commentRepository,
             OldTaskRepository oldTaskRepository,
-            FileRepository fileRepository
+            FileRepository fileRepository,
+            AmazonS3 s3Client
     ) {
         commentRepository.deleteAll(this.getComments());
         oldTaskRepository.deleteAll(this.getOldTasks());
+
+        this.getFiles().forEach(file -> s3Client.deleteObject("tmsavitrum", file.getName()));
         fileRepository.deleteAll(this.getFiles());
+
 
         taskRepository.delete(this);
     }

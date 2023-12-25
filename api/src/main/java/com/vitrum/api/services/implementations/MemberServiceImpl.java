@@ -1,5 +1,6 @@
 package com.vitrum.api.services.implementations;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.vitrum.api.data.enums.RoleInTeam;
 import com.vitrum.api.data.models.Member;
 import com.vitrum.api.data.models.Team;
@@ -29,6 +30,7 @@ public class MemberServiceImpl implements MemberService {
     private final CommentRepository commentRepository;
     private final OldTaskRepository oldTaskRepository;
     private final FileRepository fileRepository;
+    private final AmazonS3 s3Client;
     private final Converter converter;
 
     @Override
@@ -97,7 +99,7 @@ public class MemberServiceImpl implements MemberService {
 
         target.getPerformerTasks().forEach(task -> {
             if (task.getPerformer().equals(task.getCreator()))
-                task.delete(taskRepository, commentRepository, oldTaskRepository, fileRepository);
+                task.delete(taskRepository, commentRepository, oldTaskRepository, fileRepository, s3Client);
             else {
                 task.setPerformer(task.getCreator());
                 taskRepository.save(task);

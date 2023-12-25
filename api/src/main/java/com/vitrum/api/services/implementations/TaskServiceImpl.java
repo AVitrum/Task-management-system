@@ -242,8 +242,7 @@ public class TaskServiceImpl implements TaskService {
         if (actionPerformer.checkPermission())
             throw new IllegalArgumentException("You do not have permission to perform this action");
 
-        if (task.getStatus() == Status.DELETED)
-            throw new IllegalArgumentException("The task has already been deleted and cannot be deleted again");
+        ifDeletedOrCompleted(task);
 
         saveHistory(task);
 

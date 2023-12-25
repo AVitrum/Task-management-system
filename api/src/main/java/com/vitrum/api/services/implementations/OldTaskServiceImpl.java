@@ -1,5 +1,7 @@
 package com.vitrum.api.services.implementations;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.vitrum.api.data.enums.Status;
 import com.vitrum.api.data.models.*;
 import com.vitrum.api.data.submodels.OldTask;
 import com.vitrum.api.repositories.*;
@@ -25,6 +27,7 @@ public class OldTaskServiceImpl implements OldTaskService {
     private final CommentRepository commentRepository;
     private final FileRepository fileRepository;
     private final MessageUtil messageUtil;
+    private final AmazonS3 s3Client;
     private final Converter converter;
 
     @Override
@@ -58,8 +61,12 @@ public class OldTaskServiceImpl implements OldTaskService {
     @Override
     public void delete(Long taskId, Long teamId, Principal connectedUser) {
         Task task = Task.findTask(taskRepository, Team.findTeamById(teamRepository, teamId), taskId);
+
+        if (task.getStatus().equals(Status.COMPLETED))
+            throw new IllegalStateException("You cannot delete tasks that have already been completed");
+
         checkPermission(connectedUser, task);
-        task.delete(taskRepository, commentRepository, repository, fileRepository);
+        task.delete(taskRepository, commentRepository, repository, fileRepository, s3Client);
 
         messageUtil.sendMessage(
                 task.getPerformer(),
