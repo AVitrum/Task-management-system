@@ -22,7 +22,7 @@ export default function MembersPage() {
 
   const [username, setName] = useState("");
   const { token } = useContext(UserContext);
-  const { name: teamId } = useParams<{ name: string }>();
+  const { teamid: teamId } = useParams<{ teamid: string }>();
 
   const navigate = useNavigate();
 
@@ -80,7 +80,7 @@ export default function MembersPage() {
 
   const removeMember = async (username: string) => {
     try {
-      await axios.delete(`${backendIp}/api/${teamId}/members/kick`, {
+      const res = await axios.delete(`${backendIp}/api/${teamId}/members/kick`, {
         data: {
           username: username,
         },
@@ -92,8 +92,8 @@ export default function MembersPage() {
 
       window.location.reload();
       notify("You has kicked user from team");
-    } catch (error) {
-      notify("Failed to remove user from the team");
+    } catch (error: any) {
+      notify(error.response.data);
     }
   };
 
@@ -135,7 +135,7 @@ export default function MembersPage() {
   return (
     <>
       <div className="flex flex-row mr-[20px]">
-        <div className="w-80 bg-white  rounded-sm shadow-2xl lg:h-[51.55rem] md:h-[50rem] h-[48rem] overflow-auto custom-scrollbar  ">
+        <div className="w-72 bg-white  rounded-sm shadow-2xl lg:h-[51.55rem] md:h-[50rem] h-[48rem] overflow-auto custom-scrollbar  ">
           <div className="flex items-center py-2">
             <h1 className="font-bold text-lg px-20 bg-white">Members</h1>
             <a className="" onClick={showModal ? closeModal : openModal}>
@@ -176,7 +176,7 @@ export default function MembersPage() {
                     className="flex justify-between items-center"
                   >
                     {member.name} - {member.role}
-                    {member.role === "MEMBER" ? (
+                    
                       <button onClick={() => removeMember(member.name)}>
                         <span className="sr-only"></span>
                         <img
@@ -185,9 +185,7 @@ export default function MembersPage() {
                           alt=""
                         />
                       </button>
-                    ) : (
-                      <></>
-                    )}
+                    
                   </li>
                 ))}
               </ul>

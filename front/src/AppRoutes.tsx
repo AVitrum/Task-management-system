@@ -10,6 +10,7 @@ import CreateTeam from "./pages/Tasks/CreateTeam";
 import TeamPage from "./pages/Tasks/TeamPage";
 import MembersPage from "./pages/Tasks/MembersPage";
 import TasksLayout from "./pages/Tasks/TasksLayout";
+import SetStages from "./pages/Tasks/SetStages";
 
 export default function AppRoutes() {
   return (
@@ -24,8 +25,10 @@ export default function AppRoutes() {
           <Route path="/createTeam" element={<CreateTeam />} />
           <Route path="/showTeam" element={<TeamPage />} />
           <Route path="/members/:id" element={<MembersPage />} />
-          <Route path="/tasksLayout/:name" element={<TasksLayout/>} />
-          <Route path="/tasksLayout/:name/:id" element={<TasksLayout/>} />
+          <Route path="/tasksLayout/:teamid" element={<TasksLayout/>} />
+          
+          <Route path="/tasksLayout/:teamid/:taskid" element={<TasksLayout/>} />
+         
           
         </Route>
       </Routes>

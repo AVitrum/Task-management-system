@@ -7,11 +7,40 @@
     all: unset;
   }
 }
+
+
 body {
   font-family: "Roboto Slab", serif;
   margin: 0;
+  padding: 0;
+
   background: linear-gradient(to right, #6b21a8, #86198f);
+  background-attachment: fixed;
+
+
+}
+
+.custom-scroll-tasks {
+  scrollbar-width: thin;
+  scrollbar-color: #ccc  ; /* Колір полоси та фону */
+
  
+  
+  
+}
+
+.custom-scroll-tasks::-webkit-scrollbar {
+  width: 4px; /* Ширина полоси */
+  background-color: rgba(110, 103, 103, 0.6);
+  
+
+}
+
+.custom-scroll-tasks::-webkit-scrollbar-thumb {
+  background-color: #ccc; /* Колір полоси */
+  border-radius: 4px; /* Радіус */
+  background-clip: content-box;
+  
 }
 
 
@@ -28,13 +57,16 @@ body {
   background-color: #f1f1f1;
 }
 .card {
-  @apply w-80 p-4 ;
+  @apply w-[21rem] p-4 ;
 }
 .padding-r {
   @apply sm:pr-16 pr-8;
 }
 .padding-b {
   @apply sm:pb-24 pb-12;
+}
+.task-colls{
+  @apply h-[47rem] overflow-auto custom-scrollbar
 }
 .customInput {
   @apply mb-4 mt-2 w-72 py-3 px-2 border border-gray-300 rounded;

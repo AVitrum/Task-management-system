@@ -12,7 +12,7 @@ export default function HomePage() {
         
         </div>
       ) : (
-        <div className="flex justify-center py-96">
+        <div className="flex justify-center py-72">
           <>{userInfo.id}</>
           <br/>
           <>{userInfo.email}</>

@@ -55,22 +55,22 @@ export default function Header() {
   useEffect(() => {
     const handleResize = () => {
       
-      if (window.innerWidth > 1) { // Якщо ширина вікна більше 768px
-        setShowMenu(false); // Змінюємо значення showMenu на false
+      if (window.innerWidth > 1) { 
+        setShowMenu(false); 
       }
     };
 
-    window.addEventListener("resize", handleResize); // Додаємо обробник подій для події resize
+    window.addEventListener("resize", handleResize); 
 
     return () => {
-      window.removeEventListener("resize", handleResize); // Прибираємо обробник подій при виході з компонента
+      window.removeEventListener("resize", handleResize); 
     };
   }, []);
   
 
 
   return (
-    <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg ">
+    <>
       <nav className=" flex items-center justify-between p-6 ">
         
         <div className="flex lg:flex-1   ">
@@ -210,6 +210,7 @@ export default function Header() {
           </div>
         </div>
       </nav>
-    </div>
+      </>
+    
   );
 }
