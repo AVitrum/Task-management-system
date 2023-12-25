@@ -97,13 +97,16 @@ public class Converter {
                 .build();
     }
 
-    public OldTask mapTaskToOldTask(Task task) {
+    public OldTask mapTaskToOldTask(Task task, String message, User user) {
         return OldTask.builder()
                 .title(task.getTitle())
                 .description(task.getDescription())
                 .version(task.getVersion())
                 .status(task.getStatus())
                 .task(task)
+                .changeTime(LocalDateTime.now())
+                .message(message)
+                .user(user)
                 .build();
     }
 
@@ -115,6 +118,9 @@ public class Converter {
                 .title(oldTask.getTitle())
                 .description(oldTask.getDescription())
                 .status(oldTask.getStatus().name())
+                .message(oldTask.getMessage())
+                .changeTime(oldTask.getChangeTime())
+                .user(oldTask.getUser().getTrueUsername())
                 .build();
     }
 }

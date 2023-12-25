@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -16,4 +18,7 @@ public class HistoryResponse {
     private String title;
     private String description;
     private String status;
+    private LocalDateTime changeTime;
+    private String message;
+    private String user;
 }

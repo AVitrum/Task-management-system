@@ -82,6 +82,14 @@ public class TaskServiceImpl implements TaskService {
         else
             task.setStatus(Status.ASSIGNED);
         task.setAssignmentDate(LocalDateTime.now());
+
+        saveHistory(task, String.format(
+                "%s appointed %s as the performer",
+                actionPerformer.getUser().getTrueUsername(),
+                performer.getUser().getTrueUsername()),
+                actionPerformer.getUser()
+        );
+
         repository.save(task);
 
         messageUtil.sendMessage(
@@ -141,44 +149,15 @@ public class TaskServiceImpl implements TaskService {
         if (task.getCompleted() && request.getStatus() == null)
             throw new IllegalStateException("Task already marked as completed");
 
-        if (request.getStatus() != null) {
-            boolean isCurrentStageReview = task.getTeam().getCurrentStage(teamStageRepository)
-                    .getType().equals(StageType.REVIEW);
+        verifyStatus(request, task);
 
-            boolean isApprovalMethod = request.getStatus().toUpperCase().equals(Status.UNCOMPLETED.name())
-                    || request.getStatus().toUpperCase().equals(Status.COMPLETED.name());
-
-            if (task.getCompleted() && !isApprovalMethod)
-                throw new IllegalStateException("Task already marked as completed");
-
-            if (task.getStatus().equals(Status.PENDING) && isApprovalMethod)
-                throw new IllegalArgumentException("First, add the performer");
-
-            if (isApprovalMethod && !isCurrentStageReview)
-                throw new IllegalStateException("These status is only allowed during the review");
-
-            if (Status.valueOf(request.getStatus().toUpperCase()).equals(Status.COMPLETED)
-                    && !task.getCompleted()
-                    && isCurrentStageReview
-            ) throw new IllegalArgumentException("The task must be marked as completed");
-
-            if (request.getStatus().toUpperCase().equals(Status.UNCOMPLETED.name()))
-                task.setCompleted(false);
-        }
-
-        saveHistory(task);
+        saveHistory(task, String.format("%s updated the task", member.getUser().getTrueUsername()), member.getUser());
         updateTaskFields(request, task);
 
         repository.save(task);
 
         messageUtil.sendMessage(task.getPerformer(), task.getTeam().getName() + " Info!",
                 "Task has been updated: " + task.getTitle());
-    }
-
-    private static void checkManager(Member member, Task task) {
-        if (!member.equals(task.getCreator())
-                && member.checkPermission()
-        ) throw new IllegalStateException("You do not have permission for this action");
     }
 
     @Override
@@ -227,14 +206,17 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void restoreById(Long taskId, Long teamId, Principal connectedUser) {
         Task task = Task.findTask(repository, Team.findTeamById(teamRepository, teamId), taskId);
+        Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
-        checkManager(Member.getActionPerformer(memberRepository, connectedUser, task.getTeam()), task);
+        checkManager(actionPerformer, task);
 
         if (task.getStatus().equals(Status.DELETED)) {
-            saveHistory(task);
+            saveHistory(
+                    task,
+                    String.format("%s restored the task", actionPerformer.getUser().getTrueUsername()),
+                    actionPerformer.getUser()
+            );
             task.setStatus(task.getPerformer().equals(task.getCreator()) ? Status.PENDING : Status.ASSIGNED);
-            task.setVersion(task.getVersion() + 1);
-            System.out.println(task.getVersion());
             repository.save(task);
         } else
             throw new IllegalStateException("Task wasn't delete");
@@ -253,9 +235,11 @@ public class TaskServiceImpl implements TaskService {
 
         ifDeletedOrCompleted(task);
 
-        saveHistory(task);
+        saveHistory(
+                task,
+                String.format("%s deleted the task", actionPerformer.getUser().getTrueUsername()),
+                actionPerformer.getUser());
 
-        task.setVersion(task.getVersion() + 1);
         task.setStatus(Status.DELETED);
         repository.save(task);
     }
@@ -268,13 +252,46 @@ public class TaskServiceImpl implements TaskService {
         if (request.getStatus() != null)
             task.setStatus(Status.valueOf(request.getStatus().toUpperCase()));
 
-        task.setVersion(task.getVersion() + 1L);
         task.saveWithChangeDate(repository);
     }
 
-    private void saveHistory(Task task) {
-        OldTask oldTask = converter.mapTaskToOldTask(task);
+    private static void checkManager(Member member, Task task) {
+        if (!member.equals(task.getCreator())
+                && member.checkPermission()
+        ) throw new IllegalStateException("You do not have permission for this action");
+    }
+
+    private void verifyStatus(TaskRequest request, Task task) {
+        if (request.getStatus() != null) {
+            boolean isCurrentStageReview = task.getTeam().getCurrentStage(teamStageRepository)
+                    .getType().equals(StageType.REVIEW);
+
+            boolean isApprovalMethod = request.getStatus().toUpperCase().equals(Status.UNCOMPLETED.name())
+                    || request.getStatus().toUpperCase().equals(Status.COMPLETED.name());
+
+            if (task.getCompleted() && !isApprovalMethod)
+                throw new IllegalStateException("Task already marked as completed");
+
+            if (task.getStatus().equals(Status.PENDING) && isApprovalMethod)
+                throw new IllegalArgumentException("First, add the performer");
+
+            if (isApprovalMethod && !isCurrentStageReview)
+                throw new IllegalStateException("These status is only allowed during the review");
+
+            if (Status.valueOf(request.getStatus().toUpperCase()).equals(Status.COMPLETED)
+                    && !task.getCompleted()
+                    && isCurrentStageReview
+            ) throw new IllegalArgumentException("The task must be marked as completed");
+
+            if (request.getStatus().toUpperCase().equals(Status.UNCOMPLETED.name()))
+                task.setCompleted(false);
+        }
+    }
+
+    private void saveHistory(Task task, String message, User user) {
+        OldTask oldTask = converter.mapTaskToOldTask(task, message, user);
         oldTaskRepository.save(oldTask);
+        task.setVersion(task.getVersion() + 1);
     }
 
     private Member findMemberByUsernameAndTeam(String username, Team team) {
