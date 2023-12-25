@@ -29,6 +29,7 @@ public class MemberServiceImpl implements MemberService {
     private final TaskRepository taskRepository;
     private final CommentRepository commentRepository;
     private final OldTaskRepository oldTaskRepository;
+    private final TeamStageRepository teamStageRepository;
     private final FileRepository fileRepository;
     private final AmazonS3 s3Client;
     private final Converter converter;
@@ -91,11 +92,15 @@ public class MemberServiceImpl implements MemberService {
         Member performer = members.get(0);
         Member target = members.get(1);
 
+        Team team = performer.getTeam();
+
         if (!performer.getRole().canChangeTo(target.getRole()))
             throw new IllegalArgumentException("You do not have permission to perform actions on this user");
 
-        if (performer.equals(target) && performer.getRole() == RoleInTeam.LEADER)
-            throw new IllegalArgumentException("First, put someone else in the leadership role");
+        if (performer.equals(target)
+                && performer.getRole() == RoleInTeam.LEADER
+                && team.getMembers().size() > 1
+        ) throw new IllegalArgumentException("First, put someone else in the leadership role");
 
         target.getPerformerTasks().forEach(task -> {
             if (task.getPerformer().equals(task.getCreator()))
@@ -106,7 +111,12 @@ public class MemberServiceImpl implements MemberService {
             }
         });
 
-        repository.delete(target);
+        if (team.getMembers().size() == 1) {
+            teamStageRepository.deleteAll(performer.getTeam().getStages());
+            repository.delete(target);
+            teamRepository.delete(team);
+        } else
+            repository.delete(target);
     }
 
     @Override
