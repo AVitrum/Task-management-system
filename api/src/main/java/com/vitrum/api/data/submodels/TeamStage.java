@@ -42,18 +42,19 @@ public class TeamStage {
             Boolean isCurrent,
             Long number
     ) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime dueDate = LocalDateTime.parse("2100-01-01 00:00:00", formatter);
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        if (dueDateString != null)
-            dueDate = LocalDateTime.parse(dueDateString, formatter);
+        LocalDateTime dueDate = LocalDateTime.parse(dueDateString, inputFormatter);
 
         if (dueDate.isBefore(LocalDateTime.now()))
             throw new IllegalStateException("The date must be after the current one");
 
+        String formattedDueDate = dueDate.format(outputFormatter);
+
         TeamStage stage = TeamStage.builder()
                 .team(team)
-                .dueDate(dueDate)
+                .dueDate(LocalDateTime.parse(formattedDueDate, outputFormatter))
                 .type(type)
                 .isCurrent(isCurrent)
                 .number(number)
