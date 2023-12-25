@@ -102,6 +102,9 @@ public class TaskServiceImpl implements TaskService {
 
         ifDeletedOrCompleted(task);
 
+        if (task.getStatus().equals(Status.PENDING))
+            throw new IllegalArgumentException("First, add the performer");
+
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
         if (!actionPerformer.equals(task.getPerformer())
@@ -135,12 +138,18 @@ public class TaskServiceImpl implements TaskService {
 
         checkManager(member, task);
 
+        if (task.getCompleted() && request.getStatus() == null)
+            throw new IllegalStateException("Task already marked as completed");
+
         if (request.getStatus() != null) {
             boolean isCurrentStageReview = task.getTeam().getCurrentStage(teamStageRepository)
                     .getType().equals(StageType.REVIEW);
 
             boolean isApprovalMethod = request.getStatus().toUpperCase().equals(Status.UNCOMPLETED.name())
                     || request.getStatus().toUpperCase().equals(Status.COMPLETED.name());
+
+            if (task.getCompleted() && !isApprovalMethod)
+                throw new IllegalStateException("Task already marked as completed");
 
             if (task.getStatus().equals(Status.PENDING) && isApprovalMethod)
                 throw new IllegalArgumentException("First, add the performer");
