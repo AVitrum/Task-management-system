@@ -6,11 +6,13 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import backendIp from "../../serverconfig";
 import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 
 export default function SetStages() {
-  const [requirementsDueDate, setRequirementsDueDate] = useState("");
-  const [reviewDueDate, setReviewDueDate] = useState("");
-  const [implementationDueDate, setImplementationDueDate] = useState("");
+  const [requirementsDueDate, setRequirementsDueDate] = useState(new Date());
+  const [reviewDueDate, setReviewDueDate] = useState(new Date());
+  const [implementationDueDate, setImplementationDueDate] = useState(new Date());
   const { token } = useContext(UserContext);
   const { teamid: teamId } = useParams<{ teamid: string }>();
 
@@ -29,7 +31,7 @@ export default function SetStages() {
     });
   };
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const onSubmitStage = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
@@ -55,44 +57,43 @@ export default function SetStages() {
 
   return (
     <div
-      className="py-2 mx-10 my-0
-         flex flex-col justify-center items-center "
+      className="flex justify-center bg-slate-600 w-full"
     >
       <div
-        className="bg-white px-8 pt-6 pb-14
+        className="bg-white px-32 pt-6 
             rounded-sm shadow-2xl my-32"
       >
-        <form className=" " onSubmit={(e) => onSubmit(e)}>
+        <form className=" " onSubmit={(e) => onSubmitStage(e)}>
           <h1 className="text-black tracking-wide text-3xl font-black mb-8 centerForm">
-            Reset Password
+            Set Stages
           </h1>
 
-          <h2 className="textOverInputField">Сurrent Password</h2>
-          <input
-            type="text"
-            placeholder="Type your current password"
-            value={requirementsDueDate}
-            onChange={(ev) => setRequirementsDueDate(ev.target.value)}
-            className="customInput "
-          />
+          <h2 className="textOverInputField">Requirements Date</h2>
+          <DatePicker
+          selected={requirementsDueDate}  
+          onChange={(date: any) => setRequirementsDueDate(date)}
+          showTimeSelect
+          dateFormat="yyyy-MM-dd HH:mm:ss"
+          className="customInput"
+        />
 
-          <h2 className="textOverInputField"> New Password</h2>
-          <input
-            type="text"
-            placeholder="Type your new password"
-            value={reviewDueDate}
-            onChange={(ev) => setReviewDueDate(ev.target.value)}
-            className="customInput"
-          />
+          <h2 className="textOverInputField"> Review Date</h2>
+          <DatePicker
+          selected={reviewDueDate}
+          onChange={(date:any) => setReviewDueDate(date)}
+          showTimeSelect
+          dateFormat="yyyy-MM-dd HH:mm:ss"
+          className="customInput"
+        />
 
-          <h2 className="textOverInputField"> Confirm Password</h2>
-          <input
-            type="text"
-            placeholder="Type your confirm password"
-            value={implementationDueDate}
-            onChange={(ev) => setImplementationDueDate(ev.target.value)}
-            className="customInput"
-          />
+          <h2 className="textOverInputField"> Implementation Date</h2>
+          <DatePicker
+          selected={implementationDueDate}
+          onChange={(date:any) => setImplementationDueDate(date)}
+          showTimeSelect
+          dateFormat="yyyy-MM-dd HH:mm:ss"
+          className="customInput"
+        />
 
           <div className="centerForm">
             <button className="button-64 mt-6 " type="submit">

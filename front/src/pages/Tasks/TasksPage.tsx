@@ -216,7 +216,9 @@ export default function TasksPage() {
       notify(error.res.data);
     }
   };
-  console.log(team);
+
+  
+  
   useEffect(() => {
     getMembers();
     findManager();
