@@ -48,6 +48,9 @@ public class TeamStage {
         if (dueDateString != null)
             dueDate = LocalDateTime.parse(dueDateString, formatter);
 
+        if (dueDate.isBefore(LocalDateTime.now()))
+            throw new IllegalStateException("The date must be after the current one");
+
         TeamStage stage = TeamStage.builder()
                 .team(team)
                 .dueDate(dueDate)
