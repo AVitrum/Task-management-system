@@ -38,15 +38,26 @@ export default function TasksPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [team, setTeam] = useState<Team[]>([]);
+  const [task, setTask] = useState<Task[]>([]);
   const { token, userInfo } = useContext(UserContext);
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+
+  const [titleChange, setTitleChange] = useState("");
+  const [descriptionChange, setDescriptionChange] = useState("");
+
   const [performer, setPerformer] = useState("");
 
   const [showModal, setShowModal] = useState(false);
   const [addPerformerModel, setAddPerformerModel] = useState(false);
+  const [showDetailsTask, setDetailsTask] = useState(false);
+  const [showDetailsTaskForMembers, setShowDetailsTaskForMembers] =
+    useState(false);
+
   const [isPlusClicked, setIsPlusClicked] = useState(false);
   const [ifManager, setIfManager] = useState(false);
+  const [ifTaskCompleted, setIfTaskCompleted] = useState(false);
 
   const { teamid: teamId } = useParams<{ teamid: string }>();
   const [taskId, setTaskId] = useState("");
@@ -82,6 +93,51 @@ export default function TasksPage() {
 
   const closeAddPerformerModal = () => {
     setAddPerformerModel(false);
+  };
+  const openShowDetailsTask = (
+    taskId: string,
+    title: string,
+    description: string
+  ) => {
+    navigate(`/tasksLayout/${teamId}/${taskId}`);
+    setTaskId(taskId);
+    getTaskById(taskId);
+
+    setTitleChange(title);
+    setDescriptionChange(description);
+
+    setDetailsTask(true);
+  };
+
+  const closeShowDetailsTask = () => {
+    setDetailsTask(false);
+    navigate(`/tasksLayout/${teamId}`);
+  };
+
+  const openShowDetailsTaskForMembers = (
+    taskId: string,
+    title: string,
+    description: string,
+    status: string
+  ) => {
+    navigate(`/tasksLayout/${teamId}/${taskId}`);
+    setTaskId(taskId);
+    getTaskById(taskId);
+
+    setTitleChange(title);
+    setDescriptionChange(description);
+
+    if (status === "ASSIGNED" || status === "UNCOMPLETED") {
+      setIfTaskCompleted(true);
+    }
+    console.log(status);
+
+    setShowDetailsTaskForMembers(true);
+  };
+
+  const closeShowDetailsTaskForMembers = () => {
+    setShowDetailsTaskForMembers(false);
+    navigate(`/tasksLayout/${teamId}`);
   };
 
   const handleAddPerformerAndSetTaskId = (taskId: string) => {
@@ -131,14 +187,14 @@ export default function TasksPage() {
         },
       });
 
-      getTask();
+      getAllTasksInTeam();
       notify("You delete task ");
-    } catch (error:any) {
+    } catch (error: any) {
       notify(error.response.data);
     }
   };
 
-  const getTask = async () => {
+  const getAllTasksInTeam = async () => {
     try {
       const res = await axios.get(`${backendIp}/api/${teamId}/tasks`, {
         headers: {
@@ -168,7 +224,7 @@ export default function TasksPage() {
         }
       );
       window.location.reload();
-      getTask();
+      getAllTasksInTeam();
     } catch (error: any) {
       notify(error.response.data);
     }
@@ -216,13 +272,63 @@ export default function TasksPage() {
       notify(error.res.data);
     }
   };
+  const getTaskById = async (taskId: string) => {
+    try {
+      const res = await axios.get(`${backendIp}/api/${teamId}/${taskId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-  
-  
+      setTask(res.data);
+    } catch (error: any) {
+      notify(error.res.data);
+    }
+  };
+
+  const changeDetailsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      await axios.put(
+        `${backendIp}/api/${teamId}/${taskId}/update`,
+        {
+          title: titleChange,
+          description: descriptionChange,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      getAllTasksInTeam();
+    } catch (error: any) {
+      notify(error.response.data);
+    }
+  };
+
+  const confirmTask = async () => {
+    try {
+      await axios.patch(
+        `${backendIp}/api/${teamId}/${taskId}/confirmTask`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error: any) {
+      notify(error.response.data);
+    }
+  };
+
   useEffect(() => {
     getMembers();
     findManager();
-    getTask();
+    getAllTasksInTeam();
     getTeamById();
   }, [token, teamId, taskId]);
 
@@ -276,6 +382,91 @@ export default function TasksPage() {
           </form>
         </Modal>
       )}
+      {showDetailsTask && (
+        <Modal
+          onClose={closeShowDetailsTask}
+          onCloseButton={closeShowDetailsTask}
+        >
+          <form
+            className="centerForm px-5"
+            onSubmit={(e) => changeDetailsSubmit(e)}
+          >
+            <h1 className="py-1">Title</h1>
+            <input
+              type="text"
+              value={titleChange}
+              onChange={(ev) => setTitleChange(ev.target.value)}
+              className="memInput "
+            />
+            <h1 className="py-1">Description</h1>
+            <textarea
+              rows={4}
+              cols={50}
+              value={descriptionChange}
+              maxLength={255}
+              onChange={(ev) => setDescriptionChange(ev.target.value)}
+              className="memInput"
+            />
+
+            <div className="py-1">
+              <label className="">
+                <input
+                  type="checkbox"
+                  onChange={() => {
+                    confirmTask();
+                  }}
+                  className="mr-1"
+                />
+                <span>Task Completed</span>
+              </label>
+            </div>
+
+            <div className="centerForm pt-2">
+              <button className="button-32 " type="submit">
+                <span className="text">Safe Changes</span>
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+      {showDetailsTaskForMembers && (
+        <Modal
+          onClose={closeShowDetailsTaskForMembers}
+          onCloseButton={closeShowDetailsTaskForMembers}
+        >
+          <form
+            className="centerForm px-5"
+            onSubmit={(e) => changeDetailsSubmit(e)}
+          >
+            <h1 className="py-1 font-bold text-xl">Title</h1>
+            <h2 className=" bg-gray-400 rounded-md p-1 px-4 m-2">
+              {titleChange}
+            </h2>
+
+            <h1 className="py-1 font-bold text-xl">Description</h1>
+            <h2 className=" bg-gray-400 rounded-md  p-1  px-4 m-2">
+              {descriptionChange}
+            </h2>
+            {ifTaskCompleted ? (
+              <div className="py-1">
+                <label className="">
+                  <input
+                    type="checkbox"
+                    onChange={() => {
+                      confirmTask();
+                    }}
+                    className="mr-1"
+                  />
+                  <span>Task Completed</span>
+                </label>
+              </div>
+            ) : (
+              <></>
+            )}
+          </form>
+        </Modal>
+      )}
+
       {team && team.stage === null ? (
         <>
           <SetStages />
@@ -286,48 +477,61 @@ export default function TasksPage() {
             <div className="card  bg-gray-500 rounded-t-xl ">
               <div className="flex justify-between items-center ">
                 <h2 className="text-xl font-bold">Pending</h2>
-                <div className="flex  my-2">
-                  <a
-                    className="pr-4"
-                    onClick={showModal ? closeModal : openModal}
-                  >
-                    <span className="sr-only"></span>
-                    <img
-                      className="h-6 max-w-none svg-class"
-                      src={showModal ? "/minus.svg" : "/plus.svg"}
-                      alt=""
-                    />
-                  </a>
-                </div>
+                {ifManager && (
+                  <div className="flex  my-2">
+                    <a
+                      className="pr-4"
+                      onClick={showModal ? closeModal : openModal}
+                    >
+                      <span className="sr-only"></span>
+                      <img
+                        className="h-6 max-w-none svg-class"
+                        src={showModal ? "/minus.svg" : "/plus.svg"}
+                        alt=""
+                      />
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
-            <div className="card bg-gray-400 rounded-b-xl h-[46.2rem] overflow-auto custom-scrollbar">
+            <div className={`card bg-gray-400 rounded-b-xl  overflow-auto custom-scrollbar ${ifManager ? 'h-[46.2rem]' : 'h-[46.8rem]'}`}>
               <ul>
                 {tasks.map((task) => (
                   <li key={task.id} className="">
                     {task.status === "PENDING" ? (
                       <>
                         {ifManager ? (
-                          <div className="py-2 my-2 pl-2 pr-5 bg-orange-400 hover:bg-orange-300 cursor-pointer  rounded-md">
-                            <Link to={`/tasksLayout/${teamId}/${task.id}`}>
-                              <div className="flex justify-between items-center rounded">
-                                <h2 className="font-bold text-lg break-words">
-                                  {task.title}
-                                </h2>
+                          <div className="py-2 my-2 pl-2 pr-5  bg-orange-400    rounded-md">
+                            <div className="flex justify-between  rounded">
+                              <h2 className="font-bold text-lg break-words">
+                                {task.title}
+                              </h2>
 
-                                <button onClick={() => removeTask(task.id)}>
-                                  <span className="sr-only"></span>
-                                  <img
-                                    className="h-4 max-w-none svg-class"
-                                    src="/cross.svg"
-                                    alt=""
-                                  />
-                                </button>
-                              </div>
+                              <button onClick={() => removeTask(task.id)}>
+                                <span className="sr-only"></span>
+                                <img
+                                  className="h-4 max-w-none svg-class"
+                                  src="/cross.svg"
+                                  alt=""
+                                />
+                              </button>
+                            </div>
+                            <div className="flex  flex-row justify-between">
+                              <button
+                                onClick={() =>
+                                  openShowDetailsTask(
+                                    task.id,
+                                    task.title,
+                                    task.description
+                                  )
+                                }
+                                className="bg-purple-500 hover:bg-purple-400  rounded-md px-1 py-1"
+                              >
+                                <h1>Details</h1>
+                              </button>
 
-                              <div className="flex justify-center  bg-green-400 hover:bg-green-500 rounded-md  text-sm ml-24 py-1 pl-1">
-                                <a
-                                  className=" svg-class "
+                              <div className="flex justify-center  bg-green-400 hover:bg-green-500 rounded-md  text-sm py-1 pr-1 pl-1">
+                                <button
                                   onClick={() =>
                                     handleAddPerformerAndSetTaskId(task.id)
                                   }
@@ -340,16 +544,31 @@ export default function TasksPage() {
                                       alt=""
                                     />{" "}
                                   </div>
-                                </a>
+                                </button>
                               </div>
-                            </Link>
+                            </div>
                           </div>
                         ) : (
                           <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
-                            <div className="flex justify-between items-center rounded">
+                            <div className="flex justify-between  rounded">
                               <h2 className="font-bold text-lg break-words">
                                 {task.title}
                               </h2>
+                            </div>
+                            <div className="flex  flex-row justify-end">
+                              <button
+                                onClick={() =>
+                                  openShowDetailsTaskForMembers(
+                                    task.id,
+                                    task.title,
+                                    task.description,
+                                    task.status
+                                  )
+                                }
+                                className="bg-purple-500 hover:bg-purple-400  rounded-md px-8 py-1"
+                              >
+                                <h1>Details</h1>
+                              </button>
                             </div>
                           </div>
                         )}
@@ -372,11 +591,12 @@ export default function TasksPage() {
               <ul>
                 {tasks.map((task) => (
                   <li key={task.id} className="">
-                    {task.status === "ASSIGNED" ? (
+                    {task.status === "ASSIGNED" ||
+                    task.status === "UNCOMPLETED" ? (
                       <>
                         {ifManager ? (
                           <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
-                            <div className="flex justify-between items-center rounded">
+                            <div className="flex justify-between  rounded">
                               <h2 className="font-bold text-lg break-words">
                                 {task.title}
                               </h2>
@@ -390,13 +610,42 @@ export default function TasksPage() {
                                 />
                               </button>
                             </div>
+                            <div className="flex  flex-row justify-between">
+                              <button
+                                onClick={() =>
+                                  openShowDetailsTask(
+                                    task.id,
+                                    task.title,
+                                    task.description
+                                  )
+                                }
+                                className="bg-purple-500 hover:bg-purple-400  rounded-md px-1 py-1"
+                              >
+                                <h1>Details</h1>
+                              </button>
+                            </div>
                           </div>
                         ) : (
                           <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
-                            <div className="flex justify-between items-center rounded">
+                            <div className="flex justify-between  rounded">
                               <h2 className="font-bold text-lg break-words">
                                 {task.title}
                               </h2>
+                            </div>
+                            <div className="flex  flex-row justify-end">
+                              <button
+                                onClick={() =>
+                                  openShowDetailsTaskForMembers(
+                                    task.id,
+                                    task.title,
+                                    task.description,
+                                    task.status
+                                  )
+                                }
+                                className="bg-purple-500 hover:bg-purple-400  rounded-md px-8 py-1"
+                              >
+                                <h1>Details</h1>
+                              </button>
                             </div>
                           </div>
                         )}
@@ -424,7 +673,7 @@ export default function TasksPage() {
                       <>
                         {ifManager ? (
                           <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
-                            <div className="flex justify-between items-center rounded">
+                            <div className="flex justify-between  rounded">
                               <h2 className="font-bold text-lg break-words">
                                 {task.title}
                               </h2>
@@ -438,13 +687,42 @@ export default function TasksPage() {
                                 />
                               </button>
                             </div>
+                            <div className="flex  flex-row justify-between">
+                              <button
+                                onClick={() =>
+                                  openShowDetailsTask(
+                                    task.id,
+                                    task.title,
+                                    task.description
+                                  )
+                                }
+                                className="bg-purple-500 hover:bg-purple-400  rounded-md px-1 py-1"
+                              >
+                                <h1>Details</h1>
+                              </button>
+                            </div>
                           </div>
                         ) : (
                           <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
-                            <div className="flex justify-between items-center rounded">
+                            <div className="flex justify-between  rounded">
                               <h2 className="font-bold text-lg break-words">
                                 {task.title}
                               </h2>
+                            </div>
+                            <div className="flex  flex-row justify-end">
+                              <button
+                                onClick={() =>
+                                  openShowDetailsTaskForMembers(
+                                    task.id,
+                                    task.title,
+                                    task.description,
+                                    task.status
+                                  )
+                                }
+                                className="bg-purple-500 hover:bg-purple-400  rounded-md px-8 py-1"
+                              >
+                                <h1>Details</h1>
+                              </button>
                             </div>
                           </div>
                         )}
@@ -471,7 +749,7 @@ export default function TasksPage() {
                       <>
                         {ifManager ? (
                           <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
-                            <div className="flex justify-between items-center rounded">
+                            <div className="flex justify-between  rounded">
                               <h2 className="font-bold text-lg break-words">
                                 {task.title}
                               </h2>
@@ -485,13 +763,42 @@ export default function TasksPage() {
                                 />
                               </button>
                             </div>
+                            <div className="flex  flex-row justify-between">
+                              <button
+                                onClick={() =>
+                                  openShowDetailsTask(
+                                    task.id,
+                                    task.title,
+                                    task.description
+                                  )
+                                }
+                                className="bg-purple-500 hover:bg-purple-400  rounded-md px-1 py-1"
+                              >
+                                <h1>Details</h1>
+                              </button>
+                            </div>
                           </div>
                         ) : (
                           <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
-                            <div className="flex justify-between items-center rounded">
+                            <div className="flex justify-between  rounded">
                               <h2 className="font-bold text-lg break-words">
                                 {task.title}
                               </h2>
+                            </div>
+                            <div className="flex  flex-row justify-end">
+                              <button
+                                onClick={() =>
+                                  openShowDetailsTaskForMembers(
+                                    task.id,
+                                    task.title,
+                                    task.description,
+                                    task.status
+                                  )
+                                }
+                                className="bg-purple-500 hover:bg-purple-400  rounded-md px-8 py-1"
+                              >
+                                <h1>Details</h1>
+                              </button>
                             </div>
                           </div>
                         )}

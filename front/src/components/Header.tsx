@@ -74,7 +74,7 @@ export default function Header() {
       <nav className=" flex items-center justify-between p-6 ">
         
         <div className="flex lg:flex-1   ">
-          <a href="/" className="pr-4  ">
+          <a href="/" className="pr-1  ">
             <span className="sr-only">Your Company</span>
             <img
               className="h-8 max-w-none border-[2px] border-black rounded-md"
@@ -82,6 +82,7 @@ export default function Header() {
               alt=""
             />
           </a>
+          <a className="text-2xl font-medium">TMS</a>
           {userInfo.id === 0 || userInfo.id === undefined ? (
             <></>
           ) : (
@@ -108,7 +109,7 @@ export default function Header() {
           <a href="/" className="linkHomePage ">
             Home
           </a>
-          <a href="#" className="linkHomePage">
+          <a href="/about" className="linkHomePage">
             About
           </a>
           <a href="#" className="linkHomePage ">

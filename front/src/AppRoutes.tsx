@@ -11,6 +11,7 @@ import TeamPage from "./pages/Tasks/TeamPage";
 import MembersPage from "./pages/Tasks/MembersPage";
 import TasksLayout from "./pages/Tasks/TasksLayout";
 import SetStages from "./pages/Tasks/SetStages";
+import AboutPage from "./pages/AboutPage";
 
 export default function AppRoutes() {
   return (
@@ -18,6 +19,7 @@ export default function AppRoutes() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
+          <Route path="/about" element={<AboutPage/>} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/reset" element={<ResetPage />} />

@@ -80,15 +80,18 @@ export default function MembersPage() {
 
   const removeMember = async (username: string) => {
     try {
-      const res = await axios.delete(`${backendIp}/api/${teamId}/members/kick`, {
-        data: {
-          username: username,
-        },
+      const res = await axios.delete(
+        `${backendIp}/api/${teamId}/members/kick`,
+        {
+          data: {
+            username: username,
+          },
 
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       window.location.reload();
       notify("You has kicked user from team");
@@ -134,41 +137,45 @@ export default function MembersPage() {
 
   return (
     <>
+      {showModal && (
+        <Modal onClose={closeModal} onCloseButton={closeModal}>
+          <form className="centerForm" onSubmit={(e) => onSubmit(e)}>
+            <input
+              type="text"
+              placeholder="Type name of your member or email"
+              value={username}
+              onChange={(ev) => setName(ev.target.value)}
+              className="memInput"
+            />
+
+            <div className="centerForm">
+              <button className="button-32 " type="submit">
+                <span className="text">Add Member</span>
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
       <div className="flex flex-row mr-[20px]">
         <div className="w-72 bg-white  rounded-sm shadow-2xl lg:h-[51.55rem] md:h-[50rem] h-[48rem] overflow-auto custom-scrollbar  ">
           <div className="flex items-center py-2">
             <h1 className="font-bold text-lg px-20 bg-white">Members</h1>
-            <a className="" onClick={showModal ? closeModal : openModal}>
-              <span className="sr-only"></span>
-              <img
-                className="h-6 max-w-none svg-class"
-                src={showModal ? "/minus.svg" : "/plus.svg"}
-                alt=""
-              />
-            </a>
+            {ifManager ? (
+              <a className="" onClick={showModal ? closeModal : openModal}>
+                <span className="sr-only"></span>
+                <img
+                  className="h-6 max-w-none svg-class"
+                  src={showModal ? "/minus.svg" : "/plus.svg"}
+                  alt=""
+                />
+              </a>
+            ) : (
+              <></>
+            )}
           </div>
 
-          {showModal && (
-            <Modal onClose={closeModal} onCloseButton={closeModal}>
-              <form className="centerForm" onSubmit={(e) => onSubmit(e)}>
-                <input
-                  type="text"
-                  placeholder="Type name of your member or email"
-                  value={username}
-                  onChange={(ev) => setName(ev.target.value)}
-                  className="memInput"
-                />
-
-                <div className="centerForm">
-                  <button className="button-32 " type="submit">
-                    <span className="text">Add Member</span>
-                  </button>
-                </div>
-              </form>
-            </Modal>
-          )}
           {ifManager ? (
-            <ul className="bg-slate-400 mx-2 py-4 px-2  rounded-md">
+            <ul className="bg-slate-400 mx-4 py-4 px-2  rounded-md">
               <ul>
                 {members.map((member) => (
                   <li
@@ -176,16 +183,14 @@ export default function MembersPage() {
                     className="flex justify-between items-center"
                   >
                     {member.name} - {member.role}
-                    
-                      <button onClick={() => removeMember(member.name)}>
-                        <span className="sr-only"></span>
-                        <img
-                          className="h-4 max-w-none svg-class"
-                          src="/cross.svg"
-                          alt=""
-                        />
-                      </button>
-                    
+                    <button onClick={() => removeMember(member.name)}>
+                      <span className="sr-only"></span>
+                      <img
+                        className="h-4 max-w-none svg-class"
+                        src="/cross.svg"
+                        alt=""
+                      />
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -202,7 +207,7 @@ export default function MembersPage() {
             </ul>
           )}
         </div>
-     </div>
+      </div>
       <ToastContainer
         position="top-right"
         autoClose={5000}

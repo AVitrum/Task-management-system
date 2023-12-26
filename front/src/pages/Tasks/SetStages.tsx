@@ -1,18 +1,19 @@
 import axios from "axios";
 import { useState, useContext } from "react";
 import { UserContext } from "../../components/UserContext";
-import { useNavigate,useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import backendIp from "../../serverconfig";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-
 export default function SetStages() {
   const [requirementsDueDate, setRequirementsDueDate] = useState(new Date());
   const [reviewDueDate, setReviewDueDate] = useState(new Date());
-  const [implementationDueDate, setImplementationDueDate] = useState(new Date());
+  const [implementationDueDate, setImplementationDueDate] = useState(
+    new Date()
+  );
   const { token } = useContext(UserContext);
   const { teamid: teamId } = useParams<{ teamid: string }>();
 
@@ -38,9 +39,9 @@ export default function SetStages() {
       await axios.put(
         `${backendIp}/api/teams/${teamId}/setStages`,
         {
-            requirementsDueDate,
-            reviewDueDate,
-            implementationDueDate,
+          requirementsDueDate,
+          implementationDueDate,
+          reviewDueDate,
         },
         {
           headers: {
@@ -56,9 +57,7 @@ export default function SetStages() {
   };
 
   return (
-    <div
-      className="flex justify-center bg-slate-600 w-full"
-    >
+    <div className="flex justify-center bg-slate-600 w-full">
       <div
         className="bg-white px-32 pt-6 
             rounded-sm shadow-2xl my-32"
@@ -70,34 +69,37 @@ export default function SetStages() {
 
           <h2 className="textOverInputField">Requirements Date</h2>
           <DatePicker
-          selected={requirementsDueDate}  
-          onChange={(date: any) => setRequirementsDueDate(date)}
-          showTimeSelect
-          dateFormat="yyyy-MM-dd HH:mm:ss"
-          className="customInput"
-        />
+            selected={requirementsDueDate}
+            onChange={(date: any) => setRequirementsDueDate(date)}
+            showTimeSelect
+            dateFormat="yyyy-MM-dd HH:mm:ss"
+            className="customInput"
+            timeFormat="HH:mm:ss"
+          />
 
           <h2 className="textOverInputField"> Review Date</h2>
           <DatePicker
-          selected={reviewDueDate}
-          onChange={(date:any) => setReviewDueDate(date)}
-          showTimeSelect
-          dateFormat="yyyy-MM-dd HH:mm:ss"
-          className="customInput"
-        />
+            selected={reviewDueDate}
+            onChange={(date: any) => setReviewDueDate(date)}
+            showTimeSelect
+            dateFormat="yyyy-MM-dd HH:mm:ss"
+            timeFormat="HH:mm:ss"
+            className="customInput"
+          />
 
           <h2 className="textOverInputField"> Implementation Date</h2>
           <DatePicker
-          selected={implementationDueDate}
-          onChange={(date:any) => setImplementationDueDate(date)}
-          showTimeSelect
-          dateFormat="yyyy-MM-dd HH:mm:ss"
-          className="customInput"
-        />
+            selected={implementationDueDate}
+            onChange={(date: any) => setImplementationDueDate(date)}
+            showTimeSelect
+            dateFormat="yyyy-MM-dd HH:mm:ss"
+            timeFormat="HH:mm:ss"
+            className="customInput"
+          />
 
           <div className="centerForm">
             <button className="button-64 mt-6 " type="submit">
-              <span className="text">Reset</span>
+              <span className="text">Set dates of stages</span>
             </button>
           </div>
         </form>
