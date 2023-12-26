@@ -4,8 +4,8 @@ import Footer from "./Footer";
 
 export default function Layout() {
   return (
-    <div className="min-h-screen bg-gradient-to-r from-purple-800 to-pink-800  w-full ">
-      <header className="fixed w-full top-0">
+    <div className="flex flex-col min-h-screen">
+      <header className="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg  ">
         <Header />
       </header>
 
@@ -13,7 +13,7 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <footer className="fixed bottom-0 w-full  ">
+      <footer className="   mt-auto ">
         <Footer />
       </footer>
     </div>

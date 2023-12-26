@@ -44,7 +44,7 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="py-2 mx-10 my-0
+        <div className="py-10 
          flex flex-col justify-center items-center ">
             <div className="bg-white px-8 pt-8 pb-12
             rounded-sm shadow-2xl my-32">

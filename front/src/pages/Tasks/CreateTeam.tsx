@@ -51,7 +51,7 @@ export default function CreateTeam() {
 
   return (
     <div
-      className="py-2 mx-10 my-0
+      className="py-32 mx-10 my-0
          flex flex-col justify-center items-center "
     >
       <div

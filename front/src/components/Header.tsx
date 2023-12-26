@@ -55,26 +55,26 @@ export default function Header() {
   useEffect(() => {
     const handleResize = () => {
       
-      if (window.innerWidth > 1) { // Якщо ширина вікна більше 768px
-        setShowMenu(false); // Змінюємо значення showMenu на false
+      if (window.innerWidth > 1) { 
+        setShowMenu(false); 
       }
     };
 
-    window.addEventListener("resize", handleResize); // Додаємо обробник подій для події resize
+    window.addEventListener("resize", handleResize); 
 
     return () => {
-      window.removeEventListener("resize", handleResize); // Прибираємо обробник подій при виході з компонента
+      window.removeEventListener("resize", handleResize); 
     };
   }, []);
   
 
 
   return (
-    <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg ">
+    <>
       <nav className=" flex items-center justify-between p-6 ">
         
         <div className="flex lg:flex-1   ">
-          <a href="/" className="pr-4  ">
+          <a href="/" className="pr-1  ">
             <span className="sr-only">Your Company</span>
             <img
               className="h-8 max-w-none border-[2px] border-black rounded-md"
@@ -82,6 +82,7 @@ export default function Header() {
               alt=""
             />
           </a>
+          <a className="text-2xl font-medium">TMS</a>
           {userInfo.id === 0 || userInfo.id === undefined ? (
             <></>
           ) : (
@@ -108,10 +109,10 @@ export default function Header() {
           <a href="/" className="linkHomePage ">
             Home
           </a>
-          <a href="#" className="linkHomePage">
+          <a href="/about" className="linkHomePage">
             About
           </a>
-          <a href="#" className="linkHomePage ">
+          <a href="/help" className="linkHomePage ">
             Help
           </a>
         </div>
@@ -210,6 +211,7 @@ export default function Header() {
           </div>
         </div>
       </nav>
-    </div>
+      </>
+    
   );
 }
