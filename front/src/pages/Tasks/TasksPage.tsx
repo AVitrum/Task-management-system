@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import backendIp from "../../serverconfig";
 import Modal from "../../components/Modall";
 import SetStages from "./SetStages";
+import { TrashIcon } from "@heroicons/react/20/solid";
 
 interface Member {
   id: string;
@@ -26,7 +27,7 @@ interface Task {
   title: string;
   description: string;
   status: string;
-  Boolean: boolean;
+  isCompleted: boolean;
   creator: Member;
   performer: Member;
   categories: string[];
@@ -43,6 +44,7 @@ export default function TasksPage() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [isCompleted, setIsCompleted] = useState(false);
 
   const [titleChange, setTitleChange] = useState("");
   const [descriptionChange, setDescriptionChange] = useState("");
@@ -58,6 +60,7 @@ export default function TasksPage() {
   const [isPlusClicked, setIsPlusClicked] = useState(false);
   const [ifManager, setIfManager] = useState(false);
   const [ifTaskCompleted, setIfTaskCompleted] = useState(false);
+  const [ifInReview, setIfInReview] = useState(false);
 
   const { teamid: teamId } = useParams<{ teamid: string }>();
   const [taskId, setTaskId] = useState("");
@@ -97,7 +100,9 @@ export default function TasksPage() {
   const openShowDetailsTask = (
     taskId: string,
     title: string,
-    description: string
+    description: string,
+    isCompleted: boolean,
+    status: string
   ) => {
     navigate(`/tasksLayout/${teamId}/${taskId}`);
     setTaskId(taskId);
@@ -105,7 +110,18 @@ export default function TasksPage() {
 
     setTitleChange(title);
     setDescriptionChange(description);
+    if (isCompleted) {
+      setIsCompleted(true);
+    } else {
+      setIsCompleted(false);
+    }
 
+    if (status === "ASSIGNED" || status === "UNCOMPLETED") {
+      setIfTaskCompleted(true);
+    } else setIfTaskCompleted(false);
+    if (status === "IN_REVIEW" || status === "OVERDUE") {
+      setIfInReview(true);
+    } else setIfInReview(false);
     setDetailsTask(true);
   };
 
@@ -118,6 +134,7 @@ export default function TasksPage() {
     taskId: string,
     title: string,
     description: string,
+    isCompleted: boolean,
     status: string
   ) => {
     navigate(`/tasksLayout/${teamId}/${taskId}`);
@@ -126,11 +143,14 @@ export default function TasksPage() {
 
     setTitleChange(title);
     setDescriptionChange(description);
-
+    if (isCompleted) {
+      setIsCompleted(true);
+    } else {
+      setIsCompleted(false);
+    }
     if (status === "ASSIGNED" || status === "UNCOMPLETED") {
       setIfTaskCompleted(true);
-    }
-    console.log(status);
+    } else setIfTaskCompleted(false);
 
     setShowDetailsTaskForMembers(true);
   };
@@ -320,6 +340,8 @@ export default function TasksPage() {
           },
         }
       );
+      setIsCompleted(!isCompleted);
+      getAllTasksInTeam();
     } catch (error: any) {
       notify(error.response.data);
     }
@@ -407,19 +429,71 @@ export default function TasksPage() {
               onChange={(ev) => setDescriptionChange(ev.target.value)}
               className="memInput"
             />
+            {ifTaskCompleted ? (
+              <div className="py-1">
+                <label className="">
+                  <input
+                    type="checkbox"
+                    onChange={() => {
+                      confirmTask();
+                    }}
+                    checked={isCompleted}
+                    className="mr-1"
+                  />
+                  <span>Task Completed</span>
+                </label>
+              </div>
+            ) : (
+              <></>
+            )}
 
-            <div className="py-1">
-              <label className="">
-                <input
-                  type="checkbox"
-                  onChange={() => {
-                    confirmTask();
-                  }}
-                  className="mr-1"
-                />
-                <span>Task Completed</span>
-              </label>
-            </div>
+            {ifInReview ? (
+              <>
+              
+                <div className="py-1">
+                  <label className="">
+                    <input
+                      type="checkbox"
+                      onChange={() => {
+                        confirmTask();
+                      }}
+                      
+                      className="mr-1"
+                    />
+                    <span>Task is not Completed</span>
+                  </label>
+                </div>
+                <div className="py-1">
+                  <label className="">
+                    <input
+                      type="checkbox"
+                      onChange={() => {
+                        confirmTask();
+                      }}
+                      checked={isCompleted}
+                      className="mr-1"
+                    />
+                    <span>Task is Completed</span>
+                  </label>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="py-1">
+                  <label className="">
+                    <input
+                      type="checkbox"
+                      onChange={() => {
+                        confirmTask();
+                      }}
+                      checked={isCompleted}
+                      className="mr-1"
+                    />
+                    <span>Task Completed</span>
+                  </label>
+                </div>
+              </>
+            )}
 
             <div className="centerForm pt-2">
               <button className="button-32 " type="submit">
@@ -455,6 +529,7 @@ export default function TasksPage() {
                     onChange={() => {
                       confirmTask();
                     }}
+                    checked={isCompleted}
                     className="mr-1"
                   />
                   <span>Task Completed</span>
@@ -494,7 +569,11 @@ export default function TasksPage() {
                 )}
               </div>
             </div>
-            <div className={`card bg-gray-400 rounded-b-xl  overflow-auto custom-scrollbar ${ifManager ? 'h-[46.2rem]' : 'h-[46.8rem]'}`}>
+            <div
+              className={`card bg-gray-400 rounded-b-xl  overflow-auto custom-scrollbar ${
+                ifManager ? "h-[46.2rem]" : "h-[46.8rem]"
+              }`}
+            >
               <ul>
                 {tasks.map((task) => (
                   <li key={task.id} className="">
@@ -522,7 +601,9 @@ export default function TasksPage() {
                                   openShowDetailsTask(
                                     task.id,
                                     task.title,
-                                    task.description
+                                    task.description,
+                                    task.isCompleted,
+                                    task.status
                                   )
                                 }
                                 className="bg-purple-500 hover:bg-purple-400  rounded-md px-1 py-1"
@@ -562,6 +643,7 @@ export default function TasksPage() {
                                     task.id,
                                     task.title,
                                     task.description,
+                                    task.isCompleted,
                                     task.status
                                   )
                                 }
@@ -616,7 +698,9 @@ export default function TasksPage() {
                                   openShowDetailsTask(
                                     task.id,
                                     task.title,
-                                    task.description
+                                    task.description,
+                                    task.isCompleted,
+                                    task.status
                                   )
                                 }
                                 className="bg-purple-500 hover:bg-purple-400  rounded-md px-1 py-1"
@@ -639,6 +723,7 @@ export default function TasksPage() {
                                     task.id,
                                     task.title,
                                     task.description,
+                                    task.isCompleted,
                                     task.status
                                   )
                                 }
@@ -693,7 +778,9 @@ export default function TasksPage() {
                                   openShowDetailsTask(
                                     task.id,
                                     task.title,
-                                    task.description
+                                    task.description,
+                                    task.isCompleted,
+                                    task.status
                                   )
                                 }
                                 className="bg-purple-500 hover:bg-purple-400  rounded-md px-1 py-1"
@@ -716,6 +803,7 @@ export default function TasksPage() {
                                     task.id,
                                     task.title,
                                     task.description,
+                                    task.isCompleted,
                                     task.status
                                   )
                                 }
@@ -769,7 +857,9 @@ export default function TasksPage() {
                                   openShowDetailsTask(
                                     task.id,
                                     task.title,
-                                    task.description
+                                    task.description,
+                                    task.isCompleted,
+                                    task.status
                                   )
                                 }
                                 className="bg-purple-500 hover:bg-purple-400  rounded-md px-1 py-1"
@@ -792,6 +882,7 @@ export default function TasksPage() {
                                     task.id,
                                     task.title,
                                     task.description,
+                                    task.isCompleted,
                                     task.status
                                   )
                                 }

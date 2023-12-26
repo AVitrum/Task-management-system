@@ -77,16 +77,6 @@ export default function SetStages() {
             timeFormat="HH:mm:ss"
           />
 
-          <h2 className="textOverInputField"> Review Date</h2>
-          <DatePicker
-            selected={reviewDueDate}
-            onChange={(date: any) => setReviewDueDate(date)}
-            showTimeSelect
-            dateFormat="yyyy-MM-dd HH:mm:ss"
-            timeFormat="HH:mm:ss"
-            className="customInput"
-          />
-
           <h2 className="textOverInputField"> Implementation Date</h2>
           <DatePicker
             selected={implementationDueDate}
@@ -96,7 +86,15 @@ export default function SetStages() {
             timeFormat="HH:mm:ss"
             className="customInput"
           />
-
+          <h2 className="textOverInputField"> Review Date</h2>
+          <DatePicker
+            selected={reviewDueDate}
+            onChange={(date: any) => setReviewDueDate(date)}
+            showTimeSelect
+            dateFormat="yyyy-MM-dd HH:mm:ss"
+            timeFormat="HH:mm:ss"
+            className="customInput"
+          />
           <div className="centerForm">
             <button className="button-64 mt-6 " type="submit">
               <span className="text">Set dates of stages</span>

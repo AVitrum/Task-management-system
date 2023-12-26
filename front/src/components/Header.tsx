@@ -112,7 +112,7 @@ export default function Header() {
           <a href="/about" className="linkHomePage">
             About
           </a>
-          <a href="#" className="linkHomePage ">
+          <a href="/help" className="linkHomePage ">
             Help
           </a>
         </div>

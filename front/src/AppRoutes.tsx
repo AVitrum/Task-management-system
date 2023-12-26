@@ -12,6 +12,7 @@ import MembersPage from "./pages/Tasks/MembersPage";
 import TasksLayout from "./pages/Tasks/TasksLayout";
 import SetStages from "./pages/Tasks/SetStages";
 import AboutPage from "./pages/AboutPage";
+import HelpPage from "./pages/HelpPage";
 
 export default function AppRoutes() {
   return (
@@ -20,6 +21,7 @@ export default function AppRoutes() {
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="/about" element={<AboutPage/>} />
+          <Route path="/help" element={<HelpPage/>} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/reset" element={<ResetPage />} />
