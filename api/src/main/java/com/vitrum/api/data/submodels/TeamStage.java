@@ -54,7 +54,7 @@ public class TeamStage {
 
         TeamStage stage = TeamStage.builder()
                 .team(team)
-                .dueDate(LocalDateTime.parse(formattedDueDate, outputFormatter))
+                .dueDate(LocalDateTime.parse(formattedDueDate, outputFormatter).plusHours(2))
                 .type(type)
                 .isCurrent(isCurrent)
                 .number(number)
