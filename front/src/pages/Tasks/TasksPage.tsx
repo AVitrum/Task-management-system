@@ -7,7 +7,6 @@ import "react-toastify/dist/ReactToastify.css";
 import backendIp from "../../serverconfig";
 import Modal from "../../components/Modall";
 import SetStages from "./SetStages";
-import { TrashIcon } from "@heroicons/react/20/solid";
 
 interface Member {
   id: string;
@@ -163,6 +162,26 @@ export default function TasksPage() {
   const handleAddPerformerAndSetTaskId = (taskId: string) => {
     setTaskId(taskId);
     openAddPerformerModal();
+  };
+
+  const changeStatus = async (status: string, taskid: string) => {
+    console.log(status);
+    try {
+      await axios.put(
+        `${backendIp}/api/${teamId}/${taskid}/update`,
+        {
+          status: status
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      getAllTasksInTeam();
+    } catch(error: any) {
+      notify(error.response.data);
+    }
   };
 
   if (showModal) {
@@ -446,55 +465,6 @@ export default function TasksPage() {
             ) : (
               <></>
             )}
-
-            {ifInReview ? (
-              <>
-              
-                <div className="py-1">
-                  <label className="">
-                    <input
-                      type="checkbox"
-                      onChange={() => {
-                        confirmTask();
-                      }}
-                      
-                      className="mr-1"
-                    />
-                    <span>Task is not Completed</span>
-                  </label>
-                </div>
-                <div className="py-1">
-                  <label className="">
-                    <input
-                      type="checkbox"
-                      onChange={() => {
-                        confirmTask();
-                      }}
-                      checked={isCompleted}
-                      className="mr-1"
-                    />
-                    <span>Task is Completed</span>
-                  </label>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="py-1">
-                  <label className="">
-                    <input
-                      type="checkbox"
-                      onChange={() => {
-                        confirmTask();
-                      }}
-                      checked={isCompleted}
-                      className="mr-1"
-                    />
-                    <span>Task Completed</span>
-                  </label>
-                </div>
-              </>
-            )}
-
             <div className="centerForm pt-2">
               <button className="button-32 " type="submit">
                 <span className="text">Safe Changes</span>
@@ -772,6 +742,7 @@ export default function TasksPage() {
                                 />
                               </button>
                             </div>
+                            <div className="flex flex-row justify-between">
                             <div className="flex  flex-row justify-between">
                               <button
                                 onClick={() =>
@@ -787,6 +758,33 @@ export default function TasksPage() {
                               >
                                 <h1>Details</h1>
                               </button>
+                            </div>
+                            <div className="flex  flex-row justify-between">
+                              <button
+                                onClick={() =>
+                                  changeStatus(
+                                    "COMPLETED",
+                                    task.id
+                                  )
+                                }
+                                className="bg-green-500 hover:bg-green-400  rounded-md px-1 py-1"
+                              >
+                                <h1>SUBMIT</h1>
+                              </button>
+                            </div>
+                            <div className="flex  flex-row justify-between">
+                              <button
+                                onClick={() =>
+                                  changeStatus(
+                                    "UNCOMPLETED",
+                                    task.id
+                                  )
+                                }
+                                className="bg-red-500 hover:bg-red-400  rounded-md px-1 py-1"
+                              >
+                                <h1>DECLINE</h1>
+                              </button>
+                            </div>
                             </div>
                           </div>
                         ) : (
