@@ -5,6 +5,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import backendIp from "../../serverconfig";
+import CreateTeam from "./CreateTeam";
 
 interface Member {
   id: string;
@@ -47,20 +48,20 @@ export default function TeamPage() {
   
   
   return (
-    <div>
-      <div className="flex-col justify-start w-52  ">
-        <h1 className=" w-full font-bold text-lg px-6 pt-2  bg-white">
+    <div className="flex ">
+      <div className="flex-col justify-start w-60  ">
+        <h1 className=" w-full font-bold text-lg px-6 pt-2  bg-white border-black border-r-4">
           List of Teams
         </h1>
         <div
-          className=" pl-2 pr-4  pb-5  rounded-sm bg-white
-                shadow-2xl  h-[49.3rem] overflow-auto custom-scrollbar  "
+          className=" pl-2 pr-2  pb-5  rounded-sm bg-white border-black border-r-4
+                shadow-2xl  h-[49.3rem] overflow-auto custom-scrollbar   "
         >
           <ul>
             {teams.map((team) => (
               <li key={team.id} className="">
-                <ul className="bg-slate-400  my-4  py-4 pl-2 pr-10 rounded-md">
-                  <h2 className="font-bold text-lg">{team.name}</h2>
+                <ul className="bg-slate-400  my-3 py-2 px-2  rounded-md">
+                  <h2 className="font-bold text-lg break-words">{team.name}</h2>
 
                   <Link
                    to={`/tasksLayout/${team.id}`}
@@ -75,6 +76,8 @@ export default function TeamPage() {
           </ul>
         </div>
       </div>
+    <div className="  flex justify-center items-center w-full">
+      <CreateTeam/></div>
     </div>
   );
 }

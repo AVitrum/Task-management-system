@@ -93,8 +93,11 @@ export default function MembersPage() {
         }
       );
 
-      window.location.reload();
-      notify("You has kicked user from team");
+      notify("Team has been deleted");
+      setTimeout(() => {
+        navigate("/showTeam");
+      }, 1000);
+      getMembers();
     } catch (error: any) {
       notify(error.response.data);
     }
@@ -156,10 +159,10 @@ export default function MembersPage() {
           </form>
         </Modal>
       )}
-      <div className="flex flex-row mr-[20px]">
-        <div className="w-72 bg-white  rounded-sm shadow-2xl lg:h-[51.55rem] md:h-[50rem] h-[48rem] overflow-auto custom-scrollbar  ">
+      <div className="flex flex-row mr-[5px]">
+        <div className="w-60 bg-white border-black  shadow-2xl lg:h-[51.55rem] md:h-[50rem] h-[48rem] overflow-auto custom-scrollbar border-r-4 border-b-4  rounded-md">
           <div className="flex items-center py-2">
-            <h1 className="font-bold text-lg px-20 bg-white">Members</h1>
+            <h1 className="font-bold text-lg px-16 bg-white ">Members</h1>
             {ifManager ? (
               <a className="" onClick={showModal ? closeModal : openModal}>
                 <span className="sr-only"></span>
@@ -178,19 +181,35 @@ export default function MembersPage() {
             <ul className="bg-slate-400 mx-4 py-4 px-2  rounded-md">
               <ul>
                 {members.map((member) => (
-                  <li
-                    key={member.id}
-                    className="flex justify-between items-center"
-                  >
-                    {member.name} - {member.role}
-                    <button onClick={() => removeMember(member.name)}>
-                      <span className="sr-only"></span>
-                      <img
-                        className="h-4 max-w-none svg-class"
-                        src="/cross.svg"
-                        alt=""
-                      />
-                    </button>
+                  <li key={member.id} className=" ">
+                    <div className="flex flex-row items-center justify-between">
+                      <div className="flex items-center">
+                        {member.name}
+                        {member.role === "LEADER" ? (
+                          <img
+                            className="h-6 max-w-none svg-class ml-1"
+                            src="/crown.svg"
+                            alt=""
+                            title="LEADER"
+                          />
+                        ) : (
+                          <img
+                            className="h-6 max-w-none svg-class ml-1"
+                            src="/member.svg"
+                            alt=""
+                            title="MEMBER"
+                          />
+                        )}
+                      </div>
+                      <button onClick={() => removeMember(member.name)}>
+                        <span className="sr-only">Remove</span>
+                        <img
+                          className="h-4 max-w-none svg-class flex"
+                          src="/cross.svg"
+                          alt=""
+                        />
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>

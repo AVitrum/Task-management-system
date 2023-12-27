@@ -25,7 +25,6 @@ export default function CreateTeam() {
       theme: "colored",
     });
   };
-  
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,46 +50,44 @@ export default function CreateTeam() {
 
   return (
     <div
-      className="py-32 mx-10 my-0
-         flex flex-col justify-center items-center "
+      className="bg-white border-8 border-gray-800 rounded-lg px-5 pt-8 pb-8
+             shadow-2xl mb-64   mt-60"
     >
-      <div
-        className="bg-white px-8 pt-8 pb-10
-            rounded-sm shadow-2xl my-32"
-      >
-        <form className=" " onSubmit={(e) => onSubmit(e)}>
-          <h1 className="text-black tracking-wide text-3xl font-black mb-8 centerForm">
-            Create Team
-          </h1>
+      <form className=" " onSubmit={(e) => onSubmit(e)}>
+        <h1 className="text-black tracking-wide text-3xl font-black mb-4 centerForm">
+          Create Team
+        </h1>
 
-          <h2 className="textOverInputField">Team</h2>
-          <input
-            type="text"
-            placeholder="Type name of your team"
-            value={name}
-            onChange={(ev) => setName(ev.target.value)}
-            className="customInput "
-          />
-
-          <div className="centerForm">
-            <button className="button-64 mt-2 " type="submit">
-              <span className="text">Create</span>
-            </button>
-          </div>
-        </form>
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="colored"
+        <h2 className="textOverInputField">Team</h2>
+        <input
+          type="text"
+          placeholder="Type name of your team"
+          value={name}
+          onChange={(ev) => setName(ev.target.value)}
+          className="mt-1 w-[17rem] py-3 px-2 border border-gray-300 rounded "
+          required 
+          maxLength={20}
         />
-      </div>
+        <div className="flex justify-center text-gray-400 font-normal text-xs pt-1 pb-3">The name can contain a max 20 characters</div>
+
+        <div className="centerForm">
+          <button className="button-64 mt-2 " type="submit">
+            <span className="text">Create</span>
+          </button>
+        </div>
+      </form>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </div>
   );
 }

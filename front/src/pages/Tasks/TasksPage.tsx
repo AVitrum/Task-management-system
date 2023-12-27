@@ -38,7 +38,7 @@ export default function TasksPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [team, setTeam] = useState<Team[]>([]);
-  const [task, setTask] = useState<Task[]>([]);
+  const [task, setTask] = useState([]);
   const { token, userInfo } = useContext(UserContext);
 
   const [title, setTitle] = useState("");
@@ -55,13 +55,17 @@ export default function TasksPage() {
   const [showDetailsTask, setDetailsTask] = useState(false);
   const [showDetailsTaskForMembers, setShowDetailsTaskForMembers] =
     useState(false);
+  const [showAlert, setShowAlert] = useState(false);
 
   const [isPlusClicked, setIsPlusClicked] = useState(false);
   const [ifManager, setIfManager] = useState(false);
   const [ifTaskCompleted, setIfTaskCompleted] = useState(false);
   const [ifInReview, setIfInReview] = useState(false);
+  const [ifMove, setIfMove] = useState(false);
+  const [ifRemove, setIfRemove] = useState(false);
 
   const { teamid: teamId } = useParams<{ teamid: string }>();
+
   const [taskId, setTaskId] = useState("");
 
   const navigate = useNavigate();
@@ -159,6 +163,27 @@ export default function TasksPage() {
     navigate(`/tasksLayout/${teamId}`);
   };
 
+  const confirmDeleting = (f: Function, taskid: string) => {
+    if (f.name === "moveTaskToTrash") {
+      setIfMove(true);
+      console.log("+");
+    }
+    if (f.name === "removeTask") {
+      setIfRemove(true);
+      console.log("-");
+    }
+    setTaskId(taskid);
+    console.log();
+    getTaskById(taskid);
+
+    setShowAlert(true);
+  };
+
+  const closeShowAlert = () => {
+    setShowAlert(false);
+    getAllTasksInTeam();
+  };
+
   const handleAddPerformerAndSetTaskId = (taskId: string) => {
     setTaskId(taskId);
     openAddPerformerModal();
@@ -170,7 +195,7 @@ export default function TasksPage() {
       await axios.put(
         `${backendIp}/api/${teamId}/${taskid}/update`,
         {
-          status: status
+          status: status,
         },
         {
           headers: {
@@ -179,7 +204,7 @@ export default function TasksPage() {
         }
       );
       getAllTasksInTeam();
-    } catch(error: any) {
+    } catch (error: any) {
       notify(error.response.data);
     }
   };
@@ -214,6 +239,26 @@ export default function TasksPage() {
     }
   };
 
+  const moveTaskToTrash = async (taskId: string) => {
+    try {
+      await axios.delete(`${backendIp}/api/${teamId}/${taskId}`, {
+        data: {
+          username: taskId,
+        },
+
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setIfMove(false);
+
+      setShowAlert(false);
+      getAllTasksInTeam();
+      notify("The task has been moved to trash");
+    } catch (error: any) {
+      notify(error.response.data);
+    }
+  };
   const removeTask = async (taskId: string) => {
     try {
       await axios.delete(`${backendIp}/api/${teamId}/${taskId}/history`, {
@@ -225,9 +270,10 @@ export default function TasksPage() {
           Authorization: `Bearer ${token}`,
         },
       });
-
+      setShowAlert(false);
+      setIfRemove(false);
       getAllTasksInTeam();
-      notify("You delete task ");
+      notify("The task has been deleted");
     } catch (error: any) {
       notify(error.response.data);
     }
@@ -359,6 +405,7 @@ export default function TasksPage() {
           },
         }
       );
+      closeShowDetailsTask();
       setIsCompleted(!isCompleted);
       getAllTasksInTeam();
     } catch (error: any) {
@@ -512,18 +559,83 @@ export default function TasksPage() {
         </Modal>
       )}
 
+      {showAlert && (
+        <Modal onClose={closeShowAlert} onCloseButton={closeShowAlert}>
+          <form className="centerForm ">
+            {ifMove ? (
+              <>
+                <h1 className=" bg-gray-400 rounded-md py-1 font-bold text-xl p-1 px-4 m-2">
+                  Do you want to move <br />
+                  this task into trash can?
+                </h1>
+
+                <div className=" w-full flex flex-row justify-between pt-2">
+                  <div>
+                    <button className="bg-green-500  rounded-md mx-10 p-1 ">
+                      <span
+                        className="text"
+                        onClick={() => moveTaskToTrash(taskId)}
+                      >
+                        Confirm
+                      </span>
+                    </button>
+                  </div>
+                  <div>
+                    <button
+                      className="bg-red-500  rounded-md mx-10 p-1 "
+                      onClick={closeShowAlert}
+                    >
+                      <span className="text">Decline</span>
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <></>
+            )}
+            {ifRemove ? (
+              <>
+                <h1 className=" bg-gray-400 rounded-md py-1 font-bold text-xl p-1  px-4 m-2">
+                  Do you want to delete
+                  <br /> this task permanently?
+                </h1>
+                <div className=" w-full flex flex-row justify-between pt-2">
+                  <div>
+                    <button className="bg-green-500  rounded-md mx-10 p-1 ">
+                      <span className="text" onClick={() => removeTask(taskId)}>
+                        Confirm
+                      </span>
+                    </button>
+                  </div>
+                  <div>
+                    <button
+                      className="bg-red-500  rounded-md mx-10 p-1 "
+                      onClick={closeShowAlert}
+                    >
+                      <span className="text">Decline</span>
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <></>
+            )}
+          </form>
+        </Modal>
+      )}
+
       {team && team.stage === null ? (
         <>
           <SetStages />
         </>
       ) : (
-        <div className="flex flex-row gap-[20px] overflow-auto custom-scroll-tasks mb-1 py-1">
+        <div className="flex text-yellow-50 flex-row gap-[13px] overflow-auto custom-scroll-tasks mb-1 py-1 px-1">
           <div className="flex flex-col ">
-            <div className="card  bg-gray-500 rounded-t-xl ">
+            <div className="card bgTasksUp rounded-t-xl ">
               <div className="flex justify-between items-center ">
                 <h2 className="text-xl font-bold">Pending</h2>
                 {ifManager && (
-                  <div className="flex  my-2">
+                  <div className="flex  ">
                     <a
                       className="pr-4"
                       onClick={showModal ? closeModal : openModal}
@@ -531,7 +643,7 @@ export default function TasksPage() {
                       <span className="sr-only"></span>
                       <img
                         className="h-6 max-w-none svg-class"
-                        src={showModal ? "/minus.svg" : "/plus.svg"}
+                        src="/white_plus.svg"
                         alt=""
                       />
                     </a>
@@ -540,8 +652,8 @@ export default function TasksPage() {
               </div>
             </div>
             <div
-              className={`card bg-gray-400 rounded-b-xl  overflow-auto custom-scrollbar ${
-                ifManager ? "h-[46.2rem]" : "h-[46.8rem]"
+              className={`bgColTasks card  rounded-b-xl  overflow-auto custom-scrollbar ${
+                ifManager ? "h-[47rem]" : "h-[46.8rem]"
               }`}
             >
               <ul>
@@ -550,18 +662,24 @@ export default function TasksPage() {
                     {task.status === "PENDING" ? (
                       <>
                         {ifManager ? (
-                          <div className="py-2 my-2 pl-2 pr-5  bg-orange-400    rounded-md">
+                          <div className="py-2 my-2 pl-2 pr-5  bgTasks   rounded-md">
                             <div className="flex justify-between  rounded">
-                              <h2 className="font-bold text-lg break-words">
+                              <h2 className="font-bold text-lg break-all">
                                 {task.title}
                               </h2>
 
-                              <button onClick={() => removeTask(task.id)}>
+                              <button
+                                onClick={() =>
+                                  confirmDeleting(moveTaskToTrash, task.id)
+                                }
+                                className="pl-3"
+                              >
                                 <span className="sr-only"></span>
                                 <img
                                   className="h-4 max-w-none svg-class"
-                                  src="/cross.svg"
+                                  src="/white_cross.svg"
                                   alt=""
+                                  title="Delete the task"
                                 />
                               </button>
                             </div>
@@ -576,12 +694,12 @@ export default function TasksPage() {
                                     task.status
                                   )
                                 }
-                                className="bg-purple-500 hover:bg-purple-400  rounded-md px-1 py-1"
+                                className="bgDetails  rounded-md   py-1"
                               >
                                 <h1>Details</h1>
                               </button>
 
-                              <div className="flex justify-center  bg-green-400 hover:bg-green-500 rounded-md  text-sm py-1 pr-1 pl-1">
+                              <div className="flex justify-center  bg-green-600 hover:bg-green-500 rounded-md  text-sm py-1 pr-1 pl-1">
                                 <button
                                   onClick={() =>
                                     handleAddPerformerAndSetTaskId(task.id)
@@ -593,14 +711,14 @@ export default function TasksPage() {
                                       className="h-5 pl-3 max-w-none svg-class"
                                       src="/plus.svg"
                                       alt=""
-                                    />{" "}
+                                    />
                                   </div>
                                 </button>
                               </div>
                             </div>
                           </div>
                         ) : (
-                          <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
+                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
                             <div className="flex justify-between  rounded">
                               <h2 className="font-bold text-lg break-words">
                                 {task.title}
@@ -617,7 +735,7 @@ export default function TasksPage() {
                                     task.status
                                   )
                                 }
-                                className="bg-purple-500 hover:bg-purple-400  rounded-md px-8 py-1"
+                                className="bgDetails  rounded-md px-8 py-1"
                               >
                                 <h1>Details</h1>
                               </button>
@@ -634,12 +752,12 @@ export default function TasksPage() {
             </div>
           </div>
           <div className="flex flex-col ">
-            <div className="card  bg-blue-500 rounded-t-xl">
+            <div className="card  bg-blue-900 rounded-t-xl">
               <div className="flex justify-between items-center ">
                 <h2 className="text-xl font-bold">Assigned</h2>
               </div>
             </div>
-            <div className="card  bg-blue-600 task-colls rounded-b-xl">
+            <div className="bgColTasks card   task-colls rounded-b-xl">
               <ul>
                 {tasks.map((task) => (
                   <li key={task.id} className="">
@@ -647,22 +765,27 @@ export default function TasksPage() {
                     task.status === "UNCOMPLETED" ? (
                       <>
                         {ifManager ? (
-                          <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
+                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
                             <div className="flex justify-between  rounded">
                               <h2 className="font-bold text-lg break-words">
                                 {task.title}
                               </h2>
 
-                              <button onClick={() => removeTask(task.id)}>
+                              <button
+                                onClick={() =>
+                                  confirmDeleting(moveTaskToTrash, task.id)
+                                }
+                              >
                                 <span className="sr-only"></span>
                                 <img
                                   className="h-4 max-w-none svg-class"
-                                  src="/cross.svg"
+                                  src="/white_cross.svg"
                                   alt=""
+                                  title="Delete the task"
                                 />
                               </button>
                             </div>
-                            <div className="flex  flex-row justify-between">
+                            <div className="flex  flex-row justify-end">
                               <button
                                 onClick={() =>
                                   openShowDetailsTask(
@@ -673,14 +796,14 @@ export default function TasksPage() {
                                     task.status
                                   )
                                 }
-                                className="bg-purple-500 hover:bg-purple-400  rounded-md px-1 py-1"
+                                className="bgDetails  rounded-md px-1 py-1"
                               >
                                 <h1>Details</h1>
                               </button>
                             </div>
                           </div>
                         ) : (
-                          <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
+                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
                             <div className="flex justify-between  rounded">
                               <h2 className="font-bold text-lg break-words">
                                 {task.title}
@@ -697,7 +820,7 @@ export default function TasksPage() {
                                     task.status
                                   )
                                 }
-                                className="bg-purple-500 hover:bg-purple-400  rounded-md px-8 py-1"
+                                className="bgDetails  rounded-md px-8 py-1"
                               >
                                 <h1>Details</h1>
                               </button>
@@ -714,12 +837,12 @@ export default function TasksPage() {
             </div>
           </div>
           <div className="flex flex-col ">
-            <div className="card  bg-yellow-500 rounded-t-xl">
+            <div className="card  bg-yellow-600 rounded-t-xl">
               <div className="flex justify-between items-center ">
                 <h2 className="text-xl font-bold">In Review</h2>
               </div>
             </div>
-            <div className="card  bg-yellow-400 task-colls rounded-b-xl">
+            <div className="card  bgColTasks task-colls rounded-b-xl">
               <ul>
                 {tasks.map((task) => (
                   <li key={task.id} className="">
@@ -727,68 +850,76 @@ export default function TasksPage() {
                     task.status === "OVERDUE" ? (
                       <>
                         {ifManager ? (
-                          <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
+                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
                             <div className="flex justify-between  rounded">
                               <h2 className="font-bold text-lg break-words">
                                 {task.title}
                               </h2>
 
-                              <button onClick={() => removeTask(task.id)}>
+                              <button
+                                onClick={() =>
+                                  confirmDeleting(moveTaskToTrash, task.id)
+                                }
+                              >
                                 <span className="sr-only"></span>
                                 <img
                                   className="h-4 max-w-none svg-class"
-                                  src="/cross.svg"
+                                  src="/white_cross.svg"
+                                  title="Delete the task"
                                   alt=""
                                 />
                               </button>
                             </div>
-                            <div className="flex flex-row justify-between">
-                            <div className="flex  flex-row justify-between">
-                              <button
-                                onClick={() =>
-                                  openShowDetailsTask(
-                                    task.id,
-                                    task.title,
-                                    task.description,
-                                    task.isCompleted,
-                                    task.status
-                                  )
-                                }
-                                className="bg-purple-500 hover:bg-purple-400  rounded-md px-1 py-1"
-                              >
-                                <h1>Details</h1>
-                              </button>
-                            </div>
-                            <div className="flex  flex-row justify-between">
-                              <button
-                                onClick={() =>
-                                  changeStatus(
-                                    "COMPLETED",
-                                    task.id
-                                  )
-                                }
-                                className="bg-green-500 hover:bg-green-400  rounded-md px-1 py-1"
-                              >
-                                <h1>SUBMIT</h1>
-                              </button>
-                            </div>
-                            <div className="flex  flex-row justify-between">
-                              <button
-                                onClick={() =>
-                                  changeStatus(
-                                    "UNCOMPLETED",
-                                    task.id
-                                  )
-                                }
-                                className="bg-red-500 hover:bg-red-400  rounded-md px-1 py-1"
-                              >
-                                <h1>DECLINE</h1>
-                              </button>
-                            </div>
+                            <div className="flex flex-row  justify-end">
+                              <div className="flex justify-start">
+                                <button
+                                  onClick={() =>
+                                    changeStatus("COMPLETED", task.id)
+                                  }
+                                  className="  rounded-md px-1 "
+                                  title="Click to approve"
+                                >
+                                  <img
+                                    className="h-7 max-w-none svg-class"
+                                    src="/tick.svg"
+                                    alt=""
+                                  />
+                                </button>
+
+                                <button
+                                  onClick={() =>
+                                    changeStatus("UNCOMPLETED", task.id)
+                                  }
+                                  className="  rounded-md px-1 "
+                                  title="Click to decline"
+                                >
+                                  <img
+                                    className="h-8 max-w-none svg-class"
+                                    src="/cross_red.svg"
+                                    alt=""
+                                  />
+                                </button>
+                              </div>
+                              <div className="flex  flex-row justify-end">
+                                <button
+                                  onClick={() =>
+                                    openShowDetailsTask(
+                                      task.id,
+                                      task.title,
+                                      task.description,
+                                      task.isCompleted,
+                                      task.status
+                                    )
+                                  }
+                                  className="bgDetails  rounded-md  py-1"
+                                >
+                                  <h1>Details</h1>
+                                </button>
+                              </div>
                             </div>
                           </div>
                         ) : (
-                          <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
+                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
                             <div className="flex justify-between  rounded">
                               <h2 className="font-bold text-lg break-words">
                                 {task.title}
@@ -805,7 +936,7 @@ export default function TasksPage() {
                                     task.status
                                   )
                                 }
-                                className="bg-purple-500 hover:bg-purple-400  rounded-md px-8 py-1"
+                                className="bgDetails  rounded-md px-8 py-1"
                               >
                                 <h1>Details</h1>
                               </button>
@@ -822,30 +953,35 @@ export default function TasksPage() {
             </div>
           </div>
           <div className="flex flex-col ">
-            <div className="card  bg-green-600 rounded-t-xl ">
+            <div className="card  bg-green-700 rounded-t-xl ">
               <div className="flex justify-between items-center ">
                 <h2 className="text-xl font-bold">Completed</h2>
               </div>
             </div>
-            <div className="card  bg-green-500 task-colls rounded-b-xl">
+            <div className="card bgColTasks bg-green-500 task-colls rounded-b-xl">
               <ul>
                 {tasks.map((task) => (
                   <li key={task.id} className="">
                     {task.status === "COMPLETED" ? (
                       <>
                         {ifManager ? (
-                          <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
+                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
                             <div className="flex justify-between  rounded">
                               <h2 className="font-bold text-lg break-words">
                                 {task.title}
                               </h2>
 
-                              <button onClick={() => removeTask(task.id)}>
+                              <button
+                                onClick={() =>
+                                  confirmDeleting(moveTaskToTrash, task.id)
+                                }
+                              >
                                 <span className="sr-only"></span>
                                 <img
                                   className="h-4 max-w-none svg-class"
-                                  src="/cross.svg"
+                                  src="/white_cross.svg"
                                   alt=""
+                                  title="Delete the task"
                                 />
                               </button>
                             </div>
@@ -860,14 +996,14 @@ export default function TasksPage() {
                                     task.status
                                   )
                                 }
-                                className="bg-purple-500 hover:bg-purple-400  rounded-md px-1 py-1"
+                                className="bgDetails  rounded-md px-1 py-1"
                               >
                                 <h1>Details</h1>
                               </button>
                             </div>
                           </div>
                         ) : (
-                          <div className="py-2 my-2 pl-2 pr-5 bg-orange-400  rounded-md">
+                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
                             <div className="flex justify-between  rounded">
                               <h2 className="font-bold text-lg break-words">
                                 {task.title}
@@ -884,7 +1020,91 @@ export default function TasksPage() {
                                     task.status
                                   )
                                 }
-                                className="bg-purple-500 hover:bg-purple-400  rounded-md px-8 py-1"
+                                className="bgDetails  rounded-md px-8 py-1"
+                              >
+                                <h1>Details</h1>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="flex flex-col ">
+            <div className="card  bg-red-900 rounded-t-xl ">
+              <div className="flex justify-between items-center ">
+                <h2 className="text-xl font-bold">Trash</h2>
+              </div>
+            </div>
+            <div className="card bgColTasks bg-green-500 task-colls rounded-b-xl">
+              <ul>
+                {tasks.map((task) => (
+                  <li key={task.id} className="">
+                    {task.status === "DELETED" ? (
+                      <>
+                        {ifManager ? (
+                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
+                            <div className="flex justify-between  rounded">
+                              <h2 className="font-bold text-lg break-words">
+                                {task.title}
+                              </h2>
+
+                              <button
+                                onClick={() =>
+                                  confirmDeleting(removeTask, task.id)
+                                }
+                              >
+                                <span className="sr-only"></span>
+                                <img
+                                  className="h-4 max-w-none svg-class"
+                                  src="/white_cross.svg"
+                                  alt=""
+                                  title="Delete the task"
+                                />
+                              </button>
+                            </div>
+                            <div className="flex  flex-row justify-between">
+                              <button
+                                onClick={() =>
+                                  openShowDetailsTask(
+                                    task.id,
+                                    task.title,
+                                    task.description,
+                                    task.isCompleted,
+                                    task.status
+                                  )
+                                }
+                                className="bgDetails  rounded-md px-1 py-1"
+                              >
+                                <h1>Details</h1>
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
+                            <div className="flex justify-between  rounded">
+                              <h2 className="font-bold text-lg break-words">
+                                {task.title}
+                              </h2>
+                            </div>
+                            <div className="flex  flex-row justify-end">
+                              <button
+                                onClick={() =>
+                                  openShowDetailsTaskForMembers(
+                                    task.id,
+                                    task.title,
+                                    task.description,
+                                    task.isCompleted,
+                                    task.status
+                                  )
+                                }
+                                className="bgDetails  rounded-md px-8 py-1"
                               >
                                 <h1>Details</h1>
                               </button>

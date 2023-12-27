@@ -18,9 +18,12 @@ export default function AboutPage() {
                We will be glad to receive any feedback.
                <br />
                <br />
-              Our email is here: 
+              Our emails is here: 
               <br />
-              sasha.g360@gmail.com
+              Front-end: velychko.oleksandr1@student.uzhnu.edu.ua
+              <br />
+              
+              Back-end: almashi.andrii@student.uzhnu.edu.ua 
            
             </p>
           </div>

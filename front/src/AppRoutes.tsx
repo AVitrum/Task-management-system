@@ -10,7 +10,6 @@ import CreateTeam from "./pages/Tasks/CreateTeam";
 import TeamPage from "./pages/Tasks/TeamPage";
 import MembersPage from "./pages/Tasks/MembersPage";
 import TasksLayout from "./pages/Tasks/TasksLayout";
-import SetStages from "./pages/Tasks/SetStages";
 import AboutPage from "./pages/AboutPage";
 import HelpPage from "./pages/HelpPage";
 
@@ -20,8 +19,8 @@ export default function AppRoutes() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
-          <Route path="/about" element={<AboutPage/>} />
-          <Route path="/help" element={<HelpPage/>} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/help" element={<HelpPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/reset" element={<ResetPage />} />
@@ -29,11 +28,12 @@ export default function AppRoutes() {
           <Route path="/createTeam" element={<CreateTeam />} />
           <Route path="/showTeam" element={<TeamPage />} />
           <Route path="/members/:id" element={<MembersPage />} />
-          <Route path="/tasksLayout/:teamid" element={<TasksLayout/>} />
-          
-          <Route path="/tasksLayout/:teamid/:taskid" element={<TasksLayout/>} />
-         
-          
+          <Route path="/tasksLayout/:teamid" element={<TasksLayout />} />
+
+          <Route
+            path="/tasksLayout/:teamid/:taskid"
+            element={<TasksLayout />}
+          />
         </Route>
       </Routes>
     </UserContextProvider>
