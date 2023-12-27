@@ -2,6 +2,7 @@ package com.vitrum.api.services.implementations;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.vitrum.api.data.enums.RoleInTeam;
+import com.vitrum.api.data.enums.Status;
 import com.vitrum.api.data.models.Member;
 import com.vitrum.api.data.models.Team;
 import com.vitrum.api.data.models.User;
@@ -107,6 +108,8 @@ public class MemberServiceImpl implements MemberService {
                 task.delete(taskRepository, commentRepository, oldTaskRepository, fileRepository, s3Client);
             else {
                 task.setPerformer(task.getCreator());
+                if (task.getStatus().equals(Status.ASSIGNED) || task.getStatus().equals(Status.UNCOMPLETED))
+                    task.setStatus(Status.PENDING);
                 taskRepository.save(task);
             }
         });
