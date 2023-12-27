@@ -49,8 +49,7 @@ public class TaskServiceImpl implements TaskService {
         if (creator.checkPermission())
             throw new IllegalArgumentException("You do not have permission to perform this action");
 
-        if (request.getTitle().replaceAll("\\s", "").isEmpty())
-            throw new IllegalStateException("The team name cannot be empty");
+        checkTitle(request);
 
         repository.save(
                 Task.builder()
@@ -326,5 +325,13 @@ public class TaskServiceImpl implements TaskService {
             throw new IllegalStateException("The task has been deleted");
         if (task.getStatus().equals(Status.COMPLETED))
             throw new IllegalStateException("The task has been completed");
+    }
+
+    private static void checkTitle(TaskRequest request) {
+        if (request.getTitle().replaceAll("\\s", "").isEmpty())
+            throw new IllegalArgumentException("The task name cannot be empty");
+        if (request.getTitle().length() > 150) {
+            throw new IllegalArgumentException("The team name cannot be more than 150 characters (including spaces)");
+        }
     }
 }
