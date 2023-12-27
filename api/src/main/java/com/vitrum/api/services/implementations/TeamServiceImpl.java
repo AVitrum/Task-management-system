@@ -37,6 +37,8 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public TeamCreationResponse create(TeamCreationRequest request, Principal connectedUser) {
         try {
+            checkTeamName(request);
+
             User user = User.getUserFromPrincipal(connectedUser);
             Team team = Team.builder()
                     .name(request.getName().replaceAll("\\s", "_"))
@@ -129,5 +131,12 @@ public class TeamServiceImpl implements TeamService {
         TeamStage.create(teamStageRepository, team, StageType.REQUIREMENTS, request.getRequirementsDueDate(), true, 1L);
         TeamStage.create(teamStageRepository, team, StageType.IMPLEMENTATION, request.getImplementationDueDate(), false, 2L);
         TeamStage.create(teamStageRepository, team, StageType.REVIEW, request.getReviewDueDate(), false, 3L);
+    }
+
+    private static void checkTeamName(TeamCreationRequest request) {
+        if (request.getName().length() > 20)
+            throw new IllegalArgumentException("The team name cannot be more than 20 characters (including spaces)");
+        if (request.getName().replaceAll("\\s", "").isEmpty())
+            throw new IllegalStateException("The team name cannot be empty");
     }
 }

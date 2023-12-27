@@ -23,7 +23,7 @@ public class Team {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false, length = 20)
     private String name;
 
     @OneToMany(mappedBy = "team")

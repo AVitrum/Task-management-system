@@ -49,6 +49,9 @@ public class TaskServiceImpl implements TaskService {
         if (creator.checkPermission())
             throw new IllegalArgumentException("You do not have permission to perform this action");
 
+        if (request.getTitle().replaceAll("\\s", "").isEmpty())
+            throw new IllegalStateException("The team name cannot be empty");
+
         repository.save(
                 Task.builder()
                         .creator(creator)
@@ -105,10 +108,11 @@ public class TaskServiceImpl implements TaskService {
     public String confirmTask(Long teamId, Long taskId, Principal connectedUser) {
         Task task = getTask(teamId, taskId);
 
-        if (task.getTeam().getCurrentStage(teamStageRepository).getType().equals(StageType.REQUIREMENTS))
-            throw new IllegalStateException("You cannot mark a task as completed during this stage.");
-
         ifDeletedOrCompleted(task);
+
+        if (task.getTeam().getCurrentStage(teamStageRepository).getType().equals(StageType.REQUIREMENTS)) {
+            throw new IllegalStateException("You cannot mark a task as completed during this stage.");
+        }
 
         if (task.getStatus().equals(Status.PENDING))
             throw new IllegalArgumentException("First, add the performer");
@@ -116,7 +120,6 @@ public class TaskServiceImpl implements TaskService {
         Member actionPerformer = Member.getActionPerformer(memberRepository, connectedUser, task.getTeam());
 
         if (!actionPerformer.equals(task.getPerformer())
-                && !actionPerformer.equals(task.getCreator())
                 && actionPerformer.checkPermission()
         ) throw new IllegalStateException("You do not have permission for this action");
 
@@ -133,7 +136,15 @@ public class TaskServiceImpl implements TaskService {
         task.setCompleted(!currentStatus);
         task.saveWithChangeDate(repository);
 
-        return task.getCompleted() ? "Marked as COMPLETED" : "You have marked a task as NOT COMPLETED";
+        String message = task.getCompleted() ? "Marked as COMPLETED" : "Marked as NOT COMPLETED";
+
+        messageUtil.sendMessage(
+                actionPerformer,
+                String.format("%s %s by %s", task.getTitle(), message, actionPerformer.getUser().getTrueUsername()),
+                ""
+        );
+
+        return message;
     }
 
     @Override
