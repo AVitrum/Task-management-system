@@ -82,39 +82,24 @@ export default function Header() {
               alt=""
             />
           </a>
-          <a className="text-2xl font-medium">TMS</a>
-          {userInfo.id === 0 || userInfo.id === undefined ? (
-            <></>
-          ) : (
-            <>
-              <Link
-                to="/createTeam"
-                className="regLogLinks  justify-start pr-2 hover:text-red-500"
-              >
-                Create Team
-                <span aria-hidden="true">&nbsp;&#10094;</span>
-              </Link>
-              <Link
-                to="/showTeam"
-                className="regLogLinks  justify-start  hover:text-red-500"
-              >
-                Show Team
-                <span aria-hidden="true">&nbsp;&#10094;</span>
-              </Link>
-            </>
-          )}
+          <a className="text-2xl font-medium pr-2" href="/">TMS</a>
+          
         </div>
 
-        <div className="ml-8 mr-2">
+        <div className="">
           <a href="/" className="linkHomePage ">
             Home
           </a>
           <a href="/about" className="linkHomePage">
             About
           </a>
-          <a href="/help" className="linkHomePage ">
-            Help
-          </a>
+          <Link
+                to="/showTeam"
+                className="regLogLinks  hover:text-red-500"
+              >
+                Teams
+               
+              </Link>
         </div>
         <div className=" lg:flex lg:flex-1 lg:justify-end lg:gap-x-6 mr-3 ">
           <div className="lg:hidden ">

@@ -10,13 +10,15 @@
 
 
 body {
-  font-family: "Roboto Slab", serif;
+  font-family: 'Nunito Sans', sans-serif; 
   margin: 0;
   padding: 0;
 
   background: linear-gradient(to right, #6b21a8, #86198f);
   background-attachment: fixed;
-
+  min-width: 200px; /* Мінімальна ширина сайту */
+  overflow-x: hidden;
+  overflow-y: hidden;
 
 }
 
@@ -47,17 +49,19 @@ body {
 /* WebKit (Chrome, Safari) */
 .custom-scrollbar::-webkit-scrollbar {
   width: 10px;
+  
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: #4caf50;
+  cursor: grab;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
   background-color: #f1f1f1;
 }
 .card {
-  @apply w-[21rem] p-4 ;
+  @apply w-[21rem] p-4  ;
 }
 .padding-r {
   @apply sm:pr-16 pr-8;
@@ -69,8 +73,9 @@ body {
   @apply h-[47rem] overflow-auto custom-scrollbar
 }
 .customInput {
-  @apply mb-4 mt-2 w-72 py-3 px-2 border border-gray-300 rounded;
+  @apply mt-2 w-72 py-3 px-2 border border-gray-300 rounded;
 }
+
 .memInput {
   @apply mb-3 mt-2 w-64 py-2 px-1 border border-gray-300 rounded-md text-sm;
 }
@@ -86,4 +91,19 @@ body {
 }
 .textOverInputField {
   @apply text-gray-500  tracking-widest text-sm font-semibold;
+}
+
+.bgColTasks {
+  background-color: #101204;
+}
+
+.bgTasks {
+  background-color: #22272B;
+  
+}
+.bgTasksUp {
+  @apply  bg-gray-700
+}
+.bgDetails{
+  @apply  bg-purple-700 hover:bg-purple-600 px-4
 }
