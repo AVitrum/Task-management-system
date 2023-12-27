@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -199,8 +200,14 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public List<TaskResponse> findAll(Long teamId, Principal connectedUser) {
         List<Task> tasks = repository.findAllByTeam(Team.findTeamById(teamRepository, teamId));
-        return tasks.stream().map(converter::mapTaskToTaskResponse).collect(Collectors.toList());
+
+        List<Task> sortedTasks = tasks.stream().sorted(Comparator.comparing(Task::getId)).toList();
+
+        return sortedTasks.stream()
+                .map(converter::mapTaskToTaskResponse)
+                .collect(Collectors.toList());
     }
+
 
     @Override
     public List<TaskResponse> findAllInReview(Long teamId, Principal connectedUser) {

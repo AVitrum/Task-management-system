@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -81,6 +82,15 @@ public class Converter {
     public TaskResponse mapTaskToTaskResponse(Task task) {
         List<String> categories = task.getCategories().stream().map(Enum::name).toList();
 
+        List<Comment> sortedComments = task.getComments().stream()
+                .sorted(Comparator.comparing(Comment::getCreationTime))
+                .toList();
+
+        List<HistoryResponse> sortedHistories = task.getOldTasks().stream()
+                .map(this::mapOldTaskToHistoryResponse)
+                .sorted(Comparator.comparing(HistoryResponse::getChangeTime))
+                .toList();
+
         return TaskResponse.builder()
                 .id(task.getId())
                 .title(task.getTitle().replaceAll("_", " "))
@@ -92,8 +102,9 @@ public class Converter {
                 .creator(mapMemberToMemberResponse(task.getCreator()))
                 .performer(mapMemberToMemberResponse(task.getPerformer()))
                 .categories(categories)
-                .comments(task.getComments().stream().map(this::mapCommentToCommentResponse).toList())
+                .comments(sortedComments.stream().map(this::mapCommentToCommentResponse).toList())
                 .files(task.getFiles().stream().map(this::mapFileToFileResponse).toList())
+                .histories(sortedHistories)
                 .build();
     }
 

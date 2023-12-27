@@ -26,4 +26,5 @@ public class TaskResponse {
     private LocalDateTime changeTime;
     private List<CommentResponse> comments;
     private List<FileResponse> files;
+    private List<HistoryResponse> histories;
 }
