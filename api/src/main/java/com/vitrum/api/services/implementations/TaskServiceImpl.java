@@ -227,13 +227,20 @@ public class TaskServiceImpl implements TaskService {
 
         checkManager(actionPerformer, task);
 
+        OldTask oldTask = oldTaskRepository.findByTaskAndVersion(task, task.getVersion() - 1).orElseThrow(
+                () -> new IllegalArgumentException("Last version not found"));
+
         if (task.getStatus().equals(Status.DELETED)) {
             saveHistory(
                     task,
                     String.format("%s restored the task", actionPerformer.getUser().getTrueUsername()),
                     actionPerformer.getUser()
             );
-            task.setStatus(task.getPerformer().equals(task.getCreator()) ? Status.PENDING : Status.ASSIGNED);
+
+            if (oldTask.getStatus().equals(Status.IN_REVIEW) || oldTask.getStatus().equals(Status.OVERDUE))
+                task.setCompleted(true);
+
+            task.setStatus(oldTask.getStatus());
             repository.save(task);
         } else
             throw new IllegalStateException("Task wasn't delete");
