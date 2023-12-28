@@ -118,11 +118,15 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("A file with this name already exists." +
                     " Delete it before adding this one");
 
+        String[] fileNameSplit = originalFilename.split("\\.");
+        String fileExtension = fileNameSplit[fileNameSplit.length - 1];
+
+        if (!fileExtension.equals("jpeg") && !fileExtension.equals("jpg") && !fileExtension.equals("png"))
+            throw new IllegalArgumentException("Wrong format");
+
         s3Client.putObject(new PutObjectRequest(bucketName, modifiedFilename, fileObj));
         fileObj.delete();
 
-        String[] fileNameSplit = originalFilename.split("\\.");
-        String fileExtension = fileNameSplit[fileNameSplit.length - 1];
 
         File file = File.builder()
                 .name(modifiedFilename)
