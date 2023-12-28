@@ -78,7 +78,7 @@ public class SecurityConfiguration {
         config.setAllowedOrigins(Arrays.asList(
                 "http://localhost:8080",
                 "http://localhost:5173",
-                "http://ec2-16-171-44-248.eu-north-1.compute.amazonaws.com"
+                "http://ec2-13-53-41-105.eu-north-1.compute.amazonaws.com"
         ));
         config.setAllowedMethods(Arrays.asList(
                 "GET",
