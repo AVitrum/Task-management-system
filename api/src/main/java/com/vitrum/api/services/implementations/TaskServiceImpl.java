@@ -255,7 +255,11 @@ public class TaskServiceImpl implements TaskService {
         saveHistory(
                 task,
                 String.format("%s deleted the task", actionPerformer.getUser().getTrueUsername()),
-                actionPerformer.getUser());
+                actionPerformer.getUser()
+        );
+
+        if (task.getCompleted())
+            task.setCompleted(false);
 
         task.setStatus(Status.DELETED);
         repository.save(task);
