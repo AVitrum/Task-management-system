@@ -57,8 +57,8 @@ export default function ResetPage() {
          flex flex-col justify-center items-center "
     >
       <div
-        className="bg-white px-8 pt-6 pb-14
-            rounded-sm shadow-2xl my-32"
+        className="bg-white border-[4px] border-gray-800 rounded-lg px-8 pt-6 pb-14
+           shadow-2xl my-32"
       >
         <form className=" " onSubmit={(e) => onSubmit(e)}>
           <h1 className="text-black tracking-wide text-3xl font-black mb-8 centerForm">

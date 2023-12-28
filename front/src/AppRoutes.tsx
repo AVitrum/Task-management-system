@@ -12,6 +12,7 @@ import MembersPage from "./pages/Tasks/MembersPage";
 import TasksLayout from "./pages/Tasks/TasksLayout";
 import AboutPage from "./pages/AboutPage";
 import HelpPage from "./pages/HelpPage";
+import ProfilePage from "./pages/ProfilePage";
 
 export default function AppRoutes() {
   return (
@@ -25,6 +26,7 @@ export default function AppRoutes() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/reset" element={<ResetPage />} />
           <Route path="/recovery" element={<RecoveryPage />} />
+          <Route path="/profile" element={<ProfilePage/>} />
           <Route path="/createTeam" element={<CreateTeam />} />
           <Route path="/showTeam" element={<TeamPage />} />
           <Route path="/members/:id" element={<MembersPage />} />

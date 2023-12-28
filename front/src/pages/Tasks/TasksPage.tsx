@@ -39,7 +39,7 @@ export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [team, setTeam] = useState<Team[]>([]);
   const [task, setTask] = useState([]);
-  const { token, userInfo } = useContext(UserContext);
+  const { token } = useContext(UserContext);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -53,15 +53,13 @@ export default function TasksPage() {
   const [showModal, setShowModal] = useState(false);
   const [addPerformerModel, setAddPerformerModel] = useState(false);
   const [showDetailsTask, setDetailsTask] = useState(false);
-  const [showDetailsTaskForMembers, setShowDetailsTaskForMembers] =
-    useState(false);
-  const [showAlert, setShowAlert] = useState(false);
+  const [showDetailsTaskForMembers, setShowDetailsTaskForMembers] = useState(false);
+
 
   const [isPlusClicked, setIsPlusClicked] = useState(false);
   const [ifManager, setIfManager] = useState(false);
   const [ifTaskCompleted, setIfTaskCompleted] = useState(false);
   const [ifInReview, setIfInReview] = useState(false);
-  const [ifMove, setIfMove] = useState(false);
   const [ifRemove, setIfRemove] = useState(false);
 
   const { teamid: teamId } = useParams<{ teamid: string }>();
@@ -164,25 +162,10 @@ export default function TasksPage() {
   };
 
   const confirmDeleting = (f: Function, taskid: string) => {
-    if (f.name === "moveTaskToTrash") {
-      setIfMove(true);
-      console.log("+");
-    }
-    if (f.name === "removeTask") {
-      setIfRemove(true);
-      console.log("-");
-    }
-    setTaskId(taskid);
-    console.log();
-    getTaskById(taskid);
-
-    setShowAlert(true);
+    if (confirm("Do you want to delete this task?"))
+      f(taskid);
   };
 
-  const closeShowAlert = () => {
-    setShowAlert(false);
-    getAllTasksInTeam();
-  };
 
   const handleAddPerformerAndSetTaskId = (taskId: string) => {
     setTaskId(taskId);
@@ -250,9 +233,6 @@ export default function TasksPage() {
           Authorization: `Bearer ${token}`,
         },
       });
-      setIfMove(false);
-
-      setShowAlert(false);
       getAllTasksInTeam();
       notify("The task has been moved to trash");
     } catch (error: any) {
@@ -270,7 +250,6 @@ export default function TasksPage() {
           Authorization: `Bearer ${token}`,
         },
       });
-      setShowAlert(false);
       setIfRemove(false);
       getAllTasksInTeam();
       notify("The task has been deleted");
@@ -280,17 +259,21 @@ export default function TasksPage() {
   };
 
   const getAllTasksInTeam = async () => {
-    try {
-      const res = await axios.get(`${backendIp}/api/${teamId}/tasks`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
 
-      setTasks(res.data);
-    } catch (error: any) {
-      notify(error.res.data);
+    if (tasks != undefined) {
+      try {
+        const res = await axios.get(`${backendIp}/api/${teamId}/tasks`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        setTasks(res.data);
+      } catch (error: any) {
+        notify(error.res.data);
+      }
     }
+
   };
 
   const addPerformerSubmit = async (e: React.FormEvent) => {
@@ -558,72 +541,6 @@ export default function TasksPage() {
           </form>
         </Modal>
       )}
-
-      {showAlert && (
-        <Modal onClose={closeShowAlert} onCloseButton={closeShowAlert}>
-          <form className="centerForm ">
-            {ifMove ? (
-              <>
-                <h1 className=" bg-gray-400 rounded-md py-1 font-bold text-xl p-1 px-4 m-2">
-                  Do you want to move <br />
-                  this task into trash can?
-                </h1>
-
-                <div className=" w-full flex flex-row justify-between pt-2">
-                  <div>
-                    <button className="bg-green-500  rounded-md mx-10 p-1 ">
-                      <span
-                        className="text"
-                        onClick={() => moveTaskToTrash(taskId)}
-                      >
-                        Confirm
-                      </span>
-                    </button>
-                  </div>
-                  <div>
-                    <button
-                      className="bg-red-500  rounded-md mx-10 p-1 "
-                      onClick={closeShowAlert}
-                    >
-                      <span className="text">Decline</span>
-                    </button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <></>
-            )}
-            {ifRemove ? (
-              <>
-                <h1 className=" bg-gray-400 rounded-md py-1 font-bold text-xl p-1  px-4 m-2">
-                  Do you want to delete
-                  <br /> this task permanently?
-                </h1>
-                <div className=" w-full flex flex-row justify-between pt-2">
-                  <div>
-                    <button className="bg-green-500  rounded-md mx-10 p-1 ">
-                      <span className="text" onClick={() => removeTask(taskId)}>
-                        Confirm
-                      </span>
-                    </button>
-                  </div>
-                  <div>
-                    <button
-                      className="bg-red-500  rounded-md mx-10 p-1 "
-                      onClick={closeShowAlert}
-                    >
-                      <span className="text">Decline</span>
-                    </button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <></>
-            )}
-          </form>
-        </Modal>
-      )}
-
       {team && team.stage === null ? (
         <>
           <SetStages />
