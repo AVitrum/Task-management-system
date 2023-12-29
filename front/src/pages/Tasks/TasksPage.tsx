@@ -84,6 +84,7 @@ export default function TasksPage() {
   const [isPlusClicked, setIsPlusClicked] = useState(false);
   const [ifManager, setIfManager] = useState(false);
   const [ifTaskCompleted, setIfTaskCompleted] = useState(false);
+  
   const [ifInReview, setIfInReview] = useState(false);
   const [ifRemove, setIfRemove] = useState(false);
 
@@ -141,6 +142,7 @@ export default function TasksPage() {
     setMember(member);
     setTitleChange(title);
     setStatus(status);
+    console.log(status)
     setDescriptionChange(description);
     setAssignmentDate(assignmentDate);
     setChangeTime(changeTime);
@@ -152,12 +154,17 @@ export default function TasksPage() {
       setIsCompleted(false);
     }
 
-    if (status === "ASSIGNED" || status === "UNCOMPLETED") {
+    if (status === "ASSIGNED" || status === "UNCOMPLETED"  ) {
       setIfTaskCompleted(true);
     } else setIfTaskCompleted(false);
-    if (status === "IN_REVIEW" || status === "OVERDUE") {
+    
+    if (status === "IN_REVIEW" ||  status === "OVERDUE") {
       setIfInReview(true);
     } else setIfInReview(false);
+
+    if (status === "PENDING"   ) {
+      setIfTaskCompleted(true);
+    } 
     setDetailsTask(true);
   };
 
@@ -455,9 +462,7 @@ export default function TasksPage() {
     try {
       await axios.put(
         `${backendIp}/api/${teamId}/${taskid}/restore`,
-        {
-
-        },
+        {},
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -566,27 +571,29 @@ export default function TasksPage() {
               className="memInput"
             />
             {ifTaskCompleted ? (
-              <div className="py-1">
-                <label className="">
-                  <input
-                    type="checkbox"
-                    onChange={() => {
-                      confirmTask();
-                    }}
-                    checked={isCompleted}
-                    className="mr-1"
-                  />
-                  <span>Task Completed</span>
-                </label>
-              </div>
+              <>
+                <div className="py-1">
+                  <label className="">
+                    <input
+                      type="checkbox"
+                      onChange={() => {
+                        confirmTask();
+                      }}
+                      checked={isCompleted}
+                      className="mr-1"
+                    />
+                    <span>Task Completed</span>
+                  </label>
+                </div>{" "}
+                <div className="centerForm pt-2">
+                  <button className="button-32 " type="submit">
+                    <span className="text">Safe Changes</span>
+                  </button>
+                </div>
+              </>
             ) : (
               <></>
             )}
-            <div className="centerForm pt-2">
-              <button className="button-32 " type="submit">
-                <span className="text">Safe Changes</span>
-              </button>
-            </div>
 
             <h1>Status</h1>
             <h2 className=" detailsInfo">{status}</h2>
@@ -1078,8 +1085,6 @@ export default function TasksPage() {
                                   <h2 className="font-bold text-lg break-words">
                                     {task.title}
                                   </h2>
-
-                                 
                                 </div>
                                 <div className="flex  flex-row justify-between">
                                   <button
