@@ -1,6 +1,5 @@
 import { useContext } from "react";
 import { UserContext } from "../components/UserContext";
-import ModalWindow from "../components/Modal/ModalWindow";
 
 export default function HelpPage() {
   const { userInfo } = useContext(UserContext);

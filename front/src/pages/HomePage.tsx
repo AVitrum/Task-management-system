@@ -2,11 +2,13 @@ import { useContext } from "react";
 import { UserContext } from "../components/UserContext";
 import ModalWindow from "../components/Modal/ModalWindow";
 
+
 export default function HomePage() {
   const { userInfo } = useContext(UserContext);
 
   return (
     <div className=" text-white text-xl flex justify-center items-center">
+      
       {userInfo.id === 0 || userInfo.id === undefined ? (
         <div className="pt-72">
           <div className=" text-center w-[50rem] text-3xl bg-gradient-to-r from-cyan-700 to-purple-700 border-4 border-black p-4 rounded-md shadow-lg ">

@@ -7,6 +7,8 @@ import "react-toastify/dist/ReactToastify.css";
 import backendIp from "../../serverconfig";
 import Modal from "../../components/Modall";
 import SetStages from "./SetStages";
+import HistoryPage from "./HistoryPage";
+import CommentPage from "./CommentPage";
 
 interface Member {
   id: string;
@@ -32,6 +34,24 @@ interface Task {
   categories: string[];
   assignmentDate: string;
   changeTime: string;
+  comments: TaskComments[];
+  histories: TaskHistory[];
+}
+interface TaskHistory {
+  taskId: number;
+  id: number;
+  version: number;
+  title: string;
+  description: string;
+  status: string;
+  changeTime: string;
+  message: string;
+  user: string;
+}
+interface TaskComments {
+  author: string;
+  text: string;
+  creationTime: string;
 }
 
 export default function TasksPage() {
@@ -50,11 +70,14 @@ export default function TasksPage() {
 
   const [performer, setPerformer] = useState("");
 
+  const [comment, setComment] = useState("");
+
   const [showModal, setShowModal] = useState(false);
   const [addPerformerModel, setAddPerformerModel] = useState(false);
   const [showDetailsTask, setDetailsTask] = useState(false);
-  const [showDetailsTaskForMembers, setShowDetailsTaskForMembers] = useState(false);
-
+  const [showDetailsTaskForMembers, setShowDetailsTaskForMembers] =
+    useState(false);
+  const [showModalHistory, setShowHisory] = useState(false);
 
   const [isPlusClicked, setIsPlusClicked] = useState(false);
   const [ifManager, setIfManager] = useState(false);
@@ -162,10 +185,8 @@ export default function TasksPage() {
   };
 
   const confirmDeleting = (f: Function, taskid: string) => {
-    if (confirm("Do you want to delete this task?"))
-      f(taskid);
+    if (confirm("Do you want to delete this task?")) f(taskid);
   };
-
 
   const handleAddPerformerAndSetTaskId = (taskId: string) => {
     setTaskId(taskId);
@@ -259,7 +280,6 @@ export default function TasksPage() {
   };
 
   const getAllTasksInTeam = async () => {
-
     if (tasks != undefined) {
       try {
         const res = await axios.get(`${backendIp}/api/${teamId}/tasks`, {
@@ -267,13 +287,12 @@ export default function TasksPage() {
             Authorization: `Bearer ${token}`,
           },
         });
-  
+
         setTasks(res.data);
       } catch (error: any) {
         notify(error.res.data);
       }
     }
-
   };
 
   const addPerformerSubmit = async (e: React.FormEvent) => {
@@ -458,11 +477,28 @@ export default function TasksPage() {
           onClose={closeShowDetailsTask}
           onCloseButton={closeShowDetailsTask}
         >
-          <form
-            className="centerForm px-5"
-            onSubmit={(e) => changeDetailsSubmit(e)}
-          >
-            <h1 className="py-1">Title</h1>
+          <form className=" px-5" onSubmit={(e) => changeDetailsSubmit(e)}>
+            <div className="flex items-center justify-between  ">
+              
+                <h1 className="py-1 mr-auto">Title</h1>
+            
+              
+                <Link
+                  to={`/history/${teamId}/${taskId}`}
+                  className="bg-green-400 hover:bg-green-300 rounded-md px-2 p-1 text-sm mr-2"
+                >
+                  History
+                </Link>
+             
+              
+                <Link
+                  to={`/сomment/${teamId}/${taskId}`}
+                  className="bg-yellow-300 hover:bg-yellow-200 rounded-md px-3 p-1 text-sm  "
+                >
+                  Comments
+                </Link>
+             
+            </div>
             <input
               type="text"
               value={titleChange}
@@ -500,6 +536,7 @@ export default function TasksPage() {
                 <span className="text">Safe Changes</span>
               </button>
             </div>
+            
           </form>
         </Modal>
       )}
@@ -541,6 +578,7 @@ export default function TasksPage() {
           </form>
         </Modal>
       )}
+
       {team && team.stage === null ? (
         <>
           <SetStages />

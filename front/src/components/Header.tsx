@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { UserContext } from "./UserContext";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Link, useNavigate,  } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import backendIp from "../serverconfig";
 
 export default function Header() {
@@ -13,7 +13,6 @@ export default function Header() {
 
   const toggleMenu = () => {
     setShowMenu(!showMenu);
-    
   };
 
   const closeMenu = () => {
@@ -28,8 +27,6 @@ export default function Header() {
     });
     setUserInfo(res.data);
   };
-
-  
 
   const logout = async () => {
     Cookies.remove("userInfo");
@@ -47,32 +44,25 @@ export default function Header() {
 
   useEffect(() => {
     profile();
-    
-    
-    
   }, []);
 
   useEffect(() => {
     const handleResize = () => {
-      
-      if (window.innerWidth > 1) { 
-        setShowMenu(false); 
+      if (window.innerWidth > 1) {
+        setShowMenu(false);
       }
     };
 
-    window.addEventListener("resize", handleResize); 
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize); 
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
-  
-
 
   return (
     <>
-      <nav className=" flex items-center justify-between p-5 ">
-        
+      <nav className=" flex items-center justify-between p-6 ">
         <div className="flex lg:flex-1   ">
           <a href="/" className="pr-1  ">
             <span className="sr-only">Your Company</span>
@@ -82,41 +72,51 @@ export default function Header() {
               alt=""
             />
           </a>
-          <a className="text-2xl font-medium pr-2" href="/">TMS</a>
-          
+          <a className="text-2xl font-medium pr-2" href="/">
+            TMS
+          </a>
         </div>
+        {userInfo.id === 0 || userInfo.id === undefined ? (
+          <div className="">
+            <Link to="/" className="linkHomePage ">
+              Home
+            </Link>
+            <Link to="/about" className="linkHomePage">
+             About
+            </Link>
+            <Link to="/help" className="regLogLinks  hover:text-red-500">
+              Help
+            </Link>
+          </div>
+        ) : (
+          <div className="">
+            <Link to="/showTeam" className="linkHomePage ">
+              Teams
+            </Link>
+            <Link to="/" className="linkHomePage">
+              Home
+            </Link>
+            <Link to="/about" className="regLogLinks  hover:text-red-500">
+              About
+            </Link>
+          </div>
+        )}
 
-        <div className="">
-          <a href="/" className="linkHomePage ">
-            Home
-          </a>
-          <a href="/about" className="linkHomePage">
-            About
-          </a>
-          <Link
-                to="/showTeam"
-                className="regLogLinks  hover:text-red-500"
-              >
-                Teams
-               
-              </Link>
-        </div>
-        <div className=" lg:flex lg:flex-1 lg:justify-end lg:gap-x-6  ">
-          <div className=" ">
+        <div className=" lg:flex lg:flex-1 lg:justify-end lg:gap-x-6 mr-3 ">
+          <div className="lg:hidden ">
             <button
               onClick={toggleMenu}
-              className="flex items-center pl-10  text-white hover:text-green-500"
+              className="flex items-center pl-10 py-1 text-white hover:text-green-500"
             >
               <img
-                className=" h-10    border-black rounded-md"
-                src="/profile.svg"
+                className=" h-8 max-w-none  border-black rounded-md"
+                src="/menu.svg"
                 alt=""
               />
-              
             </button>
           </div>
           {showMenu && (
-            <div className="absolute  z-50 right-1 px-2   bg-zinc-600 shadow-md py-2 mt-10 rounded-md w-34">
+            <div className="absolute  z-50 right-1 px-2   bg-zinc-600 shadow-md py-2 rounded-md w-34">
               {userInfo.id === 0 || userInfo.id === undefined ? (
                 <>
                   <Link
@@ -137,14 +137,12 @@ export default function Header() {
                 </>
               ) : (
                 <>
-                 
                   <Link
-                    to="/profile"
+                    to="/reset"
                     className="block regLogLinks text- hover:text-emerald-400 lg:mr-4 md:mr-2 sm:mr-1"
                     onClick={closeMenu}
-                    
                   >
-                    Profile
+                    Change Password
                     <span aria-hidden="true">&nbsp;&#10094;</span>
                   </Link>
                   <button
@@ -158,10 +156,46 @@ export default function Header() {
               )}
             </div>
           )}
-          
+          <div className=" hidden lg:inline-block ">
+            <div className=" lg:flex lg:flex-1 lg:justify-end ">
+              {userInfo.id === 0 || userInfo.id === undefined ? (
+                <>
+                  <Link
+                    to="/login"
+                    className="block regLogLinks hover:text-green-500  lg:mr-4 md:mr-2 sm:mr-1"
+                  >
+                    Log in <span aria-hidden="true">&#10094;</span>
+                  </Link>
+
+                  <Link
+                    to="/register"
+                    className="block regLogLinks hover:text-amber-500  ml-1"
+                  >
+                    Register <span aria-hidden="true">&#10094;</span>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/reset"
+                    className="block regLogLinks hover:text-emerald-500 lg:mr-4 md:mr-2 sm:mr-1"
+                  >
+                    Change Password
+                    <span aria-hidden="true">&nbsp;&#10094;</span>
+                  </Link>
+                  <button
+                    className=" block regLogLinks hover:text-red-500 "
+                    onClick={logout}
+                  >
+                    Logout
+                    <span aria-hidden="true">&nbsp;&#10094;</span>
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </nav>
-      </>
-    
+    </>
   );
 }

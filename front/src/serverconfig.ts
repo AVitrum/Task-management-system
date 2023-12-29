@@ -1,3 +1,3 @@
-const backendIp = "http://16.171.43.55:8080";
+const backendIp = "http://13.53.41.105:8080";
 
 export default backendIp;
