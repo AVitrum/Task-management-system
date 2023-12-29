@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { UserContext } from "./UserContext";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Link, useNavigate,  } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import backendIp from "../serverconfig";
 
 export default function Header() {
@@ -13,7 +13,6 @@ export default function Header() {
 
   const toggleMenu = () => {
     setShowMenu(!showMenu);
-    
   };
 
   const closeMenu = () => {
@@ -28,8 +27,6 @@ export default function Header() {
     });
     setUserInfo(res.data);
   };
-
-  
 
   const logout = async () => {
     Cookies.remove("userInfo");
@@ -47,32 +44,25 @@ export default function Header() {
 
   useEffect(() => {
     profile();
-    
-    
-    
   }, []);
 
   useEffect(() => {
     const handleResize = () => {
-      
-      if (window.innerWidth > 1) { 
-        setShowMenu(false); 
+      if (window.innerWidth > 1) {
+        setShowMenu(false);
       }
     };
 
-    window.addEventListener("resize", handleResize); 
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize); 
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
-  
-
 
   return (
     <>
       <nav className=" flex items-center justify-between p-6 ">
-        
         <div className="flex lg:flex-1   ">
           <a href="/" className="pr-1  ">
             <span className="sr-only">Your Company</span>
@@ -82,25 +72,36 @@ export default function Header() {
               alt=""
             />
           </a>
-          <a className="text-2xl font-medium pr-2" href="/">TMS</a>
-          
+          <a className="text-2xl font-extrabold pr-2" href="/">
+            TMS
+          </a>
         </div>
+        {userInfo.id === 0 || userInfo.id === undefined ? (
+          <div className="">
+            <Link to="/" className="linkHomePage ">
+              Home
+            </Link>
+            <Link to="/about" className="linkHomePage">
+             About
+            </Link>
+            <Link to="/help" className="regLogLinks  hover:text-red-500">
+              Help
+            </Link>
+          </div>
+        ) : (
+          <div className="">
+            <Link to="/showTeam" className="linkHomePage ">
+              Teams
+            </Link>
+            <Link to="/" className="linkHomePage">
+              Home
+            </Link>
+            <Link to="/about" className="regLogLinks  hover:text-red-500">
+              About
+            </Link>
+          </div>
+        )}
 
-        <div className="">
-          <a href="/" className="linkHomePage ">
-            Home
-          </a>
-          <a href="/about" className="linkHomePage">
-            About
-          </a>
-          <Link
-                to="/showTeam"
-                className="regLogLinks  hover:text-red-500"
-              >
-                Teams
-               
-              </Link>
-        </div>
         <div className=" lg:flex lg:flex-1 lg:justify-end lg:gap-x-6 mr-3 ">
           <div className="lg:hidden ">
             <button
@@ -112,7 +113,6 @@ export default function Header() {
                 src="/menu.svg"
                 alt=""
               />
-              
             </button>
           </div>
           {showMenu && (
@@ -196,7 +196,6 @@ export default function Header() {
           </div>
         </div>
       </nav>
-      </>
-    
+    </>
   );
 }

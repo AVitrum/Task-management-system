@@ -215,11 +215,32 @@ export default function MembersPage() {
               </ul>
             </ul>
           ) : (
-            <ul className="bg-slate-400 my-4 py-4 pl-2 pr-10 rounded-md">
+            <ul className="bg-slate-400 my-4 mx-1 first-letter: py-4 pl-2 pr-10 rounded-md">
               <ul>
                 {members.map((member) => (
                   <li key={member.id}>
-                    {member.name} - {member.role}
+                   
+                    <div className="flex flex-row items-center justify-between">
+                      <div className="flex items-center">
+                        {member.name}
+                        {member.role === "LEADER" ? (
+                          <img
+                            className="h-6 max-w-none svg-class ml-1"
+                            src="/crown.svg"
+                            alt=""
+                            title="LEADER"
+                          />
+                        ) : (
+                          <img
+                            className="h-6 max-w-none svg-class ml-1"
+                            src="/member.svg"
+                            alt=""
+                            title="MEMBER"
+                          />
+                        )}
+                      </div>
+                      
+                    </div>
                   </li>
                 ))}
               </ul>

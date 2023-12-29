@@ -12,6 +12,9 @@ import MembersPage from "./pages/Tasks/MembersPage";
 import TasksLayout from "./pages/Tasks/TasksLayout";
 import AboutPage from "./pages/AboutPage";
 import HelpPage from "./pages/HelpPage";
+import HistoryPage from "./pages/Tasks/HistoryPage";
+import CommentPage from "./pages/Tasks/CommentPage";
+
 
 export default function AppRoutes() {
   return (
@@ -25,6 +28,7 @@ export default function AppRoutes() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/reset" element={<ResetPage />} />
           <Route path="/recovery" element={<RecoveryPage />} />
+
           <Route path="/createTeam" element={<CreateTeam />} />
           <Route path="/showTeam" element={<TeamPage />} />
           <Route path="/members/:id" element={<MembersPage />} />
@@ -34,6 +38,10 @@ export default function AppRoutes() {
             path="/tasksLayout/:teamid/:taskid"
             element={<TasksLayout />}
           />
+          <Route path="/history/:teamid/:taskid" element={<HistoryPage />} />
+          <Route path="/сomment/:teamid/:taskid" element={ <CommentPage/>} />
+         
+         
         </Route>
       </Routes>
     </UserContextProvider>

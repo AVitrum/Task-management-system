@@ -50,7 +50,7 @@ export default function CreateTeam() {
 
   return (
     <div
-      className="bg-white border-8 border-gray-800 rounded-lg px-5 pt-8 pb-8
+      className="bg-white border-4 border-gray-800 rounded-lg px-5 pt-8 pb-8
              shadow-2xl mb-64   mt-60"
     >
       <form className=" " onSubmit={(e) => onSubmit(e)}>

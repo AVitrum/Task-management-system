@@ -6,6 +6,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Nunito Sans', 'sans-serif'], // Замініть шрифт на потрібний вам
+      },
       
       colors:{
         primary: '#2022225',

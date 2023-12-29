@@ -8,48 +8,57 @@
   }
 }
 
-
 body {
-  font-family: 'Nunito Sans', sans-serif; 
+  font-family: "Nunito Sans", sans-serif;
   margin: 0;
   padding: 0;
+ 
 
   background: linear-gradient(to right, #6b21a8, #86198f);
   background-attachment: fixed;
   min-width: 200px; /* Мінімальна ширина сайту */
   overflow-x: hidden;
   overflow-y: hidden;
+}
 
+.custom-scroll-history::-webkit-scrollbar {
+  width: 10px; 
+}
+
+.custom-scroll-history::-webkit-scrollbar-thumb {
+  background-color: #4caf50;
+  cursor: grab;
+ 
+}
+.custom-scroll-history {
+  scrollbar-width: thin;
+  
+  scrollbar-color: #ccc; /* Колір полоси та фону */
+}
+
+.custom-history::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
 }
 
 .custom-scroll-tasks {
   scrollbar-width: thin;
-  scrollbar-color: #ccc  ; /* Колір полоси та фону */
-
- 
-  
-  
+  scrollbar-color: #ccc; /* Колір полоси та фону */
 }
 
 .custom-scroll-tasks::-webkit-scrollbar {
   width: 4px; /* Ширина полоси */
   background-color: rgba(110, 103, 103, 0.6);
-  
-
 }
 
 .custom-scroll-tasks::-webkit-scrollbar-thumb {
   background-color: #ccc; /* Колір полоси */
   border-radius: 4px; /* Радіус */
   background-clip: content-box;
-  
 }
-
 
 /* WebKit (Chrome, Safari) */
 .custom-scrollbar::-webkit-scrollbar {
   width: 10px;
-  
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
@@ -61,7 +70,7 @@ body {
   background-color: #f1f1f1;
 }
 .card {
-  @apply w-[21rem] p-4  ;
+  @apply w-[22rem] p-4;
 }
 .padding-r {
   @apply sm:pr-16 pr-8;
@@ -69,8 +78,8 @@ body {
 .padding-b {
   @apply sm:pb-24 pb-12;
 }
-.task-colls{
-  @apply h-[47rem] overflow-auto custom-scrollbar
+.task-colls {
+  @apply h-[44.5rem] overflow-auto custom-scrollbar;
 }
 .customInput {
   @apply mt-2 w-72 py-3 px-2 border border-gray-300 rounded;
@@ -94,16 +103,47 @@ body {
 }
 
 .bgColTasks {
-  background-color: #101204;
+  background-color: #181b06;
 }
 
 .bgTasks {
-  background-color: #22272B;
-  
+  background-color: #293035;
 }
 .bgTasksUp {
-  @apply  bg-gray-700
+  @apply bg-gray-700;
 }
-.bgDetails{
-  @apply  bg-purple-700 hover:bg-purple-600 px-4
+.bgDetails {
+  @apply bg-purple-700 hover:bg-purple-600 px-4;
+}
+.detailsInfo{
+  @apply bg-gray-500 w-fit p-1 mb-2 rounded text-white
+}
+
+.bgStage{
+ 
+  
+  background: linear-gradient(to right,); 
+}
+/* CSS */
+@keyframes gradientMovement {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.bgStage {
+  background: linear-gradient(to right,  #1fc944, #3f5efb);
+  animation: gradientMovement 3s linear infinite; /* 5s - час анімації */
+  background-size: 200% 200%; /* Збільшення розміру градієнту для зміни позиції */
+}
+
+/* Налаштування тексту на градієнті */
+.bgStage > h1 {
+  padding: 1rem; /* Прикладна відстань навколо тексту */
 }
