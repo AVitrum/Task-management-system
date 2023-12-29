@@ -115,7 +115,7 @@ public class Converter {
                 .version(task.getVersion())
                 .status(task.getStatus())
                 .task(task)
-                .changeTime(LocalDateTime.now())
+                .changeTime(LocalDateTime.now().plusHours(2))
                 .message(message)
                 .user(user)
                 .build();

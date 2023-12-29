@@ -31,11 +31,14 @@ public class CommentServiceImpl implements CommentService {
         if (task.getStatus().equals(Status.DELETED))
             throw new IllegalStateException("Task was deleted");
 
+        if (request.get("text").replaceAll("\\s", "").isEmpty())
+            throw new IllegalArgumentException("Text cannot be empty!");
+
         repository.save(
                 Comment.builder()
                         .author(Member.getActionPerformer(memberRepository, connectedUser, task.getTeam()))
                         .text(request.get("text"))
-                        .creationTime(LocalDateTime.now())
+                        .creationTime(LocalDateTime.now().plusHours(2))
                         .task(task)
                         .build()
         );
