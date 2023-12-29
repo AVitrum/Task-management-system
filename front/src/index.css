@@ -12,6 +12,7 @@ body {
   font-family: "Nunito Sans", sans-serif;
   margin: 0;
   padding: 0;
+ 
 
   background: linear-gradient(to right, #6b21a8, #86198f);
   background-attachment: fixed;
@@ -113,4 +114,7 @@ body {
 }
 .bgDetails {
   @apply bg-purple-700 hover:bg-purple-600 px-4;
+}
+.detailsInfo{
+  @apply bg-gray-500 w-fit p-1 mb-2 rounded text-white
 }

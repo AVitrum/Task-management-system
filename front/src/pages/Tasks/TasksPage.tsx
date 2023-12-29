@@ -56,6 +56,8 @@ interface TaskComments {
 
 export default function TasksPage() {
   const [members, setMembers] = useState<Member[]>([]);
+  const [member, setMember] = useState<Member>();
+  const [creator, setCreator] = useState<Member>();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [team, setTeam] = useState<Team[]>([]);
   const [task, setTask] = useState([]);
@@ -63,6 +65,9 @@ export default function TasksPage() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [status, setStatus] = useState("");
+  const [assignmentDate, setAssignmentDate] = useState("");
+  const [changeTime, setChangeTime] = useState("");
   const [isCompleted, setIsCompleted] = useState(false);
 
   const [titleChange, setTitleChange] = useState("");
@@ -126,14 +131,24 @@ export default function TasksPage() {
     title: string,
     description: string,
     isCompleted: boolean,
-    status: string
+    status: string,
+    member: Member,
+    assignmentDate: string,
+    changeTime: string,
+    creator: Member
   ) => {
     navigate(`/tasksLayout/${teamId}/${taskId}`);
     setTaskId(taskId);
     getTaskById(taskId);
 
+    setMember(member);
     setTitleChange(title);
+    setStatus(status);
     setDescriptionChange(description);
+    setAssignmentDate(assignmentDate);
+    setChangeTime(changeTime);
+    setCreator(creator);
+
     if (isCompleted) {
       setIsCompleted(true);
     } else {
@@ -159,14 +174,26 @@ export default function TasksPage() {
     title: string,
     description: string,
     isCompleted: boolean,
-    status: string
+    status: string,
+    member: Member,
+    assignmentDate: string,
+    changeTime: string,
+    creator: Member
   ) => {
     navigate(`/tasksLayout/${teamId}/${taskId}`);
     setTaskId(taskId);
     getTaskById(taskId);
 
+    setMember(member);
+    setTitleChange(title);
+    setStatus(status);
+    setDescriptionChange(description);
+    setAssignmentDate(assignmentDate);
+    setChangeTime(changeTime);
+    setCreator(creator);
     setTitleChange(title);
     setDescriptionChange(description);
+
     if (isCompleted) {
       setIsCompleted(true);
     } else {
@@ -190,11 +217,11 @@ export default function TasksPage() {
 
   const handleAddPerformerAndSetTaskId = (taskId: string) => {
     setTaskId(taskId);
+    navigate(`/tasksLayout/${teamId}/${taskId}`);
     openAddPerformerModal();
   };
 
   const changeStatus = async (status: string, taskid: string) => {
-    console.log(status);
     try {
       await axios.put(
         `${backendIp}/api/${teamId}/${taskid}/update`,
@@ -310,6 +337,7 @@ export default function TasksPage() {
           },
         }
       );
+
       window.location.reload();
       getAllTasksInTeam();
     } catch (error: any) {
@@ -415,6 +443,17 @@ export default function TasksPage() {
     }
   };
 
+  const formatDateTime = (dateTimeString: string) => {
+    const dateTime = new Date(dateTimeString);
+    dateTime.setHours(dateTime.getHours() + 2);
+    const hours = dateTime.getHours().toString().padStart(2, "0");
+    const minutes = dateTime.getMinutes().toString().padStart(2, "0");
+    const day = dateTime.getDate();
+    const month = (dateTime.getMonth() + 1).toString().padStart(2, "0");
+    const year = dateTime.getFullYear();
+    return `${hours}:${minutes} ${day}/${month}/${year}`;
+  };
+
   useEffect(() => {
     getMembers();
     findManager();
@@ -479,25 +518,21 @@ export default function TasksPage() {
         >
           <form className=" px-5" onSubmit={(e) => changeDetailsSubmit(e)}>
             <div className="flex items-center justify-between  ">
-              
-                <h1 className="py-1 mr-auto">Title</h1>
-            
-              
-                <Link
-                  to={`/history/${teamId}/${taskId}`}
-                  className="bg-green-400 hover:bg-green-300 rounded-md px-2 p-1 text-sm mr-2"
-                >
-                  History
-                </Link>
-             
-              
-                <Link
-                  to={`/сomment/${teamId}/${taskId}`}
-                  className="bg-yellow-300 hover:bg-yellow-200 rounded-md px-3 p-1 text-sm  "
-                >
-                  Comments
-                </Link>
-             
+              <h1 className="py-1 mr-auto">Title</h1>
+
+              <Link
+                to={`/history/${teamId}/${taskId}`}
+                className="bg-green-400 hover:bg-green-300 rounded-md px-2 p-1 text-sm mr-2"
+              >
+                History
+              </Link>
+
+              <Link
+                to={`/сomment/${teamId}/${taskId}`}
+                className="bg-yellow-300 hover:bg-yellow-200 rounded-md px-3 p-1 text-sm  "
+              >
+                Comments
+              </Link>
             </div>
             <input
               type="text"
@@ -536,7 +571,16 @@ export default function TasksPage() {
                 <span className="text">Safe Changes</span>
               </button>
             </div>
-            
+            <h1>Status</h1>
+            <h2 className=" detailsInfo">{status}</h2>
+            <h1>Performer</h1>
+            <h2 className="detailsInfo">{member?.name}</h2>
+            <h1>Creator </h1>
+            <h2 className="detailsInfo">{creator?.name}</h2>
+            <h1>Assignment date</h1>
+            <h2 className="detailsInfo">{formatDateTime(assignmentDate)}</h2>
+            <h1>Change time </h1>
+            <h2 className="detailsInfo">{formatDateTime(changeTime)}</h2>
           </form>
         </Modal>
       )}
@@ -550,14 +594,23 @@ export default function TasksPage() {
             onSubmit={(e) => changeDetailsSubmit(e)}
           >
             <h1 className="py-1 font-bold text-xl">Title</h1>
-            <h2 className=" bg-gray-400 rounded-md p-1 px-4 m-2">
+            <h2 className="  text-white bg-gray-500 rounded-md p-1 px-4 m-2">
               {titleChange}
             </h2>
-
             <h1 className="py-1 font-bold text-xl">Description</h1>
-            <h2 className=" bg-gray-400 rounded-md  p-1  px-4 m-2">
+            <h2 className=" text-white bg-gray-500 rounded-md  p-1  px-4 m-2">
               {descriptionChange}
             </h2>
+            <h1>Status</h1>
+            <h2 className=" detailsInfo">{status}</h2>
+            <h1>Performer</h1>
+            <h2 className="detailsInfo">{member?.name}</h2>
+            <h1>Creator </h1>
+            <h2 className="detailsInfo">{creator?.name}</h2>
+            <h1>Assignment date</h1>
+            <h2 className="detailsInfo">{formatDateTime(assignmentDate)}</h2>
+            <h1>Change time </h1>
+            <h2 className="detailsInfo">{formatDateTime(changeTime)}</h2>{" "}
             {ifTaskCompleted ? (
               <div className="py-1">
                 <label className="">
@@ -646,7 +699,12 @@ export default function TasksPage() {
                                     task.title,
                                     task.description,
                                     task.isCompleted,
-                                    task.status
+                                    task.status,
+                                    task.performer,
+                                    task.assignmentDate,
+
+                                    task.changeTime,
+                                    task.creator
                                   )
                                 }
                                 className="bgDetails  rounded-md   py-1"
@@ -687,7 +745,12 @@ export default function TasksPage() {
                                     task.title,
                                     task.description,
                                     task.isCompleted,
-                                    task.status
+                                    task.status,
+                                    task.performer,
+                                    task.assignmentDate,
+
+                                    task.changeTime,
+                                    task.creator
                                   )
                                 }
                                 className="bgDetails  rounded-md px-8 py-1"
@@ -748,7 +811,12 @@ export default function TasksPage() {
                                     task.title,
                                     task.description,
                                     task.isCompleted,
-                                    task.status
+                                    task.status,
+                                    task.performer,
+                                    task.assignmentDate,
+
+                                    task.changeTime,
+                                    task.creator
                                   )
                                 }
                                 className="bgDetails  rounded-md px-1 py-1"
@@ -772,7 +840,12 @@ export default function TasksPage() {
                                     task.title,
                                     task.description,
                                     task.isCompleted,
-                                    task.status
+                                    task.status,
+                                    task.performer,
+                                    task.assignmentDate,
+
+                                    task.changeTime,
+                                    task.creator
                                   )
                                 }
                                 className="bgDetails  rounded-md px-8 py-1"
@@ -863,7 +936,12 @@ export default function TasksPage() {
                                       task.title,
                                       task.description,
                                       task.isCompleted,
-                                      task.status
+                                      task.status,
+                                      task.performer,
+                                      task.assignmentDate,
+
+                                      task.changeTime,
+                                      task.creator
                                     )
                                   }
                                   className="bgDetails  rounded-md  py-1"
@@ -888,7 +966,12 @@ export default function TasksPage() {
                                     task.title,
                                     task.description,
                                     task.isCompleted,
-                                    task.status
+                                    task.status,
+                                    task.performer,
+                                    task.assignmentDate,
+
+                                    task.changeTime,
+                                    task.creator
                                   )
                                 }
                                 className="bgDetails  rounded-md px-8 py-1"
@@ -948,7 +1031,12 @@ export default function TasksPage() {
                                     task.title,
                                     task.description,
                                     task.isCompleted,
-                                    task.status
+                                    task.status,
+                                    task.performer,
+                                    task.assignmentDate,
+
+                                    task.changeTime,
+                                    task.creator
                                   )
                                 }
                                 className="bgDetails  rounded-md px-1 py-1"
@@ -972,7 +1060,12 @@ export default function TasksPage() {
                                     task.title,
                                     task.description,
                                     task.isCompleted,
-                                    task.status
+                                    task.status,
+                                    task.performer,
+                                    task.assignmentDate,
+
+                                    task.changeTime,
+                                    task.creator
                                   )
                                 }
                                 className="bgDetails  rounded-md px-8 py-1"
@@ -1032,7 +1125,12 @@ export default function TasksPage() {
                                     task.title,
                                     task.description,
                                     task.isCompleted,
-                                    task.status
+                                    task.status,
+                                    task.performer,
+                                    task.assignmentDate,
+
+                                    task.changeTime,
+                                    task.creator
                                   )
                                 }
                                 className="bgDetails  rounded-md px-1 py-1"
@@ -1056,7 +1154,12 @@ export default function TasksPage() {
                                     task.title,
                                     task.description,
                                     task.isCompleted,
-                                    task.status
+                                    task.status,
+                                    task.performer,
+                                    task.assignmentDate,
+
+                                    task.changeTime,
+                                    task.creator
                                   )
                                 }
                                 className="bgDetails  rounded-md px-8 py-1"

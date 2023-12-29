@@ -117,11 +117,14 @@ export default function HistoryPage() {
             task.histories.map((history: TaskHistory) => (
               <li
                 key={history.id}
-                className="bg-green-600 rounded-md my-3 p-4 mx-16"
+                className="bgTasks rounded-md my-3 p-4 mx-16"
               >
-                <div>Message: {history.message}</div>
-
+                <div><a className="font-light">Message:</a> {history.message}</div>
+                <div className="bg-slate-700 p-[0.4px]"> </div>
+                  
+               
                 <div>Title: {history.title}</div>
+                <div className="bg-slate-700 p-[0.4px]"> </div>
                 <div>Description: {history.description}</div>
 
                 <div className="flex justify-end">

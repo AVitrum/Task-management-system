@@ -72,7 +72,7 @@ export default function Header() {
               alt=""
             />
           </a>
-          <a className="text-2xl font-medium pr-2" href="/">
+          <a className="text-2xl font-extrabold pr-2" href="/">
             TMS
           </a>
         </div>
