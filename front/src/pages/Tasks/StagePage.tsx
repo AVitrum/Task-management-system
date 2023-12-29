@@ -19,6 +19,7 @@ interface Team {
   name: string;
   members: Member[];
   stage: string | null;
+  stageDueDate: string | null;
 }
 
 
@@ -56,6 +57,17 @@ export default function StagePage() {
       notify(error.res.data);
     }
   };
+
+  const formatDateTime = (dateTimeString: string) => {
+    const dateTime = new Date(dateTimeString);
+    dateTime.setHours(dateTime.getHours() + 2);
+    const hours = dateTime.getHours().toString().padStart(2, "0");
+    const minutes = dateTime.getMinutes().toString().padStart(2, "0");
+    const day = dateTime.getDate();
+    const month = (dateTime.getMonth() + 1).toString().padStart(2, "0");
+    const year = dateTime.getFullYear();
+    return `${hours}:${minutes} ${day}/${month}/${year}`;
+  };
   useEffect(() => {
     if (teamIdUrl) {
       getTeamById();
@@ -65,7 +77,7 @@ export default function StagePage() {
   return (
     <>
       
-        <h1 className="flex bgStage text-white shadow-sm justify-center p-2 pt-2 rounded-none text-2xl">Current Stage — {team?.stage} </h1>
+        <h1 className="flex bgStage text-white shadow-sm justify-center p-2 pt-2 rounded-none text-2xl">Current Stage — {team?.stage}  — Until: {formatDateTime(team?.stageDueDate)} </h1>
         
       
       <ToastContainer
