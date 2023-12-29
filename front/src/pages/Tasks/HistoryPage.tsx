@@ -92,13 +92,13 @@ export default function HistoryPage() {
           Authorization: `Bearer ${token}`,
         },
       });
-
+      console.log(res.data);
       setTask(res.data);
     } catch (error: any) {
       notify(error.res.data);
     }
   };
-  console.log(task);
+
   useEffect(() => {
     if (teamIdUrl && taskIdUrl) {
       getTaskById(taskIdUrl);
@@ -119,10 +119,11 @@ export default function HistoryPage() {
                 key={history.id}
                 className="bgTasks rounded-md my-3 p-4 mx-16"
               >
-                <div><a className="font-light">Message:</a> {history.message}</div>
+                <div>
+                  <a className="font-light">Message:</a> {history.message}
+                </div>
                 <div className="bg-slate-700 p-[0.4px]"> </div>
-                  
-               
+
                 <div>Title: {history.title}</div>
                 <div className="bg-slate-700 p-[0.4px]"> </div>
                 <div>Description: {history.description}</div>
