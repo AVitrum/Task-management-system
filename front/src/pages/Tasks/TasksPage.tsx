@@ -782,7 +782,7 @@ export default function TasksPage() {
                       task.status === "UNCOMPLETED" ? (
                         <>
                           {ifManager ? (
-                            <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
+                            <div className={`py-2 my-2 pl-2 pr-5 bgTasks ${task.status === 'UNCOMPLETED' ? 'border-2 border-red-600' : ''} rounded-md`}>
                               <div className="flex justify-between  rounded">
                                 <h2 className="font-bold text-lg break-words">
                                   {task.title}
@@ -825,7 +825,7 @@ export default function TasksPage() {
                               </div>
                             </div>
                           ) : (
-                            <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
+                            <div className={`py-2 my-2 pl-2 pr-5 bgTasks ${task.status === 'UNCOMPLETED' ? 'border-2 border-red-600' : ''} rounded-md`}>
                               <div className="flex justify-between  rounded">
                                 <h2 className="font-bold text-lg break-words">
                                   {task.title}
@@ -877,7 +877,7 @@ export default function TasksPage() {
                       task.status === "OVERDUE" ? (
                         <>
                           {ifManager ? (
-                            <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
+                            <div className={`py-2 my-2 pl-2 pr-5 bgTasks ${task.status === 'OVERDUE' ? 'border-2 border-red-600' : ''} rounded-md`}>
                               <div className="flex justify-between  rounded">
                                 <h2 className="font-bold text-lg break-words">
                                   {task.title}
@@ -951,7 +951,7 @@ export default function TasksPage() {
                               </div>
                             </div>
                           ) : (
-                            <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
+                            <div className={`py-2 my-2 pl-2 pr-5 bgTasks ${task.status === 'OVERDUE' ? 'border-2 border-red-600' : ''} rounded-md`}>
                               <div className="flex justify-between  rounded">
                                 <h2 className="font-bold text-lg break-words">
                                   {task.title}
