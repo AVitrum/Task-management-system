@@ -56,7 +56,7 @@ public class TaskAspect {
 
     private boolean checkMethod(JoinPoint joinPoint) {
         var methodName = joinPoint.getSignature().getName();
-        return methodName.equals("confirmTask") || methodName.equals("findAll");
+        return methodName.equals("confirmTask") || methodName.equals("findAll") || methodName.equals("findById");
     }
 
     private String extractTeamId(HttpServletRequest request) {
