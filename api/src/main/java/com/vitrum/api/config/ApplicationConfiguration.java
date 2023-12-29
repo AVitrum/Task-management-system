@@ -93,7 +93,7 @@ public class ApplicationConfiguration {
         mailSender.setHost("smtp.gmail.com");
         mailSender.setPort(587);
 
-        mailSender.setUsername("tms.team.noreply@gmail.com");
+        mailSender.setUsername("");
         mailSender.setPassword(mailPassword);
 
         Properties props = mailSender.getJavaMailProperties();
