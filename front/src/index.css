@@ -70,7 +70,7 @@ body {
   background-color: #f1f1f1;
 }
 .card {
-  @apply w-[21rem] p-4;
+  @apply w-[22rem] p-4;
 }
 .padding-r {
   @apply sm:pr-16 pr-8;
@@ -79,7 +79,7 @@ body {
   @apply sm:pb-24 pb-12;
 }
 .task-colls {
-  @apply h-[47rem] overflow-auto custom-scrollbar;
+  @apply h-[44.5rem] overflow-auto custom-scrollbar;
 }
 .customInput {
   @apply mt-2 w-72 py-3 px-2 border border-gray-300 rounded;
@@ -117,4 +117,33 @@ body {
 }
 .detailsInfo{
   @apply bg-gray-500 w-fit p-1 mb-2 rounded text-white
+}
+
+.bgStage{
+ 
+  
+  background: linear-gradient(to right,); 
+}
+/* CSS */
+@keyframes gradientMovement {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.bgStage {
+  background: linear-gradient(to right,  #1fc944, #3f5efb);
+  animation: gradientMovement 3s linear infinite; /* 5s - час анімації */
+  background-size: 200% 200%; /* Збільшення розміру градієнту для зміни позиції */
+}
+
+/* Налаштування тексту на градієнті */
+.bgStage > h1 {
+  padding: 1rem; /* Прикладна відстань навколо тексту */
 }

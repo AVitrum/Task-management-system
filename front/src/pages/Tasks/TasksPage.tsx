@@ -7,8 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import backendIp from "../../serverconfig";
 import Modal from "../../components/Modall";
 import SetStages from "./SetStages";
-import HistoryPage from "./HistoryPage";
-import CommentPage from "./CommentPage";
+import StagePage from "./StagePage";
 
 interface Member {
   id: string;
@@ -74,8 +73,6 @@ export default function TasksPage() {
   const [descriptionChange, setDescriptionChange] = useState("");
 
   const [performer, setPerformer] = useState("");
-
-  const [comment, setComment] = useState("");
 
   const [showModal, setShowModal] = useState(false);
   const [addPerformerModel, setAddPerformerModel] = useState(false);
@@ -637,294 +634,171 @@ export default function TasksPage() {
           <SetStages />
         </>
       ) : (
-        <div className="flex text-yellow-50 flex-row gap-[13px] overflow-auto custom-scroll-tasks mb-1 py-1 px-1">
-          <div className="flex flex-col ">
-            <div className="card bgTasksUp rounded-t-xl ">
-              <div className="flex justify-between items-center ">
-                <h2 className="text-xl font-bold">Pending</h2>
-                {ifManager && (
-                  <div className="flex  ">
-                    <a
-                      className="pr-4"
-                      onClick={showModal ? closeModal : openModal}
-                    >
-                      <span className="sr-only"></span>
-                      <img
-                        className="h-6 max-w-none svg-class"
-                        src="/white_plus.svg"
-                        alt=""
-                      />
-                    </a>
-                  </div>
-                )}
+        <>
+        <div className="flex flex-col overflow-auto custom-scroll-tasks">
+          
+          <StagePage />
+          <div className="flex  text-yellow-50 flex-row gap-[13px] overflow-auto custom-scroll-tasks mb-1 py-1 px-1">
+            <div className="flex flex-col ">
+              <div className="card bgTasksUp rounded-t-xl ">
+                <div className="flex justify-between items-center ">
+                  <h2 className="text-xl font-bold">Pending</h2>
+                  {ifManager && (
+                    <div className="flex  ">
+                      <a
+                        className="pr-4"
+                        onClick={showModal ? closeModal : openModal}
+                      >
+                        <span className="sr-only"></span>
+                        <img
+                          className="h-6 max-w-none svg-class"
+                          src="/white_plus.svg"
+                          alt=""
+                        />
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-            <div
-              className={`bgColTasks card  rounded-b-xl  overflow-auto custom-scrollbar ${
-                ifManager ? "h-[47rem]" : "h-[46.8rem]"
-              }`}
-            >
-              <ul>
-                {tasks.map((task) => (
-                  <li key={task.id} className="">
-                    {task.status === "PENDING" ? (
-                      <>
-                        {ifManager ? (
-                          <div className="py-2 my-2 pl-2 pr-5  bgTasks   rounded-md">
-                            <div className="flex justify-between  rounded">
-                              <h2 className="font-bold text-lg break-all">
-                                {task.title}
-                              </h2>
+              <div
+                className="bgColTasks task-colls card  rounded-b-xl  overflow-auto custom-scrollbar"
+              >
+                <ul>
+                  {tasks.map((task) => (
+                    <li key={task.id} className="">
+                      {task.status === "PENDING" ? (
+                        <>
+                          {ifManager ? (
+                            <div className="py-2 my-2 pl-2 pr-5  bgTasks   rounded-md">
+                              <div className="flex justify-between  rounded">
+                                <h2 className="font-bold text-lg break-all">
+                                  {task.title}
+                                </h2>
 
-                              <button
-                                onClick={() =>
-                                  confirmDeleting(moveTaskToTrash, task.id)
-                                }
-                                className="pl-3"
-                              >
-                                <span className="sr-only"></span>
-                                <img
-                                  className="h-4 max-w-none svg-class"
-                                  src="/white_cross.svg"
-                                  alt=""
-                                  title="Delete the task"
-                                />
-                              </button>
-                            </div>
-                            <div className="flex  flex-row justify-between">
-                              <button
-                                onClick={() =>
-                                  openShowDetailsTask(
-                                    task.id,
-                                    task.title,
-                                    task.description,
-                                    task.isCompleted,
-                                    task.status,
-                                    task.performer,
-                                    task.assignmentDate,
-
-                                    task.changeTime,
-                                    task.creator
-                                  )
-                                }
-                                className="bgDetails  rounded-md   py-1"
-                              >
-                                <h1>Details</h1>
-                              </button>
-
-                              <div className="flex justify-center  bg-green-600 hover:bg-green-500 rounded-md  text-sm py-1 pr-1 pl-1">
                                 <button
                                   onClick={() =>
-                                    handleAddPerformerAndSetTaskId(task.id)
+                                    confirmDeleting(moveTaskToTrash, task.id)
                                   }
+                                  className="pl-3"
                                 >
-                                  <div className="flex">
-                                    <div> Add Performer</div>
-                                    <img
-                                      className="h-5 pl-3 max-w-none svg-class"
-                                      src="/plus.svg"
-                                      alt=""
-                                    />
-                                  </div>
+                                  <span className="sr-only"></span>
+                                  <img
+                                    className="h-4 max-w-none svg-class"
+                                    src="/white_cross.svg"
+                                    alt=""
+                                    title="Delete the task"
+                                  />
+                                </button>
+                              </div>
+                              <div className="flex  flex-row justify-between">
+                                <button
+                                  onClick={() =>
+                                    openShowDetailsTask(
+                                      task.id,
+                                      task.title,
+                                      task.description,
+                                      task.isCompleted,
+                                      task.status,
+                                      task.performer,
+                                      task.assignmentDate,
+
+                                      task.changeTime,
+                                      task.creator
+                                    )
+                                  }
+                                  className="bgDetails  rounded-md   py-1"
+                                >
+                                  <h1>Details</h1>
+                                </button>
+
+                                <div className="flex justify-center  bg-green-600 hover:bg-green-500 rounded-md  text-sm py-1 pr-1 pl-1">
+                                  <button
+                                    onClick={() =>
+                                      handleAddPerformerAndSetTaskId(task.id)
+                                    }
+                                  >
+                                    <div className="flex">
+                                      <div> Add Performer</div>
+                                      <img
+                                        className="h-5 pl-3 max-w-none svg-class"
+                                        src="/plus.svg"
+                                        alt=""
+                                      />
+                                    </div>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
+                              <div className="flex justify-between  rounded">
+                                <h2 className="font-bold text-lg break-words">
+                                  {task.title}
+                                </h2>
+                              </div>
+                              <div className="flex  flex-row justify-end">
+                                <button
+                                  onClick={() =>
+                                    openShowDetailsTaskForMembers(
+                                      task.id,
+                                      task.title,
+                                      task.description,
+                                      task.isCompleted,
+                                      task.status,
+                                      task.performer,
+                                      task.assignmentDate,
+
+                                      task.changeTime,
+                                      task.creator
+                                    )
+                                  }
+                                  className="bgDetails  rounded-md px-8 py-1"
+                                >
+                                  <h1>Details</h1>
                                 </button>
                               </div>
                             </div>
-                          </div>
-                        ) : (
-                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
-                            <div className="flex justify-between  rounded">
-                              <h2 className="font-bold text-lg break-words">
-                                {task.title}
-                              </h2>
-                            </div>
-                            <div className="flex  flex-row justify-end">
-                              <button
-                                onClick={() =>
-                                  openShowDetailsTaskForMembers(
-                                    task.id,
-                                    task.title,
-                                    task.description,
-                                    task.isCompleted,
-                                    task.status,
-                                    task.performer,
-                                    task.assignmentDate,
-
-                                    task.changeTime,
-                                    task.creator
-                                  )
-                                }
-                                className="bgDetails  rounded-md px-8 py-1"
-                              >
-                                <h1>Details</h1>
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <></>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          <div className="flex flex-col ">
-            <div className="card  bg-blue-900 rounded-t-xl">
-              <div className="flex justify-between items-center ">
-                <h2 className="text-xl font-bold">Assigned</h2>
+                          )}
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
-            <div className="bgColTasks card   task-colls rounded-b-xl">
-              <ul>
-                {tasks.map((task) => (
-                  <li key={task.id} className="">
-                    {task.status === "ASSIGNED" ||
-                    task.status === "UNCOMPLETED" ? (
-                      <>
-                        {ifManager ? (
-                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
-                            <div className="flex justify-between  rounded">
-                              <h2 className="font-bold text-lg break-words">
-                                {task.title}
-                              </h2>
-
-                              <button
-                                onClick={() =>
-                                  confirmDeleting(moveTaskToTrash, task.id)
-                                }
-                              >
-                                <span className="sr-only"></span>
-                                <img
-                                  className="h-4 max-w-none svg-class"
-                                  src="/white_cross.svg"
-                                  alt=""
-                                  title="Delete the task"
-                                />
-                              </button>
-                            </div>
-                            <div className="flex  flex-row justify-end">
-                              <button
-                                onClick={() =>
-                                  openShowDetailsTask(
-                                    task.id,
-                                    task.title,
-                                    task.description,
-                                    task.isCompleted,
-                                    task.status,
-                                    task.performer,
-                                    task.assignmentDate,
-
-                                    task.changeTime,
-                                    task.creator
-                                  )
-                                }
-                                className="bgDetails  rounded-md px-1 py-1"
-                              >
-                                <h1>Details</h1>
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
-                            <div className="flex justify-between  rounded">
-                              <h2 className="font-bold text-lg break-words">
-                                {task.title}
-                              </h2>
-                            </div>
-                            <div className="flex  flex-row justify-end">
-                              <button
-                                onClick={() =>
-                                  openShowDetailsTaskForMembers(
-                                    task.id,
-                                    task.title,
-                                    task.description,
-                                    task.isCompleted,
-                                    task.status,
-                                    task.performer,
-                                    task.assignmentDate,
-
-                                    task.changeTime,
-                                    task.creator
-                                  )
-                                }
-                                className="bgDetails  rounded-md px-8 py-1"
-                              >
-                                <h1>Details</h1>
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <></>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          <div className="flex flex-col ">
-            <div className="card  bg-yellow-600 rounded-t-xl">
-              <div className="flex justify-between items-center ">
-                <h2 className="text-xl font-bold">In Review</h2>
+            <div className="flex flex-col ">
+              <div className="card  bg-blue-900 rounded-t-xl">
+                <div className="flex justify-between items-center ">
+                  <h2 className="text-xl font-bold">Assigned</h2>
+                </div>
               </div>
-            </div>
-            <div className="card  bgColTasks task-colls rounded-b-xl">
-              <ul>
-                {tasks.map((task) => (
-                  <li key={task.id} className="">
-                    {task.status === "IN_REVIEW" ||
-                    task.status === "OVERDUE" ? (
-                      <>
-                        {ifManager ? (
-                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
-                            <div className="flex justify-between  rounded">
-                              <h2 className="font-bold text-lg break-words">
-                                {task.title}
-                              </h2>
-
-                              <button
-                                onClick={() =>
-                                  confirmDeleting(moveTaskToTrash, task.id)
-                                }
-                              >
-                                <span className="sr-only"></span>
-                                <img
-                                  className="h-4 max-w-none svg-class"
-                                  src="/white_cross.svg"
-                                  title="Delete the task"
-                                  alt=""
-                                />
-                              </button>
-                            </div>
-                            <div className="flex flex-row  justify-end">
-                              <div className="flex justify-start">
-                                <button
-                                  onClick={() =>
-                                    changeStatus("COMPLETED", task.id)
-                                  }
-                                  className="  rounded-md px-1 "
-                                  title="Click to approve"
-                                >
-                                  <img
-                                    className="h-7 max-w-none svg-class"
-                                    src="/tick.svg"
-                                    alt=""
-                                  />
-                                </button>
+              <div className="bgColTasks card   task-colls rounded-b-xl">
+                <ul>
+                  {tasks.map((task) => (
+                    <li key={task.id} className="">
+                      {task.status === "ASSIGNED" ||
+                      task.status === "UNCOMPLETED" ? (
+                        <>
+                          {ifManager ? (
+                            <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
+                              <div className="flex justify-between  rounded">
+                                <h2 className="font-bold text-lg break-words">
+                                  {task.title}
+                                </h2>
 
                                 <button
                                   onClick={() =>
-                                    changeStatus("UNCOMPLETED", task.id)
+                                    confirmDeleting(moveTaskToTrash, task.id)
                                   }
-                                  className="  rounded-md px-1 "
-                                  title="Click to decline"
                                 >
+                                  <span className="sr-only"></span>
                                   <img
-                                    className="h-8 max-w-none svg-class"
-                                    src="/cross_red.svg"
+                                    className="h-4 max-w-none svg-class"
+                                    src="/white_cross.svg"
                                     alt=""
+                                    title="Delete the task"
                                   />
                                 </button>
                               </div>
@@ -944,241 +818,367 @@ export default function TasksPage() {
                                       task.creator
                                     )
                                   }
-                                  className="bgDetails  rounded-md  py-1"
+                                  className="bgDetails  rounded-md px-1 py-1"
                                 >
                                   <h1>Details</h1>
                                 </button>
                               </div>
                             </div>
-                          </div>
-                        ) : (
-                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
-                            <div className="flex justify-between  rounded">
-                              <h2 className="font-bold text-lg break-words">
-                                {task.title}
-                              </h2>
-                            </div>
-                            <div className="flex  flex-row justify-end">
-                              <button
-                                onClick={() =>
-                                  openShowDetailsTaskForMembers(
-                                    task.id,
-                                    task.title,
-                                    task.description,
-                                    task.isCompleted,
-                                    task.status,
-                                    task.performer,
-                                    task.assignmentDate,
+                          ) : (
+                            <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
+                              <div className="flex justify-between  rounded">
+                                <h2 className="font-bold text-lg break-words">
+                                  {task.title}
+                                </h2>
+                              </div>
+                              <div className="flex  flex-row justify-end">
+                                <button
+                                  onClick={() =>
+                                    openShowDetailsTaskForMembers(
+                                      task.id,
+                                      task.title,
+                                      task.description,
+                                      task.isCompleted,
+                                      task.status,
+                                      task.performer,
+                                      task.assignmentDate,
 
-                                    task.changeTime,
-                                    task.creator
-                                  )
-                                }
-                                className="bgDetails  rounded-md px-8 py-1"
-                              >
-                                <h1>Details</h1>
-                              </button>
+                                      task.changeTime,
+                                      task.creator
+                                    )
+                                  }
+                                  className="bgDetails  rounded-md px-8 py-1"
+                                >
+                                  <h1>Details</h1>
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <></>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          <div className="flex flex-col ">
-            <div className="card  bg-green-700 rounded-t-xl ">
-              <div className="flex justify-between items-center ">
-                <h2 className="text-xl font-bold">Completed</h2>
+                          )}
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
-            <div className="card bgColTasks bg-green-500 task-colls rounded-b-xl">
-              <ul>
-                {tasks.map((task) => (
-                  <li key={task.id} className="">
-                    {task.status === "COMPLETED" ? (
-                      <>
-                        {ifManager ? (
-                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
-                            <div className="flex justify-between  rounded">
-                              <h2 className="font-bold text-lg break-words">
-                                {task.title}
-                              </h2>
+            <div className="flex flex-col ">
+              <div className="card  bg-yellow-600 rounded-t-xl">
+                <div className="flex justify-between items-center ">
+                  <h2 className="text-xl font-bold">In Review</h2>
+                </div>
+              </div>
+              <div className="card  bgColTasks task-colls rounded-b-xl">
+                <ul>
+                  {tasks.map((task) => (
+                    <li key={task.id} className="">
+                      {task.status === "IN_REVIEW" ||
+                      task.status === "OVERDUE" ? (
+                        <>
+                          {ifManager ? (
+                            <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
+                              <div className="flex justify-between  rounded">
+                                <h2 className="font-bold text-lg break-words">
+                                  {task.title}
+                                </h2>
 
-                              <button
-                                onClick={() =>
-                                  confirmDeleting(moveTaskToTrash, task.id)
-                                }
-                              >
-                                <span className="sr-only"></span>
-                                <img
-                                  className="h-4 max-w-none svg-class"
-                                  src="/white_cross.svg"
-                                  alt=""
-                                  title="Delete the task"
-                                />
-                              </button>
-                            </div>
-                            <div className="flex  flex-row justify-between">
-                              <button
-                                onClick={() =>
-                                  openShowDetailsTask(
-                                    task.id,
-                                    task.title,
-                                    task.description,
-                                    task.isCompleted,
-                                    task.status,
-                                    task.performer,
-                                    task.assignmentDate,
+                                <button
+                                  onClick={() =>
+                                    confirmDeleting(moveTaskToTrash, task.id)
+                                  }
+                                >
+                                  <span className="sr-only"></span>
+                                  <img
+                                    className="h-4 max-w-none svg-class"
+                                    src="/white_cross.svg"
+                                    title="Delete the task"
+                                    alt=""
+                                  />
+                                </button>
+                              </div>
+                              <div className="flex flex-row  justify-end">
+                                <div className="flex justify-start">
+                                  <button
+                                    onClick={() =>
+                                      changeStatus("COMPLETED", task.id)
+                                    }
+                                    className="  rounded-md px-1 "
+                                    title="Click to approve"
+                                  >
+                                    <img
+                                      className="h-7 max-w-none svg-class"
+                                      src="/tick.svg"
+                                      alt=""
+                                    />
+                                  </button>
 
-                                    task.changeTime,
-                                    task.creator
-                                  )
-                                }
-                                className="bgDetails  rounded-md px-1 py-1"
-                              >
-                                <h1>Details</h1>
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
-                            <div className="flex justify-between  rounded">
-                              <h2 className="font-bold text-lg break-words">
-                                {task.title}
-                              </h2>
-                            </div>
-                            <div className="flex  flex-row justify-end">
-                              <button
-                                onClick={() =>
-                                  openShowDetailsTaskForMembers(
-                                    task.id,
-                                    task.title,
-                                    task.description,
-                                    task.isCompleted,
-                                    task.status,
-                                    task.performer,
-                                    task.assignmentDate,
+                                  <button
+                                    onClick={() =>
+                                      changeStatus("UNCOMPLETED", task.id)
+                                    }
+                                    className="  rounded-md px-1 "
+                                    title="Click to decline"
+                                  >
+                                    <img
+                                      className="h-8 max-w-none svg-class"
+                                      src="/cross_red.svg"
+                                      alt=""
+                                    />
+                                  </button>
+                                </div>
+                                <div className="flex  flex-row justify-end">
+                                  <button
+                                    onClick={() =>
+                                      openShowDetailsTask(
+                                        task.id,
+                                        task.title,
+                                        task.description,
+                                        task.isCompleted,
+                                        task.status,
+                                        task.performer,
+                                        task.assignmentDate,
 
-                                    task.changeTime,
-                                    task.creator
-                                  )
-                                }
-                                className="bgDetails  rounded-md px-8 py-1"
-                              >
-                                <h1>Details</h1>
-                              </button>
+                                        task.changeTime,
+                                        task.creator
+                                      )
+                                    }
+                                    className="bgDetails  rounded-md  py-1"
+                                  >
+                                    <h1>Details</h1>
+                                  </button>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <></>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          <div className="flex flex-col ">
-            <div className="card  bg-red-900 rounded-t-xl ">
-              <div className="flex justify-between items-center ">
-                <h2 className="text-xl font-bold">Trash</h2>
+                          ) : (
+                            <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
+                              <div className="flex justify-between  rounded">
+                                <h2 className="font-bold text-lg break-words">
+                                  {task.title}
+                                </h2>
+                              </div>
+                              <div className="flex  flex-row justify-end">
+                                <button
+                                  onClick={() =>
+                                    openShowDetailsTaskForMembers(
+                                      task.id,
+                                      task.title,
+                                      task.description,
+                                      task.isCompleted,
+                                      task.status,
+                                      task.performer,
+                                      task.assignmentDate,
+
+                                      task.changeTime,
+                                      task.creator
+                                    )
+                                  }
+                                  className="bgDetails  rounded-md px-8 py-1"
+                                >
+                                  <h1>Details</h1>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
-            <div className="card bgColTasks bg-green-500 task-colls rounded-b-xl">
-              <ul>
-                {tasks.map((task) => (
-                  <li key={task.id} className="">
-                    {task.status === "DELETED" ? (
-                      <>
-                        {ifManager ? (
-                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
-                            <div className="flex justify-between  rounded">
-                              <h2 className="font-bold text-lg break-words">
-                                {task.title}
-                              </h2>
+            <div className="flex flex-col ">
+              <div className="card  bg-green-700 rounded-t-xl ">
+                <div className="flex justify-between items-center ">
+                  <h2 className="text-xl font-bold">Completed</h2>
+                </div>
+              </div>
+              <div className="card bgColTasks bg-green-500 task-colls rounded-b-xl">
+                <ul>
+                  {tasks.map((task) => (
+                    <li key={task.id} className="">
+                      {task.status === "COMPLETED" ? (
+                        <>
+                          {ifManager ? (
+                            <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
+                              <div className="flex justify-between  rounded">
+                                <h2 className="font-bold text-lg break-words">
+                                  {task.title}
+                                </h2>
 
-                              <button
-                                onClick={() =>
-                                  confirmDeleting(removeTask, task.id)
-                                }
-                              >
-                                <span className="sr-only"></span>
-                                <img
-                                  className="h-4 max-w-none svg-class"
-                                  src="/white_cross.svg"
-                                  alt=""
-                                  title="Delete the task"
-                                />
-                              </button>
-                            </div>
-                            <div className="flex  flex-row justify-between">
-                              <button
-                                onClick={() =>
-                                  openShowDetailsTask(
-                                    task.id,
-                                    task.title,
-                                    task.description,
-                                    task.isCompleted,
-                                    task.status,
-                                    task.performer,
-                                    task.assignmentDate,
+                                <button
+                                  onClick={() =>
+                                    confirmDeleting(moveTaskToTrash, task.id)
+                                  }
+                                >
+                                  <span className="sr-only"></span>
+                                  <img
+                                    className="h-4 max-w-none svg-class"
+                                    src="/white_cross.svg"
+                                    alt=""
+                                    title="Delete the task"
+                                  />
+                                </button>
+                              </div>
+                              <div className="flex  flex-row justify-between">
+                                <button
+                                  onClick={() =>
+                                    openShowDetailsTask(
+                                      task.id,
+                                      task.title,
+                                      task.description,
+                                      task.isCompleted,
+                                      task.status,
+                                      task.performer,
+                                      task.assignmentDate,
 
-                                    task.changeTime,
-                                    task.creator
-                                  )
-                                }
-                                className="bgDetails  rounded-md px-1 py-1"
-                              >
-                                <h1>Details</h1>
-                              </button>
+                                      task.changeTime,
+                                      task.creator
+                                    )
+                                  }
+                                  className="bgDetails  rounded-md px-1 py-1"
+                                >
+                                  <h1>Details</h1>
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        ) : (
-                          <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
-                            <div className="flex justify-between  rounded">
-                              <h2 className="font-bold text-lg break-words">
-                                {task.title}
-                              </h2>
-                            </div>
-                            <div className="flex  flex-row justify-end">
-                              <button
-                                onClick={() =>
-                                  openShowDetailsTaskForMembers(
-                                    task.id,
-                                    task.title,
-                                    task.description,
-                                    task.isCompleted,
-                                    task.status,
-                                    task.performer,
-                                    task.assignmentDate,
+                          ) : (
+                            <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
+                              <div className="flex justify-between  rounded">
+                                <h2 className="font-bold text-lg break-words">
+                                  {task.title}
+                                </h2>
+                              </div>
+                              <div className="flex  flex-row justify-end">
+                                <button
+                                  onClick={() =>
+                                    openShowDetailsTaskForMembers(
+                                      task.id,
+                                      task.title,
+                                      task.description,
+                                      task.isCompleted,
+                                      task.status,
+                                      task.performer,
+                                      task.assignmentDate,
 
-                                    task.changeTime,
-                                    task.creator
-                                  )
-                                }
-                                className="bgDetails  rounded-md px-8 py-1"
-                              >
-                                <h1>Details</h1>
-                              </button>
+                                      task.changeTime,
+                                      task.creator
+                                    )
+                                  }
+                                  className="bgDetails  rounded-md px-8 py-1"
+                                >
+                                  <h1>Details</h1>
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <></>
-                    )}
-                  </li>
-                ))}
-              </ul>
+                          )}
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-          </div>
-        </div>
+            <div className="flex flex-col ">
+              <div className="card  bg-red-900 rounded-t-xl ">
+                <div className="flex justify-between items-center ">
+                  <h2 className="text-xl font-bold">Trash</h2>
+                </div>
+              </div>
+              <div className="card bgColTasks bg-green-500 task-colls rounded-b-xl">
+                <ul>
+                  {tasks.map((task) => (
+                    <li key={task.id} className="">
+                      {task.status === "DELETED" ? (
+                        <>
+                          {ifManager ? (
+                            <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
+                              <div className="flex justify-between  rounded">
+                                <h2 className="font-bold text-lg break-words">
+                                  {task.title}
+                                </h2>
+
+                                <button
+                                  onClick={() =>
+                                    confirmDeleting(removeTask, task.id)
+                                  }
+                                >
+                                  <span className="sr-only"></span>
+                                  <img
+                                    className="h-4 max-w-none svg-class"
+                                    src="/white_cross.svg"
+                                    alt=""
+                                    title="Delete the task"
+                                  />
+                                </button>
+                              </div>
+                              <div className="flex  flex-row justify-between">
+                                <button
+                                  onClick={() =>
+                                    openShowDetailsTask(
+                                      task.id,
+                                      task.title,
+                                      task.description,
+                                      task.isCompleted,
+                                      task.status,
+                                      task.performer,
+                                      task.assignmentDate,
+
+                                      task.changeTime,
+                                      task.creator
+                                    )
+                                  }
+                                  className="bgDetails  rounded-md px-1 py-1"
+                                >
+                                  <h1>Details</h1>
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="py-2 my-2 pl-2 pr-5 bgTasks  rounded-md">
+                              <div className="flex justify-between  rounded">
+                                <h2 className="font-bold text-lg break-words">
+                                  {task.title}
+                                </h2>
+                              </div>
+                              <div className="flex  flex-row justify-end">
+                                <button
+                                  onClick={() =>
+                                    openShowDetailsTaskForMembers(
+                                      task.id,
+                                      task.title,
+                                      task.description,
+                                      task.isCompleted,
+                                      task.status,
+                                      task.performer,
+                                      task.assignmentDate,
+
+                                      task.changeTime,
+                                      task.creator
+                                    )
+                                  }
+                                  className="bgDetails  rounded-md px-8 py-1"
+                                >
+                                  <h1>Details</h1>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div></div>
+        </>
       )}
 
       <ToastContainer
